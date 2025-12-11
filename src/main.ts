@@ -3,6 +3,8 @@ import express from 'express';
 
 dotenv.config();
 
+// TODO: Add Mongo
+
 const app = express();
 const { PORT: port } = process.env;
 
