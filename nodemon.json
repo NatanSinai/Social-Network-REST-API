@@ -1,8 +1,6 @@
 {
   "watch": ["src", ".env"],
-  "ext": "ts,json",
+  "ext": "ts,json,env",
   "ignore": ["node_modules", "dist"],
-  "execMap": {
-    "ts": "ts-node"
-  }
+  "exec": "node --loader ts-node/esm -r dotenv/config src/main.ts"
 }
