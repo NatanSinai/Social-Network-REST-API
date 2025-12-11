@@ -4,7 +4,7 @@ import express from 'express';
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT;
+const { PORT: port } = process.env;
 
 app.get('/', (req, res) => {
   res.send(`Welcome to the NASH API (v${process.env.npm_package_version ?? '1.0.0'})`);
