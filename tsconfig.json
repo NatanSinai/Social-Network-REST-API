@@ -5,10 +5,12 @@
     "outDir": "./dist",
 
     // Environment Settings
-    "module": "nodenext",
+    "module": "commonjs",
+    "esModuleInterop": true,
     "target": "esnext",
     "lib": ["esnext"],
     "types": ["node"],
+    // "moduleResolution": "bundler",
 
     // Other Outputs
     "sourceMap": true,
@@ -35,7 +37,9 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "paths": {
-      "@": ["./src/*"]
+      "@post": ["./src/post/index.ts"],
+      "@utils": ["./src/utils/index.ts"],
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*.ts"],
