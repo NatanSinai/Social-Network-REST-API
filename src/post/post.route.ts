@@ -1,22 +1,20 @@
 import { postModel, type CreatePostDTO, type Post } from '@post';
 import { Router } from 'express';
-import { StatusCodes } from 'http-status-codes';
 
 const postsRouter = Router();
 
-postsRouter.post<unknown, Post | string, CreatePostDTO>('', async (req, res) => {
-  const createPostDTO = req.body;
+postsRouter.post<unknown, Post | string, CreatePostDTO>('', async (request, response) => {
+  const createPostDTO = request.body;
 
-  try {
-    const newPost = await postModel.insertOne(createPostDTO);
+  const newPost = await postModel.insertOne(createPostDTO);
 
-    res.send(newPost);
-  } catch (e) {
-    const error = e as Error;
-    console.error(error);
+  response.send(newPost);
+});
 
-    res.status(StatusCodes.BAD_REQUEST).send(error.message);
-  }
+postsRouter.get<unknown, Post[] | string>('', async (request, response) => {
+  const posts = await postModel.find();
+
+  response.send(posts);
 });
 
 export default postsRouter;

@@ -6,3 +6,10 @@ content-type: application/json
   "title": "Title 1",
   "content": "Content 1"
 }
+
+###
+
+# Get all posts
+GET http://localhost:3000/post
+
+###
