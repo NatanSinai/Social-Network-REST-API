@@ -1,15 +1,26 @@
+import { connectToMongoDB, initializeAppConfig, initializeRouters } from '@utils';
 import dotenv from 'dotenv';
 import express from 'express';
 
 dotenv.config();
 
 const app = express();
-const { PORT: port } = process.env;
 
-app.get('/', (req, res) => {
-  res.send(`Welcome to the NASH API (v${process.env.npm_package_version ?? '1.0.0'})`);
-});
+const initializeServer = async () => {
+  console.log('\n========== STARTING TO INITIALIZE SERVER ==========\n');
 
-app.listen(port, () => {
-  console.log(`CRUD API listening on port ${port}`);
-});
+  await connectToMongoDB();
+
+  initializeAppConfig(app);
+  initializeRouters(app);
+
+  const port = process.env.PORT ?? '3000';
+
+  app.listen(port, (error) => {
+    if (error) return console.error({ error });
+
+    console.log(`\nCRUD API listening on http://localhost:${port}\n`);
+  });
+};
+
+initializeServer();
