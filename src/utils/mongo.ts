@@ -1,6 +1,7 @@
 import { connect } from 'mongoose';
 
-const mongoDBConnectionString = process.env.MONGO_CONNECTION_STRING ?? 'mongodb://127.0.0.1:27017/MongoDB';
+const DEFAULT_MONGO_CONNECTION_STRING = 'mongodb://127.0.0.1:27017/MongoDB';
+const mongoDBConnectionString = process.env.MONGO_CONNECTION_STRING ?? DEFAULT_MONGO_CONNECTION_STRING;
 
 export const connectToMongoDB = async () => {
   try {

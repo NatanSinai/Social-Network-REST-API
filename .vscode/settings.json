@@ -66,5 +66,6 @@
   "terminal.integrated.fontLigatures.enabled": true,
   "terminal.integrated.smoothScrolling": true,
   "terminal.integrated.suggest.enabled": true,
-  "terminal.integrated.stickyScroll.enabled": false
+  "terminal.integrated.stickyScroll.enabled": false,
+  "typescript.preferences.preferTypeOnlyAutoImports": true
 }
