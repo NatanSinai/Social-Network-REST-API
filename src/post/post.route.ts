@@ -6,7 +6,7 @@ const postsRouter = Router();
 postsRouter.post<unknown, Post | string, CreatePostDTO>('', async (request, response) => {
   const createPostDTO = request.body;
 
-  const newPost = await postModel.insertOne(createPostDTO);
+  const newPost = await postModel.create(createPostDTO);
 
   response.send(newPost);
 });

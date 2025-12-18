@@ -3,6 +3,7 @@ POST http://localhost:3000/post
 content-type: application/json
 
 {
+  "senderId": "507f1f77bcf86cd799439011",
   "title": "Title 1",
   "content": "Content 1"
 }
