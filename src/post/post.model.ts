@@ -1,7 +1,5 @@
-import { HydratedDocument, model, Schema } from 'mongoose';
-
-type PostData = { title: string; content: string; createdAt: Date; updatedAt: Date };
-export type PostDocument = HydratedDocument<PostData>;
+import { model, Schema } from 'mongoose';
+import type { PostDocument } from './post.types';
 
 const PostSchema = new Schema<PostDocument>(
   { title: { type: String, required: true }, content: { type: String, required: true } },
