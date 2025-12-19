@@ -5,43 +5,42 @@
 @senderId = 6945824e5cb700d554aa53a0
 
 ### Add a New Post
+### For general use replace {{senderId}} with your actual sender ID.
 POST {{basePostsURL}}
 content-type: application/json
 
 {
-  "senderId": "<sender_id>",
+  "senderId": "{{senderId}}",
   "title": "Title 1",
   "content": "Content 1"
 }
 
-# EXAMPLE
-# {
-#   "senderId": "{{senderId}}",
-#   "title": "Title 1",
-#   "content": "Content 1"
-# }
-
 ### Get All Posts
 GET {{basePostsURL}}
 
-
-### Get a Post by ID (EXAMPLE)
+### Get a Post by ID
+### For general use replace {{postId}} with your actual post ID.
 GET {{basePostsURL}}/{{postId}}
 
-### Get a Post by ID
-GET {{basePostsURL}}/<post_id>
-
-### Get Posts by Sender (EXAMPLE)
+### Get Posts by Sender
+### For general use replace {{senderId}} with your actual sender ID.
 GET {{basePostsURL}}/?sender={{senderId}}
 
-### Get Posts by Sender
-GET {{basePostsURL}}/?sender=<sender_id>
+### Update a Post
+### For general use replace {{postId}} with your actual post ID.
+PUT {{basePostsURL}}/{{postId}}
+content-type: application/json
+
+{
+  "title": "Updated title",
+  "content": "Updated content"
+}
+
+# Bonus - Deletion Routes
 
 ### Delete All Posts
-DELETE  {{basePostsURL}}
-
-### Delete Post by ID (EXAMPLE)
-DELETE  {{basePostsURL}}/{{postId}}
+DELETE {{basePostsURL}}
 
 ### Delete Post by ID
-DELETE  {{basePostsURL}}/<post_id>
+### For general use replace {{postId}} with your actual post ID.
+DELETE {{basePostsURL}}/{{postId}}

@@ -1,5 +1,5 @@
 import { postsRouter } from '@post';
-import { Express, Router } from 'express';
+import { type Express, Router } from 'express';
 import { appRouter } from './app.route';
 
 const routePathToRouter = { ['']: appRouter, post: postsRouter } satisfies Record<string, Router>;

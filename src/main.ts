@@ -17,10 +17,10 @@ const initializeServer = async () => {
   console.log('\n========== STARTING TO INITIALIZE SERVER ==========\n');
 
   await connectToMongoDB();
+  await initializeExamplePost();
 
   initializeAppConfig(app);
   initializeRouters(app);
-  await initializeExamplePost();
 
   app.use(errorHandler);
 

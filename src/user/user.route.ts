@@ -2,8 +2,8 @@ import { Router } from 'express';
 
 const usersRouter = Router();
 
-usersRouter.get('', (req, res) => {
-  res.send('hi');
+usersRouter.get('', (request, response) => {
+  response.send('WIP');
 });
 
 export default usersRouter;

@@ -1,6 +1,6 @@
 import { postModel } from '@post';
 import cors from 'cors';
-import { Express, json, type ErrorRequestHandler, type Response } from 'express';
+import { json, type ErrorRequestHandler, type Express, type Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import type { ObjectId, Types } from 'mongoose';
 import morgan from 'morgan';
@@ -34,7 +34,7 @@ export const initializeExamplePost = async () => {
     _id: EXAMPLE_POST_ID,
   });
 
-  console.log(`\nCreated example post with id '${examplePost._id}'`);
+  console.log(`Created example post with id '${examplePost._id}'\n`);
 };
 
 export const respondWithInvalidId = (id: unknown, response: Response, idName?: string) => {

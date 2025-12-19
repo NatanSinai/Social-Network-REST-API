@@ -5,4 +5,4 @@ export type Post = Prettify<{ title: string; content: string; senderId: ObjectId
 export type PostDocument = HydratedDocument<Post>;
 
 export type CreatePostDTO = Pick<Post, 'title' | 'content' | 'senderId'>;
-export type UpdatePostDTO = Pick<Post, '_id' | 'title' | 'content'>;
+export type UpdatePostDTO = Partial<Pick<Post, 'title' | 'content'>>;
