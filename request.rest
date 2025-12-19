@@ -1,21 +1,23 @@
-# Add a new post
-POST http://localhost:3000/post
+@port = 3000
+@baseURL = http://localhost:{{port}}
+@basePostsURL = {{baseURL}}/post
+@senderId = 507f1f77bcf86cd799439011
+
+### Add a New Post
+POST {{basePostsURL}}
 content-type: application/json
 
 {
-  "senderId": "507f1f77bcf86cd799439011",
+  "senderId": "{{senderId}}",
   "title": "Title 1",
   "content": "Content 1"
 }
 
-###
+### Get All Posts
+GET {{basePostsURL}}
 
-# Get all posts
-GET http://localhost:3000/post
+### Get a Post by ID
+GET {{basePostsURL}}/6944755b43edd87f6db1d3c0
 
-###
-
-# Get post by ID
-GET http://localhost:3000/post/6944755b43edd87f6db1d3c0
-
-###
+### Get Posts by Sender
+GET {{basePostsURL}}/?sender={{senderId}}

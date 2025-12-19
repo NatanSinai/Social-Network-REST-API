@@ -16,8 +16,12 @@ postsRouter.post<unknown, Post, CreatePostDTO>('', async (request, response) => 
   response.send(newPost);
 });
 
-postsRouter.get('', async (request, response) => {
-  const posts = await postModel.find();
+postsRouter.get<unknown, Post[], unknown, { sender?: Post['senderId'] }>('', async (request, response) => {
+  const { sender: senderId } = request.query;
+
+  if (!!senderId && !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'user');
+
+  const posts = await postModel.find(senderId ? { senderId } : {});
 
   response.send(posts);
 });
