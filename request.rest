@@ -1,7 +1,8 @@
 @port = 3000
 @baseURL = http://localhost:{{port}}
 @basePostsURL = {{baseURL}}/post
-@senderId = 507f1f77bcf86cd799439011
+@postId = 694582383d983573299dc89b
+@senderId = 6945824e5cb700d554aa53a0
 
 ### Add a New Post
 POST {{basePostsURL}}
@@ -17,7 +18,10 @@ content-type: application/json
 GET {{basePostsURL}}
 
 ### Get a Post by ID
-GET {{basePostsURL}}/6944755b43edd87f6db1d3c0
+GET {{basePostsURL}}/{{postId}}
 
 ### Get Posts by Sender
 GET {{basePostsURL}}/?sender={{senderId}}
+
+// TODO: DELETE all POSTS
+// TODO: DELETE POST by id

@@ -3,3 +3,5 @@ export enum ModelName {
   POST = 'Post',
   COMMENT = 'Comment',
 }
+
+export const OBJECT_ID_LENGTH = 24;

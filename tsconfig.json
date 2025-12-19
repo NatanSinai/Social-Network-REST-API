@@ -37,6 +37,7 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "paths": {
+      "@user": ["./src/user/index.ts"],
       "@post": ["./src/post/index.ts"],
       "@utils": ["./src/utils/index.ts"],
       "@/*": ["./src/*"]

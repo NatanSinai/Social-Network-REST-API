@@ -1,4 +1,11 @@
-import { connectToMongoDB, errorHandler, initializeAppConfig, initializeRouters } from '@utils';
+import {
+  connectToMongoDB,
+  envVar,
+  errorHandler,
+  initializeAppConfig,
+  initializeExamplePost,
+  initializeRouters,
+} from '@utils';
 import dotenv from 'dotenv';
 import express from 'express';
 
@@ -13,9 +20,11 @@ const initializeServer = async () => {
 
   initializeAppConfig(app);
   initializeRouters(app);
+  await initializeExamplePost();
+
   app.use(errorHandler);
 
-  const port = process.env.PORT ?? '3000';
+  const port = envVar.PORT;
 
   app.listen(port, (error) => {
     if (error) return console.error({ error });
