@@ -1,10 +1,12 @@
 import { postModel, type CreatePostDTO, type Post } from '@post';
-import { respondWithInvalidId } from '@utils';
-import { Router } from 'express';
-import { StatusCodes } from 'http-status-codes';
+import { respondWithInvalidId, respondWithNotFound } from '@utils';
+import { Router, type Response } from 'express';
 import { isValidObjectId } from 'mongoose';
 
 const postsRouter = Router();
+
+const respondWithNotFoundPost = (postId: Post['_id'], response: Response) =>
+  respondWithNotFound(postId, response, 'post');
 
 postsRouter.post<unknown, Post, CreatePostDTO>('', async (request, response) => {
   const createPostDTO = request.body;
@@ -33,9 +35,27 @@ postsRouter.get<{ postId: Post['_id'] }>('/:postId', async (request, response) =
 
   const post = await postModel.findOne({ _id: postId });
 
-  if (!post) return response.status(StatusCodes.NOT_FOUND).json({ message: `No post with id '${postId}'` });
+  if (!post) return respondWithNotFoundPost(postId, response);
 
   response.send(post);
+});
+
+postsRouter.delete('', async (request, response) => {
+  const deleteResult = await postModel.deleteMany();
+
+  response.send(deleteResult);
+});
+
+postsRouter.delete<{ postId: Post['_id'] }>('/:postId', async (request, response) => {
+  const { postId } = request.params;
+
+  if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
+
+  const deleteResult = await postModel.deleteOne({ _id: postId });
+
+  if (!deleteResult.deletedCount) return respondWithNotFoundPost(postId, response);
+
+  response.send(deleteResult);
 });
 
 export default postsRouter;

@@ -9,7 +9,7 @@ POST {{basePostsURL}}
 content-type: application/json
 
 {
-  "senderId": "<sender-id>",
+  "senderId": "<sender_id>",
   "title": "Title 1",
   "content": "Content 1"
 }
@@ -29,13 +29,19 @@ GET {{basePostsURL}}
 GET {{basePostsURL}}/{{postId}}
 
 ### Get a Post by ID
-GET {{basePostsURL}}/<post-id>
+GET {{basePostsURL}}/<post_id>
 
 ### Get Posts by Sender (EXAMPLE)
 GET {{basePostsURL}}/?sender={{senderId}}
 
 ### Get Posts by Sender
-GET {{basePostsURL}}/?sender=<sender-id>
+GET {{basePostsURL}}/?sender=<sender_id>
 
-// TODO: DELETE all POSTS
-// TODO: DELETE POST by id
+### Delete All Posts
+DELETE  {{basePostsURL}}
+
+### Delete Post by ID (EXAMPLE)
+DELETE  {{basePostsURL}}/{{postId}}
+
+### Delete Post by ID
+DELETE  {{basePostsURL}}/<post_id>

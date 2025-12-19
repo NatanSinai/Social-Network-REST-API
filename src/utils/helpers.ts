@@ -2,7 +2,7 @@ import { postModel } from '@post';
 import cors from 'cors';
 import { Express, json, type ErrorRequestHandler, type Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { type ObjectId } from 'mongoose';
+import type { ObjectId, Types } from 'mongoose';
 import morgan from 'morgan';
 import { envVar } from '.';
 
@@ -42,3 +42,6 @@ export const respondWithInvalidId = (id: unknown, response: Response, idName?: s
 
   response.status(StatusCodes.BAD_REQUEST).json({ message: `Invalid ${idLabel}: '${id}'` });
 };
+
+export const respondWithNotFound = (id: Types.ObjectId, response: Response, entityName: string) =>
+  response.status(StatusCodes.NOT_FOUND).json({ message: `There is no ${entityName} with id '${id}'` });
