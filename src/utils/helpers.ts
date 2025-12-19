@@ -1,5 +1,5 @@
 import cors from 'cors';
-import { Express, json, type ErrorRequestHandler } from 'express';
+import { Express, json, type ErrorRequestHandler, type Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import morgan from 'morgan';
 
@@ -15,4 +15,10 @@ export const initializeAppConfig = (app: Express) => {
   app.use(json());
   app.use(cors());
   app.use(morgan('dev'));
+};
+
+export const respondWithInvalidId = (id: unknown, response: Response, idName?: string) => {
+  const idLabel = `${idName ? idName + ' ' : ''}id`;
+
+  response.status(StatusCodes.BAD_REQUEST).json({ message: `Invalid ${idLabel}: '${id}'` });
 };
