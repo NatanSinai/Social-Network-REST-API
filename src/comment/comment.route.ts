@@ -19,6 +19,7 @@ commentsRouter.post<unknown, CommentDocument, CreateCommentDTO>('', async (reque
   const createCommentDTO = request.body;
 
   if (!isValidObjectId(createCommentDTO.postId)) return respondWithInvalidId(createCommentDTO.postId, response, 'post');
+
   if (!isValidObjectId(createCommentDTO.senderId))
     return respondWithInvalidId(createCommentDTO.senderId, response, 'sender');
 
@@ -28,7 +29,7 @@ commentsRouter.post<unknown, CommentDocument, CreateCommentDTO>('', async (reque
 });
 
 /* Get All Comments By Post Id*/
-commentsRouter.get<unknown, CommentDocument[], unknown, { postId?: Comment['postId'] }>(
+commentsRouter.get<unknown, CommentDocument[], unknown, Partial<Pick<Comment, 'postId'>>>(
   '',
   async (request, response) => {
     const { postId } = request.query;
