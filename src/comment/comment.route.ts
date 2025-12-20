@@ -1,4 +1,10 @@
-import { commentModel, type Comment, type CommentDocument, type CreateCommentDTO } from '@comment';
+import {
+  commentModel,
+  type Comment,
+  type CommentDocument,
+  type CreateCommentDTO,
+  type UpdateCommentDTO,
+} from '@comment';
 import { respondWithInvalidId, respondWithNotFound } from '@utils';
 import { Router, type Response } from 'express';
 import { isValidObjectId, type QueryFilter } from 'mongoose';
@@ -48,3 +54,20 @@ commentsRouter.get<{ commentId: Comment['_id'] }>('/:commentId', async (request,
 
   response.send(comment);
 });
+
+/* Update Comment */
+commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateCommentDTO>(
+  '/:commentId',
+  async (request, response) => {
+    const { commentId } = request.params;
+    const updateCommentDTO = request.body;
+
+    if (!isValidObjectId(commentId)) return respondWithInvalidId(commentId, response, 'comment');
+
+    const updatedComment = await commentModel.findByIdAndUpdate(commentId, updateCommentDTO, { new: true });
+
+    if (!updatedComment) return respondWithNotFoundComment(commentId, response);
+
+    response.send(updatedComment);
+  },
+);
