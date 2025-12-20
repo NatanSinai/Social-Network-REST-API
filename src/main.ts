@@ -1,4 +1,11 @@
-import { connectToMongoDB, initializeAppConfig, initializeRouters } from '@utils';
+import {
+  connectToMongoDB,
+  envVar,
+  errorHandler,
+  initializeAppConfig,
+  initializeExamplePost,
+  initializeRouters,
+} from '@utils';
 import dotenv from 'dotenv';
 import express from 'express';
 
@@ -10,16 +17,20 @@ const initializeServer = async () => {
   console.log('\n========== STARTING TO INITIALIZE SERVER ==========\n');
 
   await connectToMongoDB();
+  await initializeExamplePost();
 
   initializeAppConfig(app);
   initializeRouters(app);
 
-  const port = process.env.PORT ?? '3000';
+  app.use(errorHandler);
+
+  const port = envVar.PORT;
 
   app.listen(port, (error) => {
     if (error) return console.error({ error });
 
-    console.log(`\nCRUD API listening on http://localhost:${port}\n`);
+    console.log(`\nCRUD API listening on http://localhost:${port}`);
+    console.log('\n========== FINISHED INITIALIZING SERVER ==========\n');
   });
 };
 

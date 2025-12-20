@@ -1,10 +1,10 @@
 import { Router } from 'express';
+import { envVar } from '.';
 
-// Base route
 export const appRouter = Router();
 
-appRouter.get('', (req, res) => {
-  const version = process.env.npm_package_version ?? '1.0.0';
+appRouter.get('', (request, response) => {
+  const version = envVar.npm_package_version;
 
-  res.send(`Welcome to NASH API (v${version})`);
+  response.send(`Welcome to NASH API (v${version})`);
 });

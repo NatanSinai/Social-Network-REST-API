@@ -1,11 +1,11 @@
 import { connect } from 'mongoose';
+import { envVar } from '.';
 
-const DEFAULT_MONGO_CONNECTION_STRING = 'mongodb://127.0.0.1:27017/MongoDB';
-const mongoDBConnectionString = process.env.MONGO_CONNECTION_STRING ?? DEFAULT_MONGO_CONNECTION_STRING;
+const mongoDBConnectionString = envVar.MONGO_CONNECTION_STRING;
 
 export const connectToMongoDB = async () => {
   try {
-    console.log(`Connecting to MongoDB on ${mongoDBConnectionString}`);
+    console.log(`Connecting to MongoDB on '${mongoDBConnectionString}'`);
 
     await connect(mongoDBConnectionString);
 
