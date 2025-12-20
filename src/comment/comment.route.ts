@@ -71,3 +71,18 @@ commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateComment
     response.send(updatedComment);
   },
 );
+
+/* Delete Comment */
+commentsRouter.delete<{ commentId: Comment['_id'] }>('/:commentId', async (request, response) => {
+  const { commentId } = request.params;
+
+  if (!isValidObjectId(commentId)) return respondWithInvalidId(commentId, response, 'comment');
+
+  const deletedComment = await commentModel.findByIdAndDelete(commentId);
+
+  if (!deletedComment) return respondWithNotFoundComment(commentId, response);
+
+  response.send(deletedComment);
+});
+
+export default commentsRouter;
