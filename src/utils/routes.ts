@@ -1,8 +1,12 @@
+import { commentsRouter } from '@comment';
 import { postsRouter } from '@post';
 import { type Express, Router } from 'express';
 import { appRouter } from './app.route';
 
-const routePathToRouter = { ['']: appRouter, post: postsRouter } satisfies Record<string, Router>;
+const routePathToRouter = { ['']: appRouter, post: postsRouter, comment: commentsRouter } satisfies Record<
+  string,
+  Router
+>;
 
 export const initializeRouters = (app: Express) => {
   const routePathToRouterEntries = Object.entries(routePathToRouter);
