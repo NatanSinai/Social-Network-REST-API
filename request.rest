@@ -3,7 +3,7 @@
 @basePostsURL = {{baseURL}}/post
 @postId = 694582383d983573299dc89b
 @senderId = 6945824e5cb700d554aa53a0
-@baseCommentsURL = {{baseURL}}/api/comments
+@baseCommentsURL = {{baseURL}}/comments
 @commentId = 694582383d983573299dc89c
 
 # Posts API
