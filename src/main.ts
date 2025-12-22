@@ -3,6 +3,7 @@ import {
   envVar,
   errorHandler,
   initializeAppConfig,
+  initializeExampleComment,
   initializeExamplePost,
   initializeRouters,
 } from '@utils';
@@ -18,6 +19,7 @@ const initializeServer = async () => {
 
   await connectToMongoDB();
   await initializeExamplePost();
+  await initializeExampleComment();
 
   initializeAppConfig(app);
   initializeRouters(app);

@@ -3,6 +3,10 @@
 @basePostsURL = {{baseURL}}/post
 @postId = 694582383d983573299dc89b
 @senderId = 6945824e5cb700d554aa53a0
+@baseCommentsURL = {{baseURL}}/comments
+@commentId = 694582383d983573299dc89c
+
+# Posts API
 
 ### Add a New Post
 ### For general use replace {{senderId}} with your actual sender ID.
@@ -44,3 +48,40 @@ DELETE {{basePostsURL}}
 ### Delete Post by ID
 ### For general use replace {{postId}} with your actual post ID.
 DELETE {{basePostsURL}}/{{postId}}
+
+# Comments API
+
+### Add a New Comment
+### For general use replace {{postId}} and {{senderId}} with your actual IDs.
+POST {{baseCommentsURL}}
+content-type: application/json
+
+{
+  "postId": "{{postId}}",
+  "senderId": "{{senderId}}",
+  "content": "This is a comment"
+}
+
+### Get All Comments
+GET {{baseCommentsURL}}
+
+### Get Comments by Post ID
+### For general use replace {{postId}} with your actual post ID.
+GET {{baseCommentsURL}}?postId={{postId}}
+
+### Get Comment by ID
+### For general use replace {{commentId}} with your actual comment ID.
+GET {{baseCommentsURL}}/{{commentId}}
+
+### Update Comment
+### For general use replace {{commentId}} with your actual comment ID.
+PUT {{baseCommentsURL}}/{{commentId}}
+content-type: application/json
+
+{
+  "content": "Updated comment content"
+}
+
+### Delete Comment
+### For general use replace {{commentId}} with your actual comment ID.
+DELETE {{baseCommentsURL}}/{{commentId}}

@@ -1,3 +1,4 @@
+import { commentModel } from '@comment';
 import { postModel } from '@post';
 import cors from 'cors';
 import { json, type ErrorRequestHandler, type Express, type Response } from 'express';
@@ -35,6 +36,23 @@ export const initializeExamplePost = async () => {
   });
 
   console.log(`Created example post with id '${examplePost._id}'\n`);
+};
+
+export const initializeExampleComment = async () => {
+  const { EXAMPLE_COMMENT_ID, EXAMPLE_POST_ID, EXAMPLE_SENDER_ID } = envVar;
+
+  const isExampleCommentExists = await commentModel.exists({ _id: EXAMPLE_COMMENT_ID });
+
+  if (isExampleCommentExists) return;
+
+  const exampleComment = await commentModel.create({
+    content: 'Comment Example',
+    postId: EXAMPLE_POST_ID as unknown as ObjectId,
+    senderId: EXAMPLE_SENDER_ID as unknown as ObjectId,
+    _id: EXAMPLE_COMMENT_ID,
+  });
+
+  console.log(`Created example comment with id '${exampleComment._id}'\n`);
 };
 
 export const respondWithInvalidId = (id: unknown, response: Response, idName?: string) => {
