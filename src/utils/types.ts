@@ -7,3 +7,15 @@ export type ConvertKeysToType<T, Keys extends keyof T, Type> = Prettify<{
 }>;
 
 export type DocumentMetadata = Pick<Document, '_id'> & { createdAt: Date; updatedAt: Date };
+
+export type MakeOrUndefined<T, Keys extends keyof T> = {
+  [Key in keyof T]: Key extends Keys ? T[Key] | undefined : T[Key];
+};
+
+export type MakeAllOrUndefined<T> = MakeOrUndefined<T, keyof T>;
+
+export type MakeOptional<T, Keys extends keyof T> = Omit<T, Keys> & {
+  [Key in Keys]?: T[Key];
+};
+
+export type MakeAllOptional<T> = MakeOptional<T, keyof T>;

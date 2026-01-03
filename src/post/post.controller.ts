@@ -1,9 +1,11 @@
-import { postModel, type CreatePostDTO, type Post, type PostDocument, type UpdatePostDTO } from '@post';
 import { respondWithInvalidId, respondWithNotFound } from '@utils';
 import { Router, type Response } from 'express';
-import { isValidObjectId, type QueryFilter } from 'mongoose';
+import { isValidObjectId } from 'mongoose';
+import PostService from './post.service';
+import type { CreatePostDTO, Post, PostDocument, UpdatePostDTO } from './post.types';
 
 const postsRouter = Router();
+const postService = new PostService();
 
 const respondWithNotFoundPost = (postId: Post['_id'], response: Response) =>
   respondWithNotFound(postId, response, 'post');
@@ -13,7 +15,7 @@ postsRouter.post<unknown, PostDocument, CreatePostDTO>('', async (request, respo
 
   if (!isValidObjectId(createPostDTO.senderId)) return respondWithInvalidId(createPostDTO.senderId, response, 'sender');
 
-  const newPost = await postModel.create(createPostDTO);
+  const newPost = await postService.createSingle(createPostDTO);
 
   response.send(newPost);
 });
@@ -23,8 +25,7 @@ postsRouter.get<unknown, PostDocument[], unknown, { sender?: Post['senderId'] }>
 
   if (!!senderId && !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
-  const postsFilter = (senderId ? { senderId } : {}) satisfies QueryFilter<PostDocument>;
-  const posts = await postModel.find(postsFilter);
+  const posts = await postService.getMany({ senderId });
 
   response.send(posts);
 });
@@ -34,7 +35,7 @@ postsRouter.get<{ postId: Post['_id'] }>('/:postId', async (request, response) =
 
   if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
 
-  const post = await postModel.findById(postId);
+  const post = await postService.getById(postId);
 
   if (!post) return respondWithNotFoundPost(postId, response);
 
@@ -47,7 +48,7 @@ postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>('/:postId'
 
   if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
 
-  const updatedPost = await postModel.findByIdAndUpdate(postId, updatePostDTO, { new: true });
+  const updatedPost = await postService.updateById(postId, updatePostDTO);
 
   if (!updatedPost) return respondWithNotFoundPost(postId, response);
 
@@ -56,7 +57,7 @@ postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>('/:postId'
 
 // Bonus - Deletion Routes
 postsRouter.delete('', async (request, response) => {
-  const deleteResult = await postModel.deleteMany();
+  const deleteResult = await postService.deleteMany();
 
   response.send(deleteResult);
 });
@@ -66,7 +67,7 @@ postsRouter.delete<{ postId: Post['_id'] }>('/:postId', async (request, response
 
   if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
 
-  const deletedPost = await postModel.findByIdAndDelete(postId);
+  const deletedPost = await postService.deleteById(postId);
 
   if (!deletedPost) return respondWithNotFoundPost(postId, response);
 

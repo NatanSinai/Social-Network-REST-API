@@ -1,5 +1,6 @@
 import { commentModel } from '@comment';
-import { postModel } from '@post';
+import postModel from '@post/post.model';
+import PostService from '@post/post.service';
 import cors from 'cors';
 import { json, type ErrorRequestHandler, type Express, type Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
@@ -28,11 +29,13 @@ export const initializeExamplePost = async () => {
 
   if (isExamplePostExists) return;
 
-  const examplePost = await postModel.create({
+  const postService = new PostService();
+
+  const examplePost = await postService.createSingle({
     title: 'Title Example',
     content: 'Content Example',
     senderId: EXAMPLE_SENDER_ID as unknown as ObjectId, // This has to be string, but the type is ObjectId
-    _id: EXAMPLE_POST_ID,
+    _id: EXAMPLE_POST_ID as unknown as Types.ObjectId, // This has to be string, but the type is ObjectId
   });
 
   console.log(`Created example post with id '${examplePost._id}'\n`);

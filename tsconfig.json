@@ -7,12 +7,8 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "target": "esnext",
-    "lib": [
-      "esnext"
-    ],
-    "types": [
-      "node"
-    ],
+    "lib": ["esnext"],
+    "types": ["node"],
     // "moduleResolution": "bundler",
     // Other Outputs
     "sourceMap": true,
@@ -36,27 +32,13 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "paths": {
-      "@user": [
-        "./src/user/index.ts"
-      ],
-      "@post": [
-        "./src/post/index.ts"
-      ],
-      "@comment": [
-        "./src/comment/index.ts"
-      ],
-      "@utils": [
-        "./src/utils/index.ts"
-      ],
-      "@/*": [
-        "./src/*"
-      ]
+      "@user": ["./src/user/index.ts"],
+      "@post/*": ["./src/post/*"],
+      "@comment": ["./src/comment/index.ts"],
+      "@utils": ["./src/utils/index.ts"],
+      "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "dist"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist"]
 }

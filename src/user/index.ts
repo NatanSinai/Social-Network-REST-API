@@ -1,5 +1,5 @@
 import userModel from './user.model';
-import usersRouter from './user.route';
+import usersRouter from './user.controller';
 
 export * from './user.types';
 
