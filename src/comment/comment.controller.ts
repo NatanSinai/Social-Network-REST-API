@@ -1,15 +1,11 @@
-import {
-  commentModel,
-  type Comment,
-  type CommentDocument,
-  type CreateCommentDTO,
-  type UpdateCommentDTO,
-} from '@comment';
 import { respondWithInvalidId, respondWithNotFound } from '@utils';
 import { Router, type Response } from 'express';
-import { isValidObjectId, type QueryFilter } from 'mongoose';
+import { isValidObjectId } from 'mongoose';
+import CommentService from './comment.service';
+import { type Comment, type CommentDocument, type CreateCommentDTO, type UpdateCommentDTO } from './comment.types';
 
 const commentsRouter = Router();
+const commentService = new CommentService();
 
 const respondWithNotFoundComment = (commentId: Comment['_id'], response: Response) =>
   respondWithNotFound(commentId, response, 'comment');
@@ -23,7 +19,7 @@ commentsRouter.post<unknown, CommentDocument, CreateCommentDTO>('', async (reque
   if (!isValidObjectId(createCommentDTO.senderId))
     return respondWithInvalidId(createCommentDTO.senderId, response, 'sender');
 
-  const newComment = await commentModel.create(createCommentDTO);
+  const newComment = await commentService.createSingle(createCommentDTO);
 
   response.send(newComment);
 });
@@ -36,8 +32,7 @@ commentsRouter.get<unknown, CommentDocument[], unknown, Partial<Pick<Comment, 'p
 
     if (!!postId && !isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
 
-    const commentsFilter = (postId ? { postId } : {}) satisfies QueryFilter<CommentDocument>;
-    const comments = await commentModel.find(commentsFilter);
+    const comments = await commentService.getMany({ postId });
 
     response.send(comments);
   },
@@ -49,7 +44,7 @@ commentsRouter.get<{ commentId: Comment['_id'] }>('/:commentId', async (request,
 
   if (!isValidObjectId(commentId)) return respondWithInvalidId(commentId, response, 'comment');
 
-  const comment = await commentModel.findById(commentId);
+  const comment = await commentService.getById(commentId);
 
   if (!comment) return respondWithNotFoundComment(commentId, response);
 
@@ -65,7 +60,7 @@ commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateComment
 
     if (!isValidObjectId(commentId)) return respondWithInvalidId(commentId, response, 'comment');
 
-    const updatedComment = await commentModel.findByIdAndUpdate(commentId, updateCommentDTO, { new: true });
+    const updatedComment = await commentService.updateById(commentId, updateCommentDTO, { new: true });
 
     if (!updatedComment) return respondWithNotFoundComment(commentId, response);
 
@@ -79,7 +74,7 @@ commentsRouter.delete<{ commentId: Comment['_id'] }>('/:commentId', async (reque
 
   if (!isValidObjectId(commentId)) return respondWithInvalidId(commentId, response, 'comment');
 
-  const deletedComment = await commentModel.findByIdAndDelete(commentId);
+  const deletedComment = await commentService.deleteById(commentId);
 
   if (!deletedComment) return respondWithNotFoundComment(commentId, response);
 

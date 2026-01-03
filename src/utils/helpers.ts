@@ -1,4 +1,4 @@
-import { commentModel } from '@comment';
+import CommentService from '@comment/comment.service';
 import PostService from '@post/post.service';
 import cors from 'cors';
 import { json, type ErrorRequestHandler, type Express, type Response } from 'express';
@@ -43,15 +43,17 @@ export const initializeExamplePost = async () => {
 export const initializeExampleComment = async () => {
   const { EXAMPLE_COMMENT_ID, EXAMPLE_POST_ID, EXAMPLE_SENDER_ID } = envVar;
 
-  const isExampleCommentExists = await commentModel.exists({ _id: EXAMPLE_COMMENT_ID });
+  const commentService = new CommentService();
+
+  const isExampleCommentExists = await commentService.exists({ _id: EXAMPLE_COMMENT_ID });
 
   if (isExampleCommentExists) return;
 
-  const exampleComment = await commentModel.create({
+  const exampleComment = await commentService.createSingle({
     content: 'Comment Example',
-    postId: EXAMPLE_POST_ID as unknown as ObjectId,
-    senderId: EXAMPLE_SENDER_ID as unknown as ObjectId,
-    _id: EXAMPLE_COMMENT_ID,
+    postId: EXAMPLE_POST_ID as unknown as ObjectId, // This has to be string, but the type is ObjectId
+    senderId: EXAMPLE_SENDER_ID as unknown as ObjectId, // This has to be string, but the type is ObjectId
+    _id: EXAMPLE_COMMENT_ID as unknown as Types.ObjectId, // This has to be string, but the type is ObjectId
   });
 
   console.log(`Created example comment with id '${exampleComment._id}'\n`);

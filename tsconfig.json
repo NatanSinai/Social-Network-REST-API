@@ -32,9 +32,9 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "paths": {
-      "@user": ["./src/user/index.ts"],
+      "@user/*": ["./src/user/*"],
       "@post/*": ["./src/post/*"],
-      "@comment": ["./src/comment/index.ts"],
+      "@comment/*": ["./src/comment/*"],
       "@utils": ["./src/utils/index.ts"],
       "@/*": ["./src/*"]
     }

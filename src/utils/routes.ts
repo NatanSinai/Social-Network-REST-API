@@ -1,4 +1,4 @@
-import { commentsRouter } from '@comment';
+import commentsRouter from '@comment/comment.controller';
 import postsRouter from '@post/post.controller';
 import { type Express, Router } from 'express';
 import { appRouter } from './app.controller';
