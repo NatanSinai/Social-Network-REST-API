@@ -54,4 +54,8 @@ export default class Service<
   deleteMany(filter?: QueryFilter<T>, options?: DeleteOptions & MongooseBaseQueryOptions<T>) {
     return this.model.deleteMany(filter, options);
   }
+
+  async exists(filter: QueryFilter<T>) {
+    return !!(await this.model.exists(filter));
+  }
 }

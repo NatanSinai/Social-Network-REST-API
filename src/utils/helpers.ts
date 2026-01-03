@@ -1,5 +1,4 @@
 import { commentModel } from '@comment';
-import postModel from '@post/post.model';
 import PostService from '@post/post.service';
 import cors from 'cors';
 import { json, type ErrorRequestHandler, type Express, type Response } from 'express';
@@ -25,11 +24,11 @@ export const initializeAppConfig = (app: Express) => {
 export const initializeExamplePost = async () => {
   const { EXAMPLE_POST_ID, EXAMPLE_SENDER_ID } = envVar;
 
-  const isExamplePostExists = await postModel.exists({ _id: EXAMPLE_POST_ID });
+  const postService = new PostService();
+
+  const isExamplePostExists = await postService.exists({ _id: EXAMPLE_POST_ID });
 
   if (isExamplePostExists) return;
-
-  const postService = new PostService();
 
   const examplePost = await postService.createSingle({
     title: 'Title Example',
