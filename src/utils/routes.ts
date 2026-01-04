@@ -1,9 +1,9 @@
-import { commentsRouter } from '@comment';
-import { postsRouter } from '@post';
+import commentsRouter from '@comment/comment.controller';
+import postsRouter from '@post/post.controller';
 import { type Express, Router } from 'express';
-import { appRouter } from './app.route';
+import { appRouter } from './app.controller';
 
-const routePathToRouter = { ['']: appRouter, post: postsRouter, comment: commentsRouter } satisfies Record<
+const routePathToRouter = { ['']: appRouter, posts: postsRouter, comments: commentsRouter } satisfies Record<
   string,
   Router
 >;

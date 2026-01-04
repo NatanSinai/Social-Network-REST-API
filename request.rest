@@ -1,6 +1,6 @@
 @port = 3000
 @baseURL = http://localhost:{{port}}
-@basePostsURL = {{baseURL}}/post
+@basePostsURL = {{baseURL}}/posts
 @postId = 694582383d983573299dc89b
 @senderId = 6945824e5cb700d554aa53a0
 @baseCommentsURL = {{baseURL}}/comments

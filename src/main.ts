@@ -31,7 +31,7 @@ const initializeServer = async () => {
   app.listen(port, (error) => {
     if (error) return console.error({ error });
 
-    console.log(`\nCRUD API listening on http://localhost:${port}`);
+    console.log(`\nCRUD API listening on 'http://localhost:${port}'`);
     console.log('\n========== FINISHED INITIALIZING SERVER ==========\n');
   });
 };
