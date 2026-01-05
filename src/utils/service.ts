@@ -12,16 +12,19 @@ import type {
   UpdateQuery,
 } from 'mongoose';
 
-export type FilterQuery<T extends DocumentMetadata> = Partial<MakeAllOrUndefined<Omit<T, keyof DocumentMetadata>>>;
-export type CreateDTO<T extends DocumentMetadata> = DeepPartial<ApplyBasicCreateCasting<Require_id<T>>> &
+export type FilterQuery<T extends Pick<DocumentMetadata, '_id'>> = Partial<
+  MakeAllOrUndefined<Omit<T, keyof DocumentMetadata>>
+>;
+
+export type CreateDTO<T extends Pick<DocumentMetadata, '_id'>> = DeepPartial<ApplyBasicCreateCasting<Require_id<T>>> &
   Partial<Pick<DocumentMetadata, '_id'>>;
 
 export default class Service<
-  T extends DocumentMetadata,
+  T extends Pick<DocumentMetadata, '_id'>,
   TCreateDTO extends CreateDTO<T>,
   UpdateDTO extends UpdateQuery<T>,
 > {
-  private model: Model<T>;
+  protected model: Model<T>;
 
   constructor(model: typeof this.model) {
     this.model = model;
@@ -41,6 +44,10 @@ export default class Service<
 
   getById(id: T['_id']) {
     return this.model.findById(id);
+  }
+
+  getOne(filter?: FilterQuery<T>) {
+    return this.model.findOne(filter);
   }
 
   updateById(id: T['_id'], updateDTO: UpdateDTO, options?: QueryOptions<T>) {

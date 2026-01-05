@@ -3,7 +3,7 @@ import { model, Schema } from 'mongoose';
 import type { UserDocument } from './user.types';
 
 const UserSchema = new Schema<UserDocument>(
-  { name: { type: String, required: true }, bio: { type: String } },
+  { username: { type: String, required: true }, password: { type: String, required: true }, bio: { type: String } },
   { timestamps: true },
 );
 

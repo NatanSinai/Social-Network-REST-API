@@ -21,6 +21,11 @@ const envVarSchema = z.object({
   EXAMPLE_POST_ID: objectIdEnvValidator('example post', '694582383d983573299dc89b'),
   EXAMPLE_SENDER_ID: objectIdEnvValidator('example sender', '6945824e5cb700d554aa53a0'),
   EXAMPLE_COMMENT_ID: objectIdEnvValidator('example comment', '694582383d983573299dc89c'),
+  JWT_SECRET: z.string(),
+  JWT_REFRESH_SECRET: z.string(),
+  JWT_EXPIRATION: z.string(),
+  JWT_REFRESH_EXPIRATION: z.string(),
+  REFRESH_TOKEN_TTL_IN_SECONDS: z.coerce.number(),
 });
 
 export const envVar = envVarSchema.parse(process.env);

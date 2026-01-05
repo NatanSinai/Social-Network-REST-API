@@ -1,4 +1,4 @@
-import { respondWithInvalidId, respondWithNotFound } from '@utils';
+import { respondWithInvalidId, respondWithNotFoundById } from '@utils';
 import { Router, type Response } from 'express';
 import { isValidObjectId } from 'mongoose';
 import PostService from './post.service';
@@ -8,7 +8,7 @@ const postsRouter = Router();
 const postService = new PostService();
 
 const respondWithNotFoundPost = (postId: Post['_id'], response: Response) =>
-  respondWithNotFound(postId, response, 'post');
+  respondWithNotFoundById(postId, response, 'post');
 
 postsRouter.post<unknown, PostDocument, CreatePostDTO>('', async (request, response) => {
   const createPostDTO = request.body;

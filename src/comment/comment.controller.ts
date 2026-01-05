@@ -1,4 +1,4 @@
-import { respondWithInvalidId, respondWithNotFound } from '@utils';
+import { respondWithInvalidId, respondWithNotFoundById } from '@utils';
 import { Router, type Response } from 'express';
 import { isValidObjectId } from 'mongoose';
 import CommentService from './comment.service';
@@ -8,7 +8,7 @@ const commentsRouter = Router();
 const commentService = new CommentService();
 
 const respondWithNotFoundComment = (commentId: Comment['_id'], response: Response) =>
-  respondWithNotFound(commentId, response, 'comment');
+  respondWithNotFoundById(commentId, response, 'comment');
 
 /* Create Comment */
 commentsRouter.post<unknown, CommentDocument, CreateCommentDTO>('', async (request, response) => {

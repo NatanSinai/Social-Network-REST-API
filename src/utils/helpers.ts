@@ -65,5 +65,8 @@ export const respondWithInvalidId = (id: unknown, response: Response, idName?: s
   response.status(StatusCodes.BAD_REQUEST).json({ message: `Invalid ${idLabel}: '${id}'` });
 };
 
-export const respondWithNotFound = (id: Types.ObjectId, response: Response, entityName: string) =>
-  response.status(StatusCodes.NOT_FOUND).json({ message: `There is no ${entityName} with id '${id}'` });
+export const respondWithNotFound = (response: Response, message: string) =>
+  response.status(StatusCodes.NOT_FOUND).json({ message });
+
+export const respondWithNotFoundById = (id: Types.ObjectId, response: Response, entityName: string) =>
+  respondWithNotFound(response, `There is no ${entityName} with id '${id}'`);
