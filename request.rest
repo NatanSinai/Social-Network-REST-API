@@ -5,6 +5,8 @@
 @senderId = 6945824e5cb700d554aa53a0
 @baseCommentsURL = {{baseURL}}/comments
 @commentId = 694582383d983573299dc89c
+@baseUsersURL = {{baseURL}}/users
+@baseAuthURL = {{baseURL}}/auth
 
 # Posts API
 
@@ -85,3 +87,26 @@ content-type: application/json
 ### Delete Comment
 ### For general use replace {{commentId}} with your actual comment ID.
 DELETE {{baseCommentsURL}}/{{commentId}}
+
+# Users API
+
+### Register New User
+POST {{baseUsersURL}}/signup
+content-type: application/json
+
+{
+  "username": "Natan Sinai",
+  "password": "natan123",
+  "bio": "I love cats"
+}
+
+# Authentication API
+
+### Login User
+POST {{baseAuthURL}}/login
+content-type: application/json
+
+{
+  "username": "Natan Sinai",
+  "password": "natan123"
+}

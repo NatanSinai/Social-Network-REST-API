@@ -8,7 +8,7 @@ const CommentSchema = new Schema<CommentDocument>(
     postId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.POST },
     senderId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.USER },
   },
-  { timestamps: true },
+  { timestamps: true, collection: ModelName.COMMENT },
 );
 
 const commentModel = model<CommentDocument>(ModelName.COMMENT, CommentSchema);

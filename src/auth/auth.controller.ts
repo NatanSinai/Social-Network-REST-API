@@ -9,12 +9,12 @@ import { pick } from 'rambda';
 import AuthService from './auth.service';
 import type { TokensPayload } from './auth.types';
 
-const authsRouter = Router();
+const authRouter = Router();
 const authService = new AuthService();
 const userService = new UserService();
 const userRefreshTokenService = new UserRefreshTokenService();
 
-authsRouter.post<unknown, TokensPayload, Pick<User, 'username' | 'password'>>('/login', async (request, response) => {
+authRouter.post<unknown, TokensPayload, Pick<User, 'username' | 'password'>>('/login', async (request, response) => {
   const { username, password } = request.body;
 
   const user = await userService.getOne({ username });
@@ -38,4 +38,4 @@ authsRouter.post<unknown, TokensPayload, Pick<User, 'username' | 'password'>>('/
   response.json({ accessToken, refreshToken });
 });
 
-export default authsRouter;
+export default authRouter;

@@ -26,6 +26,7 @@ const envVarSchema = z.object({
   JWT_EXPIRATION: z.string(),
   JWT_REFRESH_EXPIRATION: z.string(),
   REFRESH_TOKEN_TTL_IN_SECONDS: z.coerce.number(),
+  PASSWORD_HAS_SALT_ROUNDS: z.coerce.number(),
 });
 
 export const envVar = envVarSchema.parse(process.env);

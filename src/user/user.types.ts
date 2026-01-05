@@ -5,5 +5,5 @@ export type User = Prettify<{ username: string; password: string; bio: string | 
 
 export type UserDocument = HydratedDocument<User>;
 
-export type CreateUserDTO = MakeOptional<Pick<User, '_id' | 'username' | 'password' | 'bio'>, '_id'>;
+export type CreateUserDTO = Prettify<MakeOptional<Pick<User, '_id' | 'username' | 'password' | 'bio'>, '_id'>>;
 export type UpdateUserDTO = Partial<Pick<User, 'username' | 'password' | 'bio'>>;

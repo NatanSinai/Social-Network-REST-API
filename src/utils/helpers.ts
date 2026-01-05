@@ -59,10 +59,14 @@ export const initializeExampleComment = async () => {
   console.log(`Created example comment with id '${exampleComment._id}'\n`);
 };
 
+export const respondWithBadRequest = (response: Response, message: string) =>
+  response.status(StatusCodes.BAD_REQUEST).json({ message });
+
 export const respondWithInvalidId = (id: unknown, response: Response, idName?: string) => {
   const idLabel = `${idName ? idName + ' ' : ''}id`;
+  const message = `Invalid ${idLabel}: '${id}'`;
 
-  response.status(StatusCodes.BAD_REQUEST).json({ message: `Invalid ${idLabel}: '${id}'` });
+  return respondWithBadRequest(response, message);
 };
 
 export const respondWithNotFound = (response: Response, message: string) =>
