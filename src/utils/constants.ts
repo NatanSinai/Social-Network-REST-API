@@ -1,8 +1,8 @@
 export enum ModelName {
-  USER = 'User',
-  POST = 'Post',
-  COMMENT = 'Comment',
-  USER_REFRESH_TOKEN = 'UserRefreshToken',
+  USER = 'user',
+  POST = 'post',
+  COMMENT = 'comment',
+  USER_REFRESH_TOKEN = 'userRefreshToken',
 }
 
 export const OBJECT_ID_LENGTH = 24;

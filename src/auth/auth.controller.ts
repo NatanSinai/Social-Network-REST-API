@@ -1,41 +1,25 @@
-import UserRefreshTokenService from '@/userRefreshToken/userRefreshToken.service';
 import UserService from '@user/user.service';
-import type { User } from '@user/user.types';
+import type { UserCredentials } from '@user/user.types';
 import { respondWithNotFound } from '@utils';
-import { compareSync } from 'bcrypt';
 import { Router } from 'express';
-import type { ObjectId } from 'mongoose';
-import { pick } from 'rambda';
 import AuthService from './auth.service';
 import type { TokensPayload } from './auth.types';
 
 const authRouter = Router();
+
 const authService = new AuthService();
 const userService = new UserService();
-const userRefreshTokenService = new UserRefreshTokenService();
 
-authRouter.post<unknown, TokensPayload, Pick<User, 'username' | 'password'>>('/login', async (request, response) => {
-  const { username, password } = request.body;
+authRouter.post<unknown, TokensPayload, UserCredentials>('/login', async (request, response) => {
+  const credentials = request.body;
 
-  const user = await userService.getOne({ username });
+  const { user, message } = await userService.getOneByCredentials(credentials);
 
-  if (!user) return respondWithNotFound(response, 'Invalid username');
+  if (message) return respondWithNotFound(response, message);
 
-  const isPasswordsMatch = compareSync(password, user.password);
+  const tokensPayload = await authService.generateUserTokens(user);
 
-  if (!isPasswordsMatch) return respondWithNotFound(response, 'Invalid password');
-
-  const userId = user._id as unknown as ObjectId;
-  const userPayload = pick('_id')(user);
-  const { accessToken, refreshToken } = authService.generateTokens(userPayload);
-
-  const userToken = await userRefreshTokenService.getOne({ userId });
-
-  if (userToken) await userRefreshTokenService.deleteById(userToken._id);
-
-  await userRefreshTokenService.createSingle({ userId, refreshToken });
-
-  response.json({ accessToken, refreshToken });
+  response.json(tokensPayload);
 });
 
 export default authRouter;

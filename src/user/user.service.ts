@@ -1,7 +1,7 @@
 import { envVar, Service } from '@utils';
-import { hashSync } from 'bcrypt';
+import { compareSync, hashSync } from 'bcrypt';
 import userModel from './user.model';
-import type { CreateUserDTO, UpdateUserDTO, UserDocument } from './user.types';
+import type { CreateUserDTO, UpdateUserDTO, UserCredentials, UserDocument } from './user.types';
 
 export default class UserService extends Service<UserDocument, CreateUserDTO, UpdateUserDTO> {
   constructor() {
@@ -15,4 +15,16 @@ export default class UserService extends Service<UserDocument, CreateUserDTO, Up
 
     return super.createSingle({ password: hashedPassword, ...createUserDTO });
   }
+
+  getOneByCredentials = async ({ username, password }: UserCredentials) => {
+    const user = await this.getOne({ username });
+
+    if (!user) return { user: null, message: 'Invalid username' } as const;
+
+    const isPasswordsMatch = compareSync(password, user.password);
+
+    if (!isPasswordsMatch) return { user: null, message: 'Invalid password' } as const;
+
+    return { user, message: '' } as const;
+  };
 }
