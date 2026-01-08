@@ -1,4 +1,4 @@
-import { isDuplicateKeyMongoError, respondWithBadRequest } from '@utils';
+import { isDuplicateKeyMongoError, respondWithBadRequest, respondWithJSONMessage } from '@utils';
 import { Router } from 'express';
 import UserService from './user.service';
 import type { CreateUserDTO } from './user.types';
@@ -12,7 +12,7 @@ usersRouter.post<unknown, { message: string }, CreateUserDTO>('/signup', async (
   try {
     const newUser = await userService.createSingle(createUserDTO);
 
-    response.json({ message: `User was registered successfully with id ${newUser._id}` });
+    respondWithJSONMessage(response, `User was registered successfully with id ${newUser._id}`);
   } catch (error) {
     if (isDuplicateKeyMongoError(error))
       respondWithBadRequest(response, `Username '${createUserDTO.username}' already exists`);

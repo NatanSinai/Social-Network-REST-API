@@ -1,3 +1,4 @@
+import { app } from '@/main';
 import { isValidObjectId } from 'mongoose';
 import { z } from 'zod';
 import { OBJECT_ID_LENGTH } from './';
@@ -28,5 +29,7 @@ const envVarSchema = z.object({
   REFRESH_TOKEN_TTL_IN_SECONDS: z.coerce.number(),
   PASSWORD_HAS_SALT_ROUNDS: z.coerce.number(),
 });
+
+export const getNodeEnvironment = () => app.get('env') as 'development' | 'production' | 'test';
 
 export const envVar = envVarSchema.parse(process.env);

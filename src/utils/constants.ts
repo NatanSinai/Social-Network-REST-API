@@ -6,3 +6,7 @@ export enum ModelName {
 }
 
 export const OBJECT_ID_LENGTH = 24;
+
+export enum CookieName {
+  REFRESH_TOKEN = 'refreshToken',
+}

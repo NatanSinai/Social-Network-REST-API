@@ -12,7 +12,7 @@ import express from 'express';
 
 dotenv.config();
 
-const app = express();
+export const app = express();
 
 const initializeServer = async () => {
   console.log('\n========== STARTING TO INITIALIZE SERVER ==========\n');
@@ -23,10 +23,9 @@ const initializeServer = async () => {
 
   initializeAppConfig(app);
   initializeRouters(app);
-
   app.use(errorHandler);
 
-  const port = envVar.PORT;
+  const { PORT: port } = envVar;
 
   app.listen(port, (error) => {
     if (error) return console.error({ error });

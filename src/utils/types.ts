@@ -1,9 +1,11 @@
+import type { UserRefreshToken } from '@/userRefreshToken/userRefreshToken.types';
 import type { User } from '@user/user.types';
 import type { Document } from 'mongoose';
 
 declare module 'express-serve-static-core' {
   interface Request {
     userId?: User['_id'];
+    authCookies: Partial<Pick<UserRefreshToken, 'refreshToken'>>;
   }
 }
 

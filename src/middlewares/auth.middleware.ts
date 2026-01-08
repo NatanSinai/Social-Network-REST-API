@@ -17,6 +17,7 @@ const authMiddleware =
       const { _id } = verify(token, JWT_SECRET) as Pick<User, '_id'>;
 
       request.userId = _id;
+      request.authCookies = { refreshToken: request.cookies?.refreshToken };
 
       next();
     } catch (error) {

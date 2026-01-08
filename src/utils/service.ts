@@ -54,6 +54,10 @@ export default class Service<
     return this.model.findByIdAndUpdate(id, updateDTO, { new: true, ...options });
   }
 
+  deleteSingle(filter?: FilterQuery<T>) {
+    return this.model.findOneAndDelete(filter);
+  }
+
   deleteById(id: T['_id']) {
     return this.model.findByIdAndDelete(id);
   }

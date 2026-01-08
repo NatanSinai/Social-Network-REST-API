@@ -9,7 +9,6 @@
 @baseAuthURL = {{baseURL}}/auth
 
 @accessToken = Bearer {{loginAPI.response.body.accessToken}}
-@refreshToken = {{loginAPI.response.body.refreshToken}}
 
 # Users API
 
@@ -34,6 +33,10 @@ content-type: application/json
   "username": "Natan Sinai",
   "password": "natan123"
 }
+
+### Logout User
+POST {{baseAuthURL}}/logout
+Authorization: {{accessToken}}
 
 # Posts API
 

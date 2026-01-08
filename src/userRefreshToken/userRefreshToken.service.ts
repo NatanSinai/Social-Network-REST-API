@@ -1,10 +1,8 @@
 import { Service } from '@utils';
-import type { ObjectId } from 'mongoose';
 import userRefreshTokenModel from './userRefreshToken.model';
 import type {
   CreateUserRefreshTokenDTO,
   UpdateUserRefreshTokenDTO,
-  UserRefreshToken,
   UserRefreshTokenDocument,
 } from './userRefreshToken.types';
 
@@ -17,14 +15,13 @@ export default class UserRefreshTokenService extends Service<
     super(userRefreshTokenModel);
   }
 
-  validateUserRefreshTokenToken = async ({
-    userId,
-    refreshToken,
-  }: Pick<UserRefreshToken, 'refreshToken'> & { userId: ObjectId }) => {
-    const userToken = await this.getOne({ userId });
+  createSingle = async ({ userId, refreshToken }: CreateUserRefreshTokenDTO) => {
+    const userToken = await super.getOne({ userId });
 
-    if (userToken) await this.deleteById(userToken._id);
+    if (userToken) await super.deleteById(userToken._id);
 
-    await this.createSingle({ userId, refreshToken });
+    const newUserRefreshToken = await super.createSingle({ userId, refreshToken });
+
+    return newUserRefreshToken;
   };
 }

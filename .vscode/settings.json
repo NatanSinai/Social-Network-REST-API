@@ -67,5 +67,6 @@
   "terminal.integrated.smoothScrolling": true,
   "terminal.integrated.suggest.enabled": true,
   "terminal.integrated.stickyScroll.enabled": false,
-  "typescript.preferences.preferTypeOnlyAutoImports": true
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
+  "rest-client.rememberCookiesForSubsequentRequests": true
 }

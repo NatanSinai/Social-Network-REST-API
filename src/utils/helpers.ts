@@ -1,11 +1,12 @@
 import CommentService from '@comment/comment.service';
 import PostService from '@post/post.service';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import { json, type ErrorRequestHandler, type Express, type Response } from 'express';
+import { json, type CookieOptions, type ErrorRequestHandler, type Express, type Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import type { Types } from 'mongoose';
 import morgan from 'morgan';
-import { envVar } from '.';
+import { envVar, getNodeEnvironment, type CookieName } from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const errorHandler: ErrorRequestHandler = (error: Error, request, response, next) => {
@@ -19,6 +20,7 @@ export const initializeAppConfig = (app: Express) => {
   app.use(json());
   app.use(cors());
   app.use(morgan('dev'));
+  app.use(cookieParser());
 };
 
 export const initializeExamplePost = async () => {
@@ -59,6 +61,8 @@ export const initializeExampleComment = async () => {
   console.log(`Created example comment with id '${exampleComment._id}'\n`);
 };
 
+export const respondWithJSONMessage = (response: Response, message: string) => response.json({ message });
+
 const respondWithStatusAndJSONMessage = (status: StatusCodes) => (response: Response, message: string) =>
   response.status(status).json({ message });
 
@@ -79,3 +83,24 @@ export const respondWithNotFound = respondWithStatusAndJSONMessage(StatusCodes.N
 
 export const respondWithNotFoundById = (id: Types.ObjectId, response: Response, entityName: string) =>
   respondWithNotFound(response, `There is no ${entityName} with id '${id}'`);
+
+export const addCookieToResponse = ({
+  response,
+  cookieName,
+  cookieValue,
+  ...cookieOptions
+}: CookieOptions & {
+  response: Response;
+  cookieName: CookieName;
+  cookieValue: string;
+}) => {
+  const nodeEnvironment = getNodeEnvironment();
+
+  response.cookie(cookieName, cookieValue, {
+    httpOnly: true,
+    secure: nodeEnvironment === 'production',
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days expiration
+    ...cookieOptions,
+  });
+};
