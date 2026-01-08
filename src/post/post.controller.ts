@@ -56,7 +56,7 @@ postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
     const updatePostDTO = request.body;
     const senderId = request.userId;
 
-    if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(postId, response, 'sender');
+    if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
     if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
 
