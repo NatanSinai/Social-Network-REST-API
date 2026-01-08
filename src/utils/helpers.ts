@@ -3,7 +3,7 @@ import PostService from '@post/post.service';
 import cors from 'cors';
 import { json, type ErrorRequestHandler, type Express, type Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import type { ObjectId, Types } from 'mongoose';
+import type { Types } from 'mongoose';
 import morgan from 'morgan';
 import { envVar } from '.';
 
@@ -33,7 +33,7 @@ export const initializeExamplePost = async () => {
   const examplePost = await postService.createSingle({
     title: 'Title Example',
     content: 'Content Example',
-    senderId: EXAMPLE_SENDER_ID as unknown as ObjectId, // This has to be string, but the type is ObjectId
+    senderId: EXAMPLE_SENDER_ID as unknown as Types.ObjectId, // This has to be string, but the type is ObjectId
     _id: EXAMPLE_POST_ID as unknown as Types.ObjectId, // This has to be string, but the type is ObjectId
   });
 
@@ -51,16 +51,22 @@ export const initializeExampleComment = async () => {
 
   const exampleComment = await commentService.createSingle({
     content: 'Comment Example',
-    postId: EXAMPLE_POST_ID as unknown as ObjectId, // This has to be string, but the type is ObjectId
-    senderId: EXAMPLE_SENDER_ID as unknown as ObjectId, // This has to be string, but the type is ObjectId
+    postId: EXAMPLE_POST_ID as unknown as Types.ObjectId, // This has to be string, but the type is ObjectId
+    senderId: EXAMPLE_SENDER_ID as unknown as Types.ObjectId, // This has to be string, but the type is ObjectId
     _id: EXAMPLE_COMMENT_ID as unknown as Types.ObjectId, // This has to be string, but the type is ObjectId
   });
 
   console.log(`Created example comment with id '${exampleComment._id}'\n`);
 };
 
-export const respondWithBadRequest = (response: Response, message: string) =>
-  response.status(StatusCodes.BAD_REQUEST).json({ message });
+const respondWithStatusAndJSONMessage = (status: StatusCodes) => (response: Response, message: string) =>
+  response.status(status).json({ message });
+
+export const respondWithForbidden = respondWithStatusAndJSONMessage(StatusCodes.FORBIDDEN);
+
+export const respondWithUnauthorized = respondWithStatusAndJSONMessage(StatusCodes.UNAUTHORIZED);
+
+export const respondWithBadRequest = respondWithStatusAndJSONMessage(StatusCodes.BAD_REQUEST);
 
 export const respondWithInvalidId = (id: unknown, response: Response, idName?: string) => {
   const idLabel = `${idName ? idName + ' ' : ''}id`;
@@ -69,8 +75,7 @@ export const respondWithInvalidId = (id: unknown, response: Response, idName?: s
   return respondWithBadRequest(response, message);
 };
 
-export const respondWithNotFound = (response: Response, message: string) =>
-  response.status(StatusCodes.NOT_FOUND).json({ message });
+export const respondWithNotFound = respondWithStatusAndJSONMessage(StatusCodes.NOT_FOUND);
 
 export const respondWithNotFoundById = (id: Types.ObjectId, response: Response, entityName: string) =>
   respondWithNotFound(response, `There is no ${entityName} with id '${id}'`);

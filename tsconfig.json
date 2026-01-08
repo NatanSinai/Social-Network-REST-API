@@ -35,6 +35,7 @@
       "@user/*": ["./src/user/*"],
       "@post/*": ["./src/post/*"],
       "@comment/*": ["./src/comment/*"],
+      "@middlewares": ["./src/middlewares/index.ts"],
       "@utils": ["./src/utils/index.ts"],
       "@/*": ["./src/*"]
     }

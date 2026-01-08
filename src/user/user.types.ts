@@ -1,7 +1,7 @@
 import type { DocumentMetadata, MakeOptional, Prettify } from '@utils';
 import type { HydratedDocument } from 'mongoose';
 
-export type User = Prettify<{ username: string; password: string; bio: string | null } & DocumentMetadata>;
+export type User = Prettify<DocumentMetadata & { username: string; password: string; bio: string | null }>;
 
 export type UserDocument = HydratedDocument<User>;
 

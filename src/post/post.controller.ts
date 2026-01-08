@@ -1,3 +1,4 @@
+import { authMiddleware } from '@middlewares';
 import { respondWithInvalidId, respondWithNotFoundById } from '@utils';
 import { Router, type Response } from 'express';
 import { isValidObjectId } from 'mongoose';
@@ -10,15 +11,20 @@ const postService = new PostService();
 const respondWithNotFoundPost = (postId: Post['_id'], response: Response) =>
   respondWithNotFoundById(postId, response, 'post');
 
-postsRouter.post<unknown, PostDocument, CreatePostDTO>('', async (request, response) => {
-  const createPostDTO = request.body;
+postsRouter.post<unknown, PostDocument, Omit<CreatePostDTO, 'senderId'>>(
+  '',
+  authMiddleware(),
+  async (request, response) => {
+    const senderId = request.userId;
+    const createPostDTO = request.body;
 
-  if (!isValidObjectId(createPostDTO.senderId)) return respondWithInvalidId(createPostDTO.senderId, response, 'sender');
+    if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
-  const newPost = await postService.createSingle(createPostDTO);
+    const newPost = await postService.createSingle({ ...createPostDTO, senderId });
 
-  response.send(newPost);
-});
+    response.send(newPost);
+  },
+);
 
 postsRouter.get<unknown, PostDocument[], unknown, { sender?: Post['senderId'] }>('', async (request, response) => {
   const { sender: senderId } = request.query;
@@ -42,18 +48,25 @@ postsRouter.get<{ postId: Post['_id'] }>('/:postId', async (request, response) =
   response.send(post);
 });
 
-postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>('/:postId', async (request, response) => {
-  const { postId } = request.params;
-  const updatePostDTO = request.body;
+postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
+  '/:postId',
+  authMiddleware(),
+  async (request, response) => {
+    const { postId } = request.params;
+    const updatePostDTO = request.body;
+    const senderId = request.userId;
 
-  if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
+    if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(postId, response, 'sender');
 
-  const updatedPost = await postService.updateById(postId, updatePostDTO);
+    if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
 
-  if (!updatedPost) return respondWithNotFoundPost(postId, response);
+    const updatedPost = await postService.updateById(postId, updatePostDTO);
 
-  response.send(updatedPost);
-});
+    if (!updatedPost) return respondWithNotFoundPost(postId, response);
+
+    response.send(updatedPost);
+  },
+);
 
 // Bonus - Deletion Routes
 postsRouter.delete('', async (request, response) => {
@@ -62,8 +75,11 @@ postsRouter.delete('', async (request, response) => {
   response.send(deleteResult);
 });
 
-postsRouter.delete<{ postId: Post['_id'] }>('/:postId', async (request, response) => {
+postsRouter.delete<{ postId: Post['_id'] }>('/:postId', authMiddleware(), async (request, response) => {
   const { postId } = request.params;
+  const senderId = request.userId;
+
+  if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(postId, response, 'sender');
 
   if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
 

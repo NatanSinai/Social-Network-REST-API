@@ -8,15 +8,41 @@
 @baseUsersURL = {{baseURL}}/users
 @baseAuthURL = {{baseURL}}/auth
 
-# Posts API
+@accessToken = Bearer {{loginAPI.response.body.accessToken}}
+@refreshToken = {{loginAPI.response.body.refreshToken}}
 
-### Add a New Post
-### For general use replace {{senderId}} with your actual sender ID.
-POST {{basePostsURL}}
+# Users API
+
+### Register New User
+POST {{baseUsersURL}}/signup
 content-type: application/json
 
 {
-  "senderId": "{{senderId}}",
+  "username": "Natan Sinai",
+  "password": "natan123",
+  "bio": "I love cats"
+}
+
+# Authentication API
+
+### Login User
+# @name loginAPI
+POST {{baseAuthURL}}/login
+content-type: application/json
+
+{
+  "username": "Natan Sinai",
+  "password": "natan123"
+}
+
+# Posts API
+
+### Add a New Post
+POST {{basePostsURL}}
+content-type: application/json
+Authorization: {{accessToken}}
+
+{
   "title": "Title 1",
   "content": "Content 1"
 }
@@ -36,6 +62,7 @@ GET {{basePostsURL}}/?sender={{senderId}}
 ### For general use replace {{postId}} with your actual post ID.
 PUT {{basePostsURL}}/{{postId}}
 content-type: application/json
+Authorization: {{accessToken}}
 
 {
   "title": "Updated title",
@@ -50,17 +77,17 @@ DELETE {{basePostsURL}}
 ### Delete Post by ID
 ### For general use replace {{postId}} with your actual post ID.
 DELETE {{basePostsURL}}/{{postId}}
+Authorization: {{accessToken}}
 
 # Comments API
 
 ### Add a New Comment
-### For general use replace {{postId}} and {{senderId}} with your actual IDs.
 POST {{baseCommentsURL}}
 content-type: application/json
+Authorization: {{accessToken}}
 
 {
   "postId": "{{postId}}",
-  "senderId": "{{senderId}}",
   "content": "This is a comment"
 }
 
@@ -79,6 +106,7 @@ GET {{baseCommentsURL}}/{{commentId}}
 ### For general use replace {{commentId}} with your actual comment ID.
 PUT {{baseCommentsURL}}/{{commentId}}
 content-type: application/json
+Authorization: {{accessToken}}
 
 {
   "content": "Updated comment content"
@@ -87,26 +115,4 @@ content-type: application/json
 ### Delete Comment
 ### For general use replace {{commentId}} with your actual comment ID.
 DELETE {{baseCommentsURL}}/{{commentId}}
-
-# Users API
-
-### Register New User
-POST {{baseUsersURL}}/signup
-content-type: application/json
-
-{
-  "username": "Natan Sinai",
-  "password": "natan123",
-  "bio": "I love cats"
-}
-
-# Authentication API
-
-### Login User
-POST {{baseAuthURL}}/login
-content-type: application/json
-
-{
-  "username": "Natan Sinai",
-  "password": "natan123"
-}
+Authorization: {{accessToken}}
