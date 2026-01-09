@@ -1,8 +1,7 @@
-import type { User } from '@user/user.types';
-import { envVar, respondWithForbidden, respondWithUnauthorized } from '@utils';
+import { envVar, NoAuthorizationReason, respondWithForbidden, respondWithUnauthorized } from '@utils';
 import type { NextFunction, Request, Response } from 'express';
 import type { ParamsDictionary, Query } from 'express-serve-static-core';
-import { JsonWebTokenError, TokenExpiredError, verify } from 'jsonwebtoken';
+import { JsonWebTokenError, TokenExpiredError, verify, type JwtPayload } from 'jsonwebtoken';
 
 const authMiddleware =
   <P = ParamsDictionary, ResBody = unknown, ReqBody = unknown, ReqQuery = Query>() =>
@@ -14,19 +13,32 @@ const authMiddleware =
     if (!token) return respondWithForbidden(response, 'No access token provided');
 
     try {
-      const { _id } = verify(token, JWT_SECRET) as Pick<User, '_id'>;
+      const { userId } = verify(token, JWT_SECRET) as JwtPayload;
 
-      request.userId = _id;
+      request.userId = userId;
       request.authCookies = { refreshToken: request.cookies?.refreshToken };
 
       next();
     } catch (error) {
-      if (error instanceof TokenExpiredError) return respondWithUnauthorized(response, 'Access token expired');
+      if (error instanceof TokenExpiredError)
+        return respondWithUnauthorized(
+          response,
+          'Access token expired, please refresh it',
+          NoAuthorizationReason.TOKEN_EXPIRED,
+        );
 
       if (error instanceof JsonWebTokenError)
-        return respondWithUnauthorized(response, error.message || 'Invalid access token');
+        return respondWithUnauthorized(
+          response,
+          error.message || 'Invalid access token',
+          NoAuthorizationReason.INVALID_TOKEN,
+        );
 
-      return respondWithUnauthorized(response, 'Unauthorized to access this route');
+      return respondWithUnauthorized(
+        response,
+        'Unauthorized to access this routeNoAuthorization',
+        NoAuthorizationReason.UNAUTHORIZED_TO_ACCESS_ROUTE,
+      );
     }
   };
 

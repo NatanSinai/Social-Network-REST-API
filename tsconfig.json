@@ -32,6 +32,7 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "paths": {
+      "@userSession/*": ["./src/userSession/*"],
       "@user/*": ["./src/user/*"],
       "@post/*": ["./src/post/*"],
       "@comment/*": ["./src/comment/*"],

@@ -9,9 +9,9 @@ export default class UserService extends Service<UserDocument, CreateUserDTO, Up
   }
 
   createSingle({ password: rawPassword, ...createUserDTO }: CreateUserDTO) {
-    const { PASSWORD_HAS_SALT_ROUNDS } = envVar;
+    const { PASSWORD_HASH_SALT_ROUNDS } = envVar;
 
-    const hashedPassword = hashSync(rawPassword, PASSWORD_HAS_SALT_ROUNDS);
+    const hashedPassword = hashSync(rawPassword, PASSWORD_HASH_SALT_ROUNDS);
 
     return super.createSingle({ password: hashedPassword, ...createUserDTO });
   }

@@ -26,10 +26,10 @@ const envVarSchema = z.object({
   JWT_REFRESH_SECRET: z.string(),
   JWT_EXPIRATION: z.string(),
   JWT_REFRESH_EXPIRATION: z.string(),
-  REFRESH_TOKEN_TTL_IN_SECONDS: z.coerce.number(),
-  PASSWORD_HAS_SALT_ROUNDS: z.coerce.number(),
+  JWT_REFRESH_HASH_SALT_ROUNDS: z.coerce.number(),
+  PASSWORD_HASH_SALT_ROUNDS: z.coerce.number(),
 });
 
-export const getNodeEnvironment = () => app.get('env') as 'development' | 'production' | 'test';
-
 export const envVar = envVarSchema.parse(process.env);
+
+export const getNodeEnvironment = () => app.get('env') as 'development' | 'production' | 'test';

@@ -6,7 +6,7 @@ import { json, type CookieOptions, type ErrorRequestHandler, type Express, type 
 import { StatusCodes } from 'http-status-codes';
 import type { Types } from 'mongoose';
 import morgan from 'morgan';
-import { envVar, getNodeEnvironment, type CookieName } from '.';
+import { envVar, getNodeEnvironment, type CookieName, type NoAuthorizationReason } from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const errorHandler: ErrorRequestHandler = (error: Error, request, response, next) => {
@@ -63,12 +63,24 @@ export const initializeExampleComment = async () => {
 
 export const respondWithJSONMessage = (response: Response, message: string) => response.json({ message });
 
-const respondWithStatusAndJSONMessage = (status: StatusCodes) => (response: Response, message: string) =>
-  response.status(status).json({ message });
+const respondWithStatusAndJSONMessage =
+  (status: StatusCodes) =>
+  (response: Response, message: string, ...jsonValues: Record<string, unknown>[]) => {
+    const additionalJSONValues = jsonValues.reduce((allValues, current) => ({ ...allValues, ...current }), {});
+
+    return response.status(status).json({ message, ...additionalJSONValues });
+  };
+
+export const respondWithNoContent = respondWithStatusAndJSONMessage(StatusCodes.NO_CONTENT);
 
 export const respondWithForbidden = respondWithStatusAndJSONMessage(StatusCodes.FORBIDDEN);
 
-export const respondWithUnauthorized = respondWithStatusAndJSONMessage(StatusCodes.UNAUTHORIZED);
+export const respondWithUnauthorized = (
+  response: Response,
+  message: string,
+  reason: NoAuthorizationReason,
+  ...jsonValues: Record<string, unknown>[]
+) => respondWithStatusAndJSONMessage(StatusCodes.UNAUTHORIZED)(response, message, { reason }, ...jsonValues);
 
 export const respondWithBadRequest = respondWithStatusAndJSONMessage(StatusCodes.BAD_REQUEST);
 
