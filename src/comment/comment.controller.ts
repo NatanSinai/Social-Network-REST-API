@@ -1,3 +1,5 @@
+import PostService from '@post/post.service';
+import UserService from '@user/user.service';
 import { respondWithInvalidId, respondWithNotFound } from '@utils';
 import { Router, type Response } from 'express';
 import { isValidObjectId } from 'mongoose';
@@ -6,7 +8,8 @@ import { type Comment, type CommentDocument, type CreateCommentDTO, type UpdateC
 
 const commentsRouter = Router();
 const commentService = new CommentService();
-
+const userService = new UserService();
+const postService = new PostService();
 const respondWithNotFoundComment = (commentId: Comment['_id'], response: Response) =>
   respondWithNotFound(commentId, response, 'comment');
 
@@ -19,10 +22,38 @@ commentsRouter.post<unknown, CommentDocument, CreateCommentDTO>('', async (reque
   if (!isValidObjectId(createCommentDTO.senderId))
     return respondWithInvalidId(createCommentDTO.senderId, response, 'sender');
 
+  const user = await userService.getById(createCommentDTO.senderId);
+  if (!user) return respondWithNotFound(createCommentDTO.senderId, response, 'sender');
+
+  const post = await postService.getById(createCommentDTO.postId);
+  if (!post) return respondWithNotFound(createCommentDTO.postId, response, 'post');
+
   const newComment = await commentService.createSingle(createCommentDTO);
 
   response.send(newComment);
 });
+
+/* Update Comment */
+commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateCommentDTO>(
+  '/:commentId',
+  async (request, response) => {
+    const { commentId } = request.params;
+    const updateCommentDTO = request.body;
+
+    if (!isValidObjectId(commentId)) return respondWithInvalidId(commentId, response, 'comment');
+
+    if (updateCommentDTO.senderId) {
+      const user = await userService.getById(updateCommentDTO.senderId);
+      if (!user) return respondWithNotFound(updateCommentDTO.senderId, response, 'sender');
+    }
+
+    const updatedComment = await commentService.updateById(commentId, updateCommentDTO, { new: true });
+
+    if (!updatedComment) return respondWithNotFoundComment(commentId, response);
+
+    response.send(updatedComment);
+  },
+);
 
 /* Get All Comments By Post Id*/
 commentsRouter.get<unknown, CommentDocument[], unknown, Partial<Pick<Comment, 'postId'>>>(
@@ -50,23 +81,6 @@ commentsRouter.get<{ commentId: Comment['_id'] }>('/:commentId', async (request,
 
   response.send(comment);
 });
-
-/* Update Comment */
-commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateCommentDTO>(
-  '/:commentId',
-  async (request, response) => {
-    const { commentId } = request.params;
-    const updateCommentDTO = request.body;
-
-    if (!isValidObjectId(commentId)) return respondWithInvalidId(commentId, response, 'comment');
-
-    const updatedComment = await commentService.updateById(commentId, updateCommentDTO, { new: true });
-
-    if (!updatedComment) return respondWithNotFoundComment(commentId, response);
-
-    response.send(updatedComment);
-  },
-);
 
 /* Delete Comment */
 commentsRouter.delete<{ commentId: Comment['_id'] }>('/:commentId', async (request, response) => {
