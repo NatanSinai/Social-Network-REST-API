@@ -10,10 +10,6 @@ const userService = new UserService();
 const respondWithNotFoundUser = (userId: User['_id'], response: Response) =>
   respondWithNotFound(userId, response, 'user');
 
-usersRouter.get('', (request, response) => {
-  response.send('WIP');
-});
-
 /* Get User by ID */
 usersRouter.get<{ userId: User['_id'] }>('/:userId', async (request, response) => {
   const { userId } = request.params;

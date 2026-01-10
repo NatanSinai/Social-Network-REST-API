@@ -47,7 +47,7 @@ commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateComment
       if (!user) return respondWithNotFound(updateCommentDTO.senderId, response, 'sender');
     }
 
-    const updatedComment = await commentService.updateById(commentId, updateCommentDTO, { new: true });
+    const updatedComment = await commentService.updateById(commentId, updateCommentDTO);
 
     if (!updatedComment) return respondWithNotFoundComment(commentId, response);
 
