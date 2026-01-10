@@ -12,7 +12,7 @@
     "lint:fix": "eslint --fix --cache .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "jest",
+    "test": "jest --runInBand",
     "prepare": "husky"
   },
   "keywords": [],

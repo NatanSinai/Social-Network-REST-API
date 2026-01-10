@@ -81,6 +81,12 @@ describe('User Controller', () => {
       expect(response.status).toBe(StatusCodes.BAD_REQUEST);
       expect(response.body.message).toBe(`Invalid user id: '${INVALID_ID}'`);
     });
+
+    it('should return 404 when userId is missing', async () => {
+      const response = await request(app).get('/users/');
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
   });
 
   describe('PUT /users/:userId', () => {
@@ -133,6 +139,11 @@ describe('User Controller', () => {
     it('should return 400 for invalid id on deletion', async () => {
       const response = await request(app).delete(`/users/${INVALID_ID}`);
       expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 404 when deleting non-existent user', async () => {
+      const response = await request(app).delete(`/users/${NON_EXISTENT_ID}`);
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
     });
   });
 });
