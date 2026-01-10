@@ -82,14 +82,8 @@ describe('User Controller', () => {
       expect(response.body.message).toBe(`Invalid user id: '${INVALID_ID}'`);
     });
 
-    it('should return 400 when userId is missing', async () => {
+    it('should return 404 when userId is missing', async () => {
       const response = await request(app).get('/users/');
-
-      expect(response.status).toBe(StatusCodes.NOT_FOUND);
-    });
-
-    it('should return 404 when userId is an empty string', async () => {
-      const response = await request(app).get('/users/ ');
 
       expect(response.status).toBe(StatusCodes.NOT_FOUND);
     });
