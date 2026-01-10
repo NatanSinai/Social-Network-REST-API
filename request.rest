@@ -1,12 +1,15 @@
 @port = 3000
 @baseURL = http://localhost:{{port}}
 @basePostsURL = {{baseURL}}/posts
+@baseCommentsURL = {{baseURL}}/comments
+@baseUsersURL = {{baseURL}}/users
 @postId = 694582383d983573299dc89b
 @senderId = 6945824e5cb700d554aa53a0
-@baseCommentsURL = {{baseURL}}/comments
 @commentId = 694582383d983573299dc89c
 
+# ==================================================================================== #
 # Posts API
+# ==================================================================================== #
 
 ### Add a New Post
 ### For general use replace {{senderId}} with your actual sender ID.
@@ -49,7 +52,9 @@ DELETE {{basePostsURL}}
 ### For general use replace {{postId}} with your actual post ID.
 DELETE {{basePostsURL}}/{{postId}}
 
+# ==================================================================================== #
 # Comments API
+# ==================================================================================== #
 
 ### Add a New Comment
 ### For general use replace {{postId}} and {{senderId}} with your actual IDs.
@@ -85,3 +90,36 @@ content-type: application/json
 ### Delete Comment
 ### For general use replace {{commentId}} with your actual comment ID.
 DELETE {{baseCommentsURL}}/{{commentId}}
+
+# ==================================================================================== #
+# Users API
+# ==================================================================================== #
+
+### Create a New User
+# POST {{baseUsersURL}}
+# content-type: application/json
+
+# {
+#   "name": "example_user",
+#   "email": "example@test.com",
+#   "isPrivate": true,
+#   "postsCount": 1,
+#   "bio": "This is an example user"
+# }
+
+### Get User by ID
+GET {{baseUsersURL}}/{{senderId}}
+
+### Update User Profile
+PUT {{baseUsersURL}}/{{senderId}}
+content-type: application/json
+
+{
+  "name": "John Updated",
+  "email": "john.updated@example.com",
+  "isPrivate": false,
+  "bio": "Software Engineer & Traveler"
+}
+
+### Delete User
+DELETE {{baseUsersURL}}/{{senderId}}

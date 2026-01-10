@@ -1,9 +1,10 @@
 import CommentService from '@comment/comment.service';
 import PostService from '@post/post.service';
+import UserService from '@user/user.service';
 import cors from 'cors';
 import { json, type ErrorRequestHandler, type Express, type Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import type { ObjectId, Types } from 'mongoose';
+import type { Types } from 'mongoose';
 import morgan from 'morgan';
 import { envVar } from '.';
 
@@ -33,7 +34,7 @@ export const initializeExamplePost = async () => {
   const examplePost = await postService.createSingle({
     title: 'Title Example',
     content: 'Content Example',
-    senderId: EXAMPLE_SENDER_ID as unknown as ObjectId, // This has to be string, but the type is ObjectId
+    senderId: EXAMPLE_SENDER_ID as unknown as Types.ObjectId, // This has to be string, but the type is ObjectId
     _id: EXAMPLE_POST_ID as unknown as Types.ObjectId, // This has to be string, but the type is ObjectId
   });
 
@@ -51,12 +52,32 @@ export const initializeExampleComment = async () => {
 
   const exampleComment = await commentService.createSingle({
     content: 'Comment Example',
-    postId: EXAMPLE_POST_ID as unknown as ObjectId, // This has to be string, but the type is ObjectId
-    senderId: EXAMPLE_SENDER_ID as unknown as ObjectId, // This has to be string, but the type is ObjectId
+    postId: EXAMPLE_POST_ID as unknown as Types.ObjectId, // This has to be string, but the type is ObjectId
+    senderId: EXAMPLE_SENDER_ID as unknown as Types.ObjectId, // This has to be string, but the type is ObjectId
     _id: EXAMPLE_COMMENT_ID as unknown as Types.ObjectId, // This has to be string, but the type is ObjectId
   });
 
   console.log(`Created example comment with id '${exampleComment._id}'\n`);
+};
+
+export const initializeExampleUser = async () => {
+  const { EXAMPLE_SENDER_ID } = envVar;
+  const userService = new UserService();
+
+  const isExampleUserExists = await userService.exists({ _id: EXAMPLE_SENDER_ID });
+
+  if (isExampleUserExists) return;
+
+  const exampleUser = await userService.createSingle({
+    _id: EXAMPLE_SENDER_ID as unknown as Types.ObjectId,
+    name: 'example_user',
+    email: 'example@test.com',
+    isPrivate: true,
+    postsCount: 1,
+    bio: 'This is an example user',
+  });
+
+  console.log(`Created example user with id '${exampleUser._id}'\n`);
 };
 
 export const respondWithInvalidId = (id: unknown, response: Response, idName?: string) => {
