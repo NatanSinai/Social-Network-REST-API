@@ -10,6 +10,8 @@ import {
 } from '@utils';
 import dotenv from 'dotenv';
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './swagger';
 
 dotenv.config();
 
@@ -27,6 +29,7 @@ const initializeServer = async () => {
   initializeRouters(app);
 
   app.use(errorHandler);
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   const port = envVar.PORT;
 
