@@ -1,29 +1,27 @@
-import type { User } from '@user/user.types';
 import UserSessionService from '@userSession/userSession.service';
-import type { UserSession } from '@userSession/userSession.types';
-import { CookieName, envVar } from '@utils';
+import type { UpdateUserSessionDTO, UserSession } from '@userSession/userSession.types';
+import { CookieName, envVar, NoAuthorizationReason, respondWithUnauthorized } from '@utils';
 import type { Response } from 'express';
 import { sign } from 'jsonwebtoken';
 import type { StringValue } from 'ms';
-
-type UserPayload = Pick<UserSession, 'ip'> & { userId: User['_id']; sessionId?: UserSession['_id'] };
+import type { AccessTokenJWTPayload, RefreshTokenJWTPayload } from './auth.types';
 
 export default class AuthService {
   private userSessionService = new UserSessionService();
 
-  private generateAccessToken = ({ userId }: UserPayload) => {
+  private generateAccessToken = ({ userId }: AccessTokenJWTPayload) => {
     const { JWT_SECRET, JWT_EXPIRATION } = envVar;
 
     return sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRATION as StringValue });
   };
 
-  generateRefreshToken = ({ userId, sessionId }: UserPayload) => {
+  generateRefreshToken = ({ userId, sessionId }: RefreshTokenJWTPayload) => {
     const { JWT_REFRESH_SECRET, JWT_REFRESH_EXPIRATION } = envVar;
 
     return sign({ userId, sessionId }, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRATION as StringValue });
   };
 
-  private generateTokens = (payload: UserPayload) => {
+  private generateTokens = (payload: RefreshTokenJWTPayload) => {
     const refreshToken = this.generateRefreshToken(payload);
     const accessToken = this.generateAccessToken(payload);
 
@@ -32,31 +30,47 @@ export default class AuthService {
     return tokens;
   };
 
-  generateUserTokens = async ({ userId, ip }: UserPayload) => {
-    const session = await this.userSessionService.createSingle({ userId, ip });
+  generateUserTokens = async ({ userId, ip }: Pick<AccessTokenJWTPayload, 'userId'> & Pick<UserSession, 'ip'>) => {
+    const sessionWithoutToken = await this.userSessionService.createSingle({ userId, ip });
 
-    const { accessToken, refreshToken } = this.generateTokens({ userId, ip, sessionId: session._id });
+    const { accessToken, refreshToken } = this.generateTokens({ userId, sessionId: sessionWithoutToken._id });
 
-    await this.userSessionService.updateById(session._id, { refreshToken });
+    await this.userSessionService.updateById(sessionWithoutToken._id, { refreshToken });
 
     return { accessToken, refreshToken };
   };
 
-  removeRefreshToken = async ({ response, refreshToken }: { refreshToken: string; response: Response }) => {
-    const payload = this.userSessionService.verifyRefreshToken(refreshToken, response);
+  removeRefreshToken = async ({ response, refreshToken }: UpdateUserSessionDTO & { response: Response }) => {
+    const payloadOrErrorConfig = this.userSessionService.verifyRefreshToken(refreshToken);
 
-    if (!payload) return;
+    if (!payloadOrErrorConfig.payload)
+      return respondWithUnauthorized(response, payloadOrErrorConfig?.message, payloadOrErrorConfig?.reason);
 
-    await this.userSessionService.deleteById(payload.sessionId);
+    await this.userSessionService.deleteById(payloadOrErrorConfig.payload.sessionId);
 
     response.clearCookie(CookieName.REFRESH_TOKEN);
   };
 
-  // refreshAccessToken = async ({ tokenHash: refreshToken }: Pick<UserSession, 'refreshToken'>) => {
-  //   const { JWT_REFRESH_SECRET } = envVar;
+  refreshAccessToken = async ({ refreshToken }: UpdateUserSessionDTO) => {
+    const payloadOrErrorConfig = this.userSessionService.verifyRefreshToken(refreshToken);
 
-  //   const { sub: userId } = verify(refreshToken, JWT_REFRESH_SECRET) as JwtPayload;
+    if (!payloadOrErrorConfig.payload) return { ...payloadOrErrorConfig, tokens: null };
 
-  //   const newRefreshToken = this.generateRefreshToken({ _id: userId });
-  // };
+    const {
+      payload: { sessionId, userId },
+    } = payloadOrErrorConfig;
+
+    const session = await this.userSessionService.getById(sessionId);
+
+    if (!session) return { message: 'No session found', reason: NoAuthorizationReason.NO_SESSION, tokens: null };
+
+    if (session?.expiresAt && session.expiresAt < new Date())
+      return { message: 'Refresh token expired', reason: NoAuthorizationReason.TOKEN_EXPIRED, tokens: null };
+
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = this.generateTokens({ userId, sessionId });
+
+    await this.userSessionService.updateById(session._id, { refreshToken: newRefreshToken });
+
+    return { tokens: { newAccessToken, newRefreshToken } };
+  };
 }

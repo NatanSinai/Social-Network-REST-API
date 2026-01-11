@@ -1,7 +1,8 @@
+import type { AccessTokenJWTPayload } from '@/auth/auth.types';
 import { envVar, NoAuthorizationReason, respondWithForbidden, respondWithUnauthorized } from '@utils';
 import type { NextFunction, Request, Response } from 'express';
 import type { ParamsDictionary, Query } from 'express-serve-static-core';
-import { JsonWebTokenError, TokenExpiredError, verify, type JwtPayload } from 'jsonwebtoken';
+import { JsonWebTokenError, TokenExpiredError, verify } from 'jsonwebtoken';
 
 const authMiddleware =
   <P = ParamsDictionary, ResBody = unknown, ReqBody = unknown, ReqQuery = Query>() =>
@@ -13,7 +14,7 @@ const authMiddleware =
     if (!token) return respondWithForbidden(response, 'No access token provided');
 
     try {
-      const { userId } = verify(token, JWT_SECRET) as JwtPayload;
+      const { userId } = verify(token, JWT_SECRET) as AccessTokenJWTPayload;
 
       request.userId = userId;
       request.authCookies = { refreshToken: request.cookies?.refreshToken };

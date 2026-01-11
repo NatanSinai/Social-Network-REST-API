@@ -2,7 +2,7 @@ import type { DocumentMetadata, Prettify } from '@utils';
 import type { HydratedDocument, Types } from 'mongoose';
 
 export type UserSession = Prettify<
-  DocumentMetadata & { userId: Types.ObjectId; tokenHash?: string; ip: string | undefined; expiresAt: Date }
+  DocumentMetadata & { userId: Types.ObjectId; tokenHash?: string; ip: string | undefined; expiresAt?: Date }
 >;
 
 export type UserSessionDocument = HydratedDocument<UserSession>;

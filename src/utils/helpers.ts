@@ -10,7 +10,7 @@ import { envVar, getNodeEnvironment, type CookieName, type NoAuthorizationReason
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const errorHandler: ErrorRequestHandler = (error: Error, request, response, next) => {
-  console.log(`Error in ${request.method} request to ${request}:`);
+  console.log(`Error in ${request.method} request to ${request.url}:`);
   console.error(error);
 
   response.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);

@@ -8,7 +8,11 @@
 @baseUsersURL = {{baseURL}}/users
 @baseAuthURL = {{baseURL}}/auth
 
-@accessToken = Bearer {{loginAPI.response.body.accessToken}}
+@accessToken = Bearer {{loginRequest.response.body.accessToken}}
+@refreshedAccessToken = Bearer {{refreshAccessTokenRequest.response.body.newAccessToken}}
+
+# If `accessToken` expires, call the `Refresh access token` method, and
+# replace it with `refreshedAccessToken`.
 
 # Users API
 
@@ -25,7 +29,7 @@ content-type: application/json
 # Authentication API
 
 ### Login User
-# @name loginAPI
+# @name loginRequest
 POST {{baseAuthURL}}/login
 content-type: application/json
 
@@ -33,6 +37,10 @@ content-type: application/json
   "username": "Natan Sinai",
   "password": "natan123"
 }
+
+### Refresh access token
+# @name refreshAccessTokenRequest
+POST {{baseAuthURL}}/refresh
 
 ### Logout User
 POST {{baseAuthURL}}/logout
