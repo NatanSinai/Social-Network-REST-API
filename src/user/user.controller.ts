@@ -63,10 +63,10 @@ usersRouter.put<{ userId: User['_id'] }, UserDocument, UpdateUserDTO>(
 );
 
 /* Delete User */
-usersRouter.delete<{ userId: User['_id'] }>('/:userId', async (request, response) => {
+usersRouter.delete<{ userId: User['_id'] }>('/:userId', authMiddleware(), async (request, response) => {
   const { userId } = request.params;
 
-  if (!isValidObjectId(userId)) return respondWithInvalidId(userId, response, 'user');
+  if (request.userId !== userId || !isValidObjectId(userId)) return respondWithInvalidId(userId, response, 'user');
 
   const deletedUser = await userService.deleteById(userId);
 

@@ -53,7 +53,9 @@ Authorization: {{accessToken}}
 DELETE {{baseUsersURL}}/{{senderId}}
 Authorization: {{accessToken}}
 
+# ==================================================================================== #
 # Authentication API
+# ==================================================================================== #
 
 ### Login User
 # @name loginRequest
