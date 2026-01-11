@@ -69,4 +69,8 @@ export default class Service<
   async exists(filter: QueryFilter<T>) {
     return !!(await this.model.exists(filter));
   }
+
+  existsById(_id: T['_id']) {
+    return this.exists({ _id });
+  }
 }

@@ -1,4 +1,5 @@
 import { authMiddleware } from '@middlewares';
+import UserService from '@user/user.service';
 import { respondWithInvalidId, respondWithNotFoundById } from '@utils';
 import { Router, type Response } from 'express';
 import { isValidObjectId } from 'mongoose';
@@ -7,10 +8,12 @@ import type { CreatePostDTO, Post, PostDocument, UpdatePostDTO } from './post.ty
 
 const postsRouter = Router();
 const postService = new PostService();
+const userService = new UserService();
 
 const respondWithNotFoundPost = (postId: Post['_id'], response: Response) =>
   respondWithNotFoundById(postId, response, 'post');
 
+/* Create Post */
 postsRouter.post<unknown, PostDocument, Omit<CreatePostDTO, 'senderId'>>(
   '',
   authMiddleware(),
@@ -20,34 +23,18 @@ postsRouter.post<unknown, PostDocument, Omit<CreatePostDTO, 'senderId'>>(
 
     if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
+    const user = await userService.getById(senderId);
+
+    if (!user) return respondWithNotFoundById(senderId, response, 'sender');
+
     const newPost = await postService.createSingle({ ...createPostDTO, senderId });
+    await userService.updateById(senderId, { postsCount: user.postsCount + 1 });
 
     response.send(newPost);
   },
 );
 
-postsRouter.get<unknown, PostDocument[], unknown, { sender?: Post['senderId'] }>('', async (request, response) => {
-  const { sender: senderId } = request.query;
-
-  if (!!senderId && !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
-
-  const posts = await postService.getMany({ senderId });
-
-  response.send(posts);
-});
-
-postsRouter.get<{ postId: Post['_id'] }>('/:postId', async (request, response) => {
-  const { postId } = request.params;
-
-  if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
-
-  const post = await postService.getById(postId);
-
-  if (!post) return respondWithNotFoundPost(postId, response);
-
-  response.send(post);
-});
-
+/* Update Post */
 postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
   '/:postId',
   authMiddleware(),
@@ -60,6 +47,10 @@ postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
 
     if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
 
+    const isUserExist = await userService.existsById(senderId);
+
+    if (!isUserExist) return respondWithNotFoundById(senderId, response, 'sender');
+
     const updatedPost = await postService.updateById(postId, updatePostDTO);
 
     if (!updatedPost) return respondWithNotFoundPost(postId, response);
@@ -68,13 +59,31 @@ postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
   },
 );
 
-// Bonus - Deletion Routes
-postsRouter.delete('', async (request, response) => {
-  const deleteResult = await postService.deleteMany();
+/* Get Posts (Optionally By Sender ID) */
+postsRouter.get<unknown, PostDocument[], unknown, { sender?: Post['senderId'] }>('', async (request, response) => {
+  const { sender: senderId } = request.query;
 
-  response.send(deleteResult);
+  if (!!senderId && !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
+
+  const posts = await postService.getMany({ senderId });
+
+  response.send(posts);
 });
 
+/* Get Post By ID */
+postsRouter.get<{ postId: Post['_id'] }>('/:postId', async (request, response) => {
+  const { postId } = request.params;
+
+  if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
+
+  const post = await postService.getById(postId);
+
+  if (!post) return respondWithNotFoundPost(postId, response);
+
+  response.send(post);
+});
+
+/* Delete Post */
 postsRouter.delete<{ postId: Post['_id'] }>('/:postId', authMiddleware(), async (request, response) => {
   const { postId } = request.params;
   const senderId = request.userId;

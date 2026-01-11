@@ -1,9 +1,10 @@
 @port = 3000
 @baseURL = http://localhost:{{port}}
 @basePostsURL = {{baseURL}}/posts
+@baseCommentsURL = {{baseURL}}/comments
+@baseUsersURL = {{baseURL}}/users
 @postId = 694582383d983573299dc89b
 @senderId = 6945824e5cb700d554aa53a0
-@baseCommentsURL = {{baseURL}}/comments
 @commentId = 694582383d983573299dc89c
 @baseUsersURL = {{baseURL}}/users
 @baseAuthURL = {{baseURL}}/auth
@@ -14,17 +15,43 @@
 # If `accessToken` expires, call the `Refresh access token` method, and
 # replace it with `refreshedAccessToken`.
 
+# ==================================================================================== #
 # Users API
+# ==================================================================================== #
 
-### Register New User
-POST {{baseUsersURL}}/signup
+### Create a New User
+POST {{baseUsersURL}}
 content-type: application/json
 
 {
-  "username": "Natan Sinai",
-  "password": "natan123",
-  "bio": "I love cats"
+  "username": "example_user",
+  "password": "1234567",
+  "email": "example@gmail.com",
+  "isPrivate": true,
+  "postsCount": 1,
+  "bio": "This is an example user"
 }
+
+### Get User by ID
+GET {{baseUsersURL}}/{{senderId}}
+Authorization: {{accessToken}}
+
+### Update User Profile
+PUT {{baseUsersURL}}/{{senderId}}
+content-type: application/json
+Authorization: {{accessToken}}
+
+{
+  "username": "John Updated",
+  "password": "updated1234567",
+  "email": "updated@gmail.com",
+  "isPrivate": false,
+  "bio": "Software Engineer & Traveler"
+}
+
+### Delete User
+DELETE {{baseUsersURL}}/{{senderId}}
+Authorization: {{accessToken}}
 
 # Authentication API
 
@@ -34,8 +61,8 @@ POST {{baseAuthURL}}/login
 content-type: application/json
 
 {
-  "username": "Natan Sinai",
-  "password": "natan123"
+  "username": "example_user",
+  "password": "1234567"
 }
 
 ### Refresh access token
@@ -46,7 +73,9 @@ POST {{baseAuthURL}}/refresh
 POST {{baseAuthURL}}/logout
 Authorization: {{accessToken}}
 
+# ==================================================================================== #
 # Posts API
+# ==================================================================================== #
 
 ### Add a New Post
 POST {{basePostsURL}}
@@ -90,7 +119,9 @@ DELETE {{basePostsURL}}
 DELETE {{basePostsURL}}/{{postId}}
 Authorization: {{accessToken}}
 
+# ==================================================================================== #
 # Comments API
+# ==================================================================================== #
 
 ### Add a New Comment
 POST {{baseCommentsURL}}

@@ -5,6 +5,7 @@ import {
   initializeAppConfig,
   initializeExampleComment,
   initializeExamplePost,
+  initializeExampleUser,
   initializeRouters,
 } from '@utils';
 import dotenv from 'dotenv';
@@ -20,6 +21,7 @@ const initializeServer = async () => {
   await connectToMongoDB();
   await initializeExamplePost();
   await initializeExampleComment();
+  await initializeExampleUser();
 
   initializeAppConfig(app);
   initializeRouters(app);

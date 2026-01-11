@@ -7,6 +7,8 @@ const UserSchema = new Schema<UserDocument>(
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     bio: { type: String },
+    postsCount: { type: Number, default: 0 },
+    isPrivate: { type: Boolean, default: false },
   },
   { timestamps: true, collection: ModelName.USER },
 );
