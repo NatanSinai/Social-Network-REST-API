@@ -9,7 +9,7 @@ import type { AccessTokenJWTPayload, RefreshTokenJWTPayload } from './auth.types
 export default class AuthService {
   private userSessionService = new UserSessionService();
 
-  private generateAccessToken = ({ userId }: AccessTokenJWTPayload) => {
+  generateAccessToken = ({ userId }: AccessTokenJWTPayload) => {
     const { JWT_SECRET, JWT_EXPIRATION } = envVar;
 
     return sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRATION as StringValue });

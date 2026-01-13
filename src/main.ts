@@ -37,4 +37,4 @@ const initializeServer = async () => {
   });
 };
 
-initializeServer();
+if (require.main === module) initializeServer();

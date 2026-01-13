@@ -2,9 +2,9 @@ import { MongoServerError } from 'mongodb';
 import { connect } from 'mongoose';
 import { envVar } from '.';
 
-const mongoDBConnectionString = envVar.MONGO_CONNECTION_STRING;
-
 export const connectToMongoDB = async () => {
+  const mongoDBConnectionString = envVar.MONGO_CONNECTION_STRING;
+
   try {
     console.log(`Connecting to MongoDB on '${mongoDBConnectionString}'`);
 
