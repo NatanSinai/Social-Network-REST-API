@@ -44,27 +44,27 @@ describe('User Controller', () => {
 
   describe('GET /users/:userId', () => {
     it('should return a user by id', async () => {
-      const userDTO: CreateUserDTO = {
+      const createUserDTO: CreateUserDTO = {
         _id: new Types.ObjectId(VALID_USER_ID),
-        name: 'John Doe',
+        username: 'John Doe',
+        password: '12345',
         email: 'john@example.com',
         isPrivate: false,
-        postsCount: 0,
         bio: 'Hello world',
       };
 
-      await userService.createSingle(userDTO);
+      await userService.createSingle(createUserDTO);
 
       const response = await request(app).get(`/users/${VALID_USER_ID}`);
 
       expect(response.status).toBe(StatusCodes.OK);
       expect(response.body).toMatchObject({
         _id: VALID_USER_ID,
-        name: userDTO.name,
-        email: userDTO.email,
-        isPrivate: userDTO.isPrivate,
-        postsCount: userDTO.postsCount,
-        bio: userDTO.bio,
+        username: createUserDTO.username,
+        password: createUserDTO.password,
+        email: createUserDTO.email,
+        isPrivate: createUserDTO.isPrivate,
+        bio: createUserDTO.bio,
       });
     });
 
@@ -93,19 +93,19 @@ describe('User Controller', () => {
     it('should update user information', async () => {
       await userService.createSingle({
         _id: new Types.ObjectId(VALID_USER_ID),
-        name: 'Original Name',
+        username: 'Original Username',
+        password: '11111',
         email: 'test@test.com',
         isPrivate: false,
-        postsCount: 0,
         bio: 'Old bio',
       });
 
-      const updateDTO: UpdateUserDTO = { name: 'Updated Name', bio: 'New bio' };
+      const updateDTO: UpdateUserDTO = { username: 'Updated Username', bio: 'New bio' };
 
       const response = await request(app).put(`/users/${VALID_USER_ID}`).send(updateDTO);
 
       expect(response.status).toBe(StatusCodes.OK);
-      expect(response.body.name).toBe(updateDTO.name);
+      expect(response.body.username).toBe(updateDTO.username);
       expect(response.body.bio).toBe(updateDTO.bio);
     });
 
@@ -120,10 +120,10 @@ describe('User Controller', () => {
     it('should delete a user and return the deleted document', async () => {
       await userService.createSingle({
         _id: new Types.ObjectId(VALID_USER_ID),
-        name: 'To Be Deleted',
+        username: 'To Be Deleted',
+        password: '11111',
         email: 'delete@test.com',
         isPrivate: false,
-        postsCount: 0,
         bio: 'Bye',
       });
 

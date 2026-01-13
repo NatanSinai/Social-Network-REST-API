@@ -55,7 +55,6 @@ describe('Post Controller', () => {
       password: '123456',
       email: 'author@test.com',
       isPrivate: false,
-      postsCount: 0,
       bio: 'Bio',
     });
 
