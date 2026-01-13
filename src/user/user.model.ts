@@ -6,6 +6,7 @@ const UserSchema = new Schema<UserDocument>(
   {
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
     bio: { type: String },
     postsCount: { type: Number, default: 0 },
     isPrivate: { type: Boolean, default: false },

@@ -34,9 +34,9 @@ afterAll(async () => {
 });
 
 afterEach(async () => {
-  await commentModel.deleteMany({});
-  await postModel.deleteMany({});
-  await userModel.deleteMany({});
+  await commentModel.deleteMany();
+  await postModel.deleteMany();
+  await userModel.deleteMany();
 });
 
 describe('Comment Controller', () => {
