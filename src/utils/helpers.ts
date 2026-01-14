@@ -3,10 +3,18 @@ import PostService from '@post/post.service';
 import UserService from '@user/user.service';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import { json, type CookieOptions, type ErrorRequestHandler, type Express, type Response } from 'express';
+import {
+  json,
+  type Application,
+  type CookieOptions,
+  type ErrorRequestHandler,
+  type Express,
+  type Response,
+} from 'express';
 import { StatusCodes } from 'http-status-codes';
 import type { Types } from 'mongoose';
 import morgan from 'morgan';
+import request from 'supertest';
 import { envVar, getNodeEnvironment, type CookieName, type NoAuthorizationReason } from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -138,3 +146,7 @@ export const addCookieToResponse = ({
     ...cookieOptions,
   });
 };
+
+export const createSendAuthorizedRequest =
+  (app: Application, accessToken: string) => (method: 'get' | 'post' | 'put' | 'delete', url: string) =>
+    request(app)[method](url).set('Authorization', `Bearer ${accessToken}`);

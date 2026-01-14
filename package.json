@@ -65,19 +65,6 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.52.0"
   },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "moduleNameMapper": {
-      "^@userSession/(.*)$": "<rootDir>/src/userSession/$1",
-      "^@user/(.*)$": "<rootDir>/src/user/$1",
-      "^@post/(.*)$": "<rootDir>/src/post/$1",
-      "^@comment/(.*)$": "<rootDir>/src/comment/$1",
-      "^@middlewares$": "<rootDir>/src/middlewares/index.ts",
-      "^@utils$": "<rootDir>/src/utils/index.ts",
-      "^@/(.*)$": "<rootDir>/src/$1"
-    }
-  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "prettier --write",
