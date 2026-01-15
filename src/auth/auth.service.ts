@@ -30,8 +30,11 @@ export default class AuthService {
     return tokens;
   };
 
-  generateUserTokens = async ({ userId, ip }: Pick<AccessTokenJWTPayload, 'userId'> & Pick<UserSession, 'ip'>) => {
-    const sessionWithoutToken = await this.userSessionService.createSingle({ userId, ip });
+  generateUserTokens = async ({
+    userId,
+    ipAddress,
+  }: Pick<AccessTokenJWTPayload, 'userId'> & Pick<UserSession, 'ipAddress'>) => {
+    const sessionWithoutToken = await this.userSessionService.createSingle({ userId, ipAddress });
 
     const { accessToken, refreshToken } = this.generateTokens({ userId, sessionId: sessionWithoutToken._id });
 

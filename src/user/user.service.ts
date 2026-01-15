@@ -19,12 +19,12 @@ export default class UserService extends Service<UserDocument, CreateUserDTO, Up
   getOneByCredentials = async ({ username, password }: UserCredentials) => {
     const user = await this.getOne({ username });
 
-    if (!user) return { user: null, message: 'Invalid username' } as const;
+    if (!user) return { user: null, errorMessage: 'Invalid username' } as const;
 
     const isPasswordsMatch = compareSync(password, user.password);
 
-    if (!isPasswordsMatch) return { user: null, message: 'Invalid password' } as const;
+    if (!isPasswordsMatch) return { user: null, errorMessage: 'Invalid password' } as const;
 
-    return { user, message: '' } as const;
+    return { user, errorMessage: '' } as const;
   };
 }

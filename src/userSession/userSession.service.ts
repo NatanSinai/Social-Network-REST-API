@@ -18,15 +18,15 @@ export default class UserSessionService extends Service<
 
   updateById(
     sessionId: UserSessionDocument['_id'],
-    { refreshToken, ...updateUserSessionDTO }: UpdateUserSessionDTO,
+    { refreshToken }: UpdateUserSessionDTO,
     options?: QueryOptions<UserSessionDocument>,
   ) {
     const { JWT_REFRESH_HASH_SALT_ROUNDS, JWT_REFRESH_EXPIRATION } = envVar;
 
-    const tokenHash = refreshToken ? hashSync(refreshToken, JWT_REFRESH_HASH_SALT_ROUNDS) : '';
+    const tokenHash = hashSync(refreshToken, JWT_REFRESH_HASH_SALT_ROUNDS);
     const expiresAt = new Date(Date.now() + ms(JWT_REFRESH_EXPIRATION as StringValue));
 
-    return this.model.findByIdAndUpdate(sessionId, { ...updateUserSessionDTO, tokenHash, expiresAt }, options);
+    return this.model.findByIdAndUpdate(sessionId, { tokenHash, expiresAt }, options);
   }
 
   verifyRefreshToken(refreshToken: string) {

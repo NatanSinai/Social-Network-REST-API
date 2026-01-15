@@ -23,11 +23,14 @@ const userService = new UserService();
 authRouter.post<unknown, { accessToken: string }, UserCredentials>('/login', async (request, response) => {
   const credentials = request.body;
 
-  const { user, message } = await userService.getOneByCredentials(credentials);
+  const { user, errorMessage } = await userService.getOneByCredentials(credentials);
 
-  if (message) return respondWithNotFound(response, message);
+  if (errorMessage) return respondWithNotFound(response, errorMessage);
 
-  const { accessToken, refreshToken } = await authService.generateUserTokens({ userId: user._id, ip: request.ip });
+  const { accessToken, refreshToken } = await authService.generateUserTokens({
+    userId: user._id,
+    ipAddress: request.ip,
+  });
 
   addCookieToResponse({ response, cookieName: CookieName.REFRESH_TOKEN, cookieValue: refreshToken });
 

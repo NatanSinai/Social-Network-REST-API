@@ -6,7 +6,7 @@ const UserSessionSchema = new Schema<UserSessionDocument>(
   {
     userId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.USER },
     tokenHash: { type: String },
-    ip: { type: String },
+    ipAddress: { type: String },
     expiresAt: { type: Date, index: { expireAfterSeconds: 0 } },
   },
   { timestamps: true, collection: ModelName.USER_SESSION },
