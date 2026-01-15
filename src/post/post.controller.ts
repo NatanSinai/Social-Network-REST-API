@@ -50,7 +50,7 @@ postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
     const isUserExist = await userService.existsById(senderId);
     const currentPost = await postService.getById(postId);
 
-    if (!isUserExist || !currentPost || currentPost.senderId !== senderId)
+    if (!isUserExist || !currentPost || currentPost.senderId.toString() !== senderId.toString())
       return respondWithNotFoundById(senderId, response, 'sender');
 
     const updatedPost = await postService.updateById(postId, updatePostDTO);
@@ -97,7 +97,7 @@ postsRouter.delete<{ postId: Post['_id'] }>('/:postId', authMiddleware(), async 
   const isUserExist = await userService.existsById(senderId);
   const currentPost = await postService.getById(postId);
 
-  if (!isUserExist || !currentPost || currentPost.senderId !== senderId)
+  if (!isUserExist || !currentPost || currentPost.senderId.toString() !== senderId.toString())
     return respondWithNotFoundById(senderId, response, 'sender');
 
   const deletedPost = await postService.deleteById(postId);
