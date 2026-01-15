@@ -12,6 +12,7 @@ import {
   type Response,
 } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import type { Types } from 'mongoose';
 import morgan from 'morgan';
 import request from 'supertest';
@@ -150,3 +151,5 @@ export const addCookieToResponse = ({
 export const createSendAuthorizedRequest =
   (app: Application, accessToken: string) => (method: 'get' | 'post' | 'put' | 'delete', url: string) =>
     request(app)[method](url).set('Authorization', `Bearer ${accessToken}`);
+
+export const createMongoMemoryServer = () => MongoMemoryServer.create({ binary: { version: '6.0.5' } });
