@@ -1,11 +1,32 @@
-import type { DocumentMetadata, MakeOptional, Prettify } from '@utils';
-import type { HydratedDocument, Types } from 'mongoose';
+import { DocumentMetadataSchema, ObjectIdSchema } from '@/utils/baseSchema';
+import type { Prettify } from '@utils';
+import type { HydratedDocument } from 'mongoose';
+import { z } from 'zod';
 
-export type Comment = Prettify<
-  DocumentMetadata & { content: string; postId: Types.ObjectId; senderId: Types.ObjectId }
->;
+/* ───────── Entity ───────── */
 
+export const CommentSchema = DocumentMetadataSchema.extend({
+  content: z.string(),
+  postId: ObjectIdSchema,
+  senderId: ObjectIdSchema,
+});
+
+/* ───────── DTOs (derived) ───────── */
+
+export const CreateCommentSchema = CommentSchema.pick({
+  content: true,
+  postId: true,
+  senderId: true,
+});
+
+export const UpdateCommentSchema = CreateCommentSchema.pick({
+  content: true,
+}).partial();
+
+/* ───────── Types ───────── */
+
+export type Comment = z.infer<typeof CommentSchema>;
 export type CommentDocument = HydratedDocument<Comment>;
 
-export type CreateCommentDTO = MakeOptional<Pick<Comment, '_id' | 'content' | 'postId' | 'senderId'>, '_id'>;
-export type UpdateCommentDTO = Partial<Pick<Comment, 'content'>>;
+export type CreateCommentDTO = Prettify<z.infer<typeof CreateCommentSchema> & Partial<Pick<Comment, '_id'>>>;
+export type UpdateCommentDTO = z.infer<typeof UpdateCommentSchema>;

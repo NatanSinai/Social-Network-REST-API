@@ -1,12 +1,31 @@
-import type { DocumentMetadata, Prettify } from '@utils';
-import type { HydratedDocument, Types } from 'mongoose';
+import { DocumentMetadataSchema, ObjectIdSchema } from '@utils';
+import type { HydratedDocument } from 'mongoose';
+import { z } from 'zod';
 
-export type UserSession = Prettify<
-  DocumentMetadata & { userId: Types.ObjectId; tokenHash?: string; ipAddress: string | undefined; expiresAt?: Date }
->;
+/* ───────── Entity ───────── */
 
+export const UserSessionSchema = DocumentMetadataSchema.extend({
+  userId: ObjectIdSchema,
+  tokenHash: z.string().optional(),
+  ipAddress: z.string().optional(),
+  expiresAt: z.date().optional(),
+});
+
+/* ───────── DTOs ───────── */
+
+export const CreateUserSessionSchema = UserSessionSchema.pick({
+  userId: true,
+  ipAddress: true,
+});
+
+export const UpdateUserSessionSchema = z.object({
+  refreshToken: z.string(),
+});
+
+/* ───────── Types ───────── */
+
+export type UserSession = z.infer<typeof UserSessionSchema>;
 export type UserSessionDocument = HydratedDocument<UserSession>;
 
-export type CreateUserSessionDTO = Pick<UserSession, 'userId' | 'ipAddress'>;
-
-export type UpdateUserSessionDTO = { refreshToken: string };
+export type CreateUserSessionDTO = z.infer<typeof CreateUserSessionSchema>;
+export type UpdateUserSessionDTO = z.infer<typeof UpdateUserSessionSchema>;

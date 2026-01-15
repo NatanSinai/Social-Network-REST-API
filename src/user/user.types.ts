@@ -1,24 +1,48 @@
-import type { DocumentMetadata, MakeOptional, Prettify } from '@utils';
+import { DocumentMetadataSchema } from '@/utils/baseSchema';
+import type { Prettify } from '@utils';
 import type { HydratedDocument } from 'mongoose';
+import { z } from 'zod';
 
-export type User = Prettify<
-  DocumentMetadata & {
-    username: string;
-    password: string;
-    email: string;
-    isPrivate: boolean;
-    postsCount: number;
-    bio: string | null;
-  }
->;
+/* ───────── Entity ───────── */
 
+export const UserSchema = DocumentMetadataSchema.extend({
+  username: z.string(),
+  password: z.string(),
+  email: z.email(),
+  isPrivate: z.boolean(),
+  postsCount: z.number(),
+  bio: z.string().nullable(),
+});
+
+/* ───────── DTOs (derived) ───────── */
+
+export const CreateUserSchema = UserSchema.pick({
+  username: true,
+  password: true,
+  email: true,
+  isPrivate: true,
+  bio: true,
+});
+
+export const UpdateUserSchema = CreateUserSchema.partial();
+
+export const UserCredentialsSchema = z.object({
+  username: z.string(),
+  password: z.string(),
+});
+
+/* ───────── Safe response ───────── */
+
+export const UserResponseSchema = UserSchema.omit({
+  password: true,
+});
+
+/* ───────── Types ───────── */
+
+export type User = z.infer<typeof UserSchema>;
 export type UserDocument = HydratedDocument<User>;
 
-export type CreateUserDTO = MakeOptional<
-  Pick<User, '_id' | 'username' | 'email' | 'password' | 'isPrivate' | 'postsCount' | 'bio'>,
-  '_id' | 'postsCount'
->;
-
-export type UpdateUserDTO = Partial<Pick<User, 'username' | 'password' | 'email' | 'isPrivate' | 'postsCount' | 'bio'>>;
-
-export type UserCredentials = Pick<User, 'username' | 'password'>;
+export type CreateUserDTO = Prettify<z.infer<typeof CreateUserSchema> & Partial<Pick<User, '_id' | 'postsCount'>>>;
+export type UpdateUserDTO = Prettify<z.infer<typeof UpdateUserSchema> & Partial<Pick<User, 'postsCount'>>>;
+export type UserCredentials = z.infer<typeof UserCredentialsSchema>;
+export type UserResponse = z.infer<typeof UserResponseSchema>;

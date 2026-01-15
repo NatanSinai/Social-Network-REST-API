@@ -1,8 +1,30 @@
-import type { DocumentMetadata, MakeOptional, Prettify } from '@utils';
-import type { HydratedDocument, Types } from 'mongoose';
+import { DocumentMetadataSchema, ObjectIdSchema } from '@/utils/baseSchema';
+import type { Prettify } from '@utils';
+import type { HydratedDocument } from 'mongoose';
+import { z } from 'zod';
 
-export type Post = Prettify<DocumentMetadata & { title: string; content: string; senderId: Types.ObjectId }>;
+/* ───────── Entity ───────── */
+
+export const PostSchema = DocumentMetadataSchema.extend({
+  title: z.string(),
+  content: z.string(),
+  senderId: ObjectIdSchema,
+});
+
+/* ───────── DTOs (derived) ───────── */
+
+export const CreatePostSchema = PostSchema.pick({
+  title: true,
+  content: true,
+  senderId: true,
+});
+
+export const UpdatePostSchema = CreatePostSchema.partial();
+
+/* ───────── Types ───────── */
+
+export type Post = z.infer<typeof PostSchema>;
 export type PostDocument = HydratedDocument<Post>;
 
-export type CreatePostDTO = MakeOptional<Pick<Post, '_id' | 'title' | 'content' | 'senderId'>, '_id'>;
-export type UpdatePostDTO = Partial<Pick<Post, 'title' | 'content' | 'senderId'>>;
+export type CreatePostDTO = Prettify<z.infer<typeof CreatePostSchema> & Partial<Pick<Post, '_id'>>>;
+export type UpdatePostDTO = z.infer<typeof UpdatePostSchema>;

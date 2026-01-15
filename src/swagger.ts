@@ -2,8 +2,10 @@ import { envVar } from '@utils';
 import dotenv from 'dotenv';
 import { Types } from 'mongoose';
 import swaggerJsdoc from 'swagger-jsdoc';
+
 dotenv.config();
-const port = envVar.PORT;
+
+const { PORT: port } = envVar;
 
 const swaggerSpec = swaggerJsdoc({
   definition: {
@@ -30,8 +32,10 @@ const swaggerSpec = swaggerJsdoc({
             { $ref: '#/components/schemas/DocumentMetadata' },
             {
               type: 'object',
+              required: ['username', 'password', 'email', 'isPrivate', 'postsCount'],
               properties: {
-                name: { type: 'string' },
+                username: { type: 'string' },
+                password: { type: 'string', format: 'password' },
                 email: { type: 'string', format: 'email' },
                 isPrivate: { type: 'boolean' },
                 postsCount: { type: 'number' },
@@ -43,12 +47,16 @@ const swaggerSpec = swaggerJsdoc({
 
         CreateUserDTO: {
           type: 'object',
-          required: ['name', 'email', 'isPrivate', 'postsCount'],
+          required: ['username', 'email', 'password', 'isPrivate'],
           properties: {
-            name: { type: 'string' },
+            username: { type: 'string' },
+            password: { type: 'string', format: 'password' },
             email: { type: 'string', format: 'email' },
             isPrivate: { type: 'boolean' },
-            postsCount: { type: 'number' },
+            postsCount: {
+              type: 'number',
+              description: 'Optional, defaults to 0',
+            },
             bio: { type: 'string', nullable: true },
           },
         },
@@ -56,11 +64,22 @@ const swaggerSpec = swaggerJsdoc({
         UpdateUserDTO: {
           type: 'object',
           properties: {
-            name: { type: 'string' },
+            username: { type: 'string' },
+            password: { type: 'string', format: 'password' },
             email: { type: 'string', format: 'email' },
             isPrivate: { type: 'boolean' },
             postsCount: { type: 'number' },
             bio: { type: 'string', nullable: true },
+          },
+          additionalProperties: false,
+        },
+
+        UserCredentials: {
+          type: 'object',
+          required: ['username', 'password'],
+          properties: {
+            username: { type: 'string' },
+            password: { type: 'string', format: 'password' },
           },
         },
 
