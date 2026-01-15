@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { connectToMongoDB, createMongoMemoryServer, envVar } from '@utils';
+import { connectToMongoMemoryServer, createMongoMemoryServer } from '@utils';
 import express from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { MongoMemoryServer } from 'mongodb-memory-server';
@@ -24,9 +24,8 @@ let mongoServer: MongoMemoryServer;
 
 beforeAll(async () => {
   mongoServer = await createMongoMemoryServer();
-  envVar.MONGO_CONNECTION_STRING = mongoServer.getUri();
 
-  await connectToMongoDB();
+  await connectToMongoMemoryServer(mongoServer);
 });
 
 afterAll(async () => {

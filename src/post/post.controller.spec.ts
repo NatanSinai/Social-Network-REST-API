@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
-import { connectToMongoDB, createMongoMemoryServer, envVar } from '@utils';
+import { connectToMongoMemoryServer, createMongoMemoryServer } from '@utils';
 import express from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { MongoMemoryServer } from 'mongodb-memory-server';
@@ -19,12 +19,13 @@ const NON_EXISTENT_ID = '507f1f77bcf86cd799439012';
 
 let mongoServer: MongoMemoryServer;
 
-beforeAll(async () => {
+export const createMongoMemoryServerAndConnect = async () => {
   mongoServer = await createMongoMemoryServer();
-  envVar.MONGO_CONNECTION_STRING = mongoServer.getUri();
 
-  await connectToMongoDB();
-});
+  await connectToMongoMemoryServer(mongoServer);
+};
+
+beforeAll(createMongoMemoryServerAndConnect);
 
 afterAll(async () => {
   await mongoServer.stop();

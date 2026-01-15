@@ -33,6 +33,7 @@ const initializeServer = async () => {
     if (error) return console.error({ error });
 
     console.log(`\nCRUD API listening on 'http://localhost:${port}'`);
+    console.log(`\nSwagger documentation running on 'http://localhost:${port}/api-docs'`);
     console.log('\n========== FINISHED INITIALIZING SERVER ==========\n');
   });
 };

@@ -8,26 +8,8 @@ const config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   modulePaths: ['<rootDir>/src'],
-  ...(moduleNameMapper ? { moduleNameMapper } : {}),
-
-  // Pick up *.spec.ts
-  testMatch: ['**/*.spec.ts'],
-
-  // ✅ COVER LIMIT: controllers only
-  collectCoverage: true,
   collectCoverageFrom: ['src/**/*.controller.ts'],
-
-  coveragePathIgnorePatterns: ['/node_modules/', '/dist/'],
-
-  coverageReporters: ['text', 'lcov'],
-
-  // Needed for TS → coverage mapping
-  transform: {
-    '^.+\\.ts$': 'ts-jest',
-  },
-
-  clearMocks: true,
-  testTimeout: 30000,
+  ...(moduleNameMapper ? { moduleNameMapper } : {}),
 } satisfies JestConfigWithTsJest;
 
 export default config;

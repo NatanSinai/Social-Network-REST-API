@@ -55,9 +55,11 @@ commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateComment
 
     if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
-    const isUserExists = await userService.existsById(senderId);
+    const isUserExist = await userService.existsById(senderId);
+    const currentComment = await commentService.getById(commentId);
 
-    if (!isUserExists) return respondWithNotFoundById(senderId, response, 'sender');
+    if (!isUserExist || !currentComment || currentComment.senderId.toString() !== senderId.toString())
+      return respondWithNotFoundById(senderId, response, 'sender');
 
     const updatedComment = await commentService.updateById(commentId, updateCommentDTO);
 
@@ -102,6 +104,12 @@ commentsRouter.delete<{ commentId: Comment['_id'] }>('/:commentId', authMiddlewa
   if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
   if (!isValidObjectId(commentId)) return respondWithInvalidId(commentId, response, 'comment');
+
+  const isUserExist = await userService.existsById(senderId);
+  const currentComment = await commentService.getById(commentId);
+
+  if (!isUserExist || !currentComment || currentComment.senderId.toString() !== senderId.toString())
+    return respondWithNotFoundById(senderId, response, 'sender');
 
   const deletedComment = await commentService.deleteById(commentId);
 
