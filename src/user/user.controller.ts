@@ -1,14 +1,35 @@
-import { respondWithInvalidId, respondWithNotFound } from '@utils';
+import { authMiddleware } from '@middlewares';
+import {
+  isDuplicateKeyMongoError,
+  respondWithBadRequest,
+  respondWithInvalidId,
+  respondWithJSONMessage,
+  respondWithNotFoundById,
+} from '@utils';
 import { Router, type Response } from 'express';
 import { isValidObjectId } from 'mongoose';
 import UserService from './user.service';
-import type { UpdateUserDTO, User, UserDocument } from './user.types';
+import type { CreateUserDTO, UpdateUserDTO, User, UserDocument } from './user.types';
 
 const usersRouter = Router();
 const userService = new UserService();
 
 const respondWithNotFoundUser = (userId: User['_id'], response: Response) =>
-  respondWithNotFound(userId, response, 'user');
+  respondWithNotFoundById(userId, response, 'user');
+
+/* Create User */
+usersRouter.post<unknown, { message: string }, CreateUserDTO>('', async (request, response) => {
+  const createUserDTO = request.body;
+
+  try {
+    const newUser = await userService.createSingle(createUserDTO);
+
+    respondWithJSONMessage(response, `User was registered successfully with id ${newUser._id}`);
+  } catch (error) {
+    if (isDuplicateKeyMongoError(error))
+      respondWithBadRequest(response, `Username '${createUserDTO.username}' already exists`);
+  }
+});
 
 /**
  * @swagger
@@ -84,18 +105,22 @@ usersRouter.get<{ userId: User['_id'] }>('/:userId', async (request, response) =
  *       200:
  *         description: Updated user
  */
-usersRouter.put<{ userId: User['_id'] }, UserDocument, UpdateUserDTO>('/:userId', async (request, response) => {
-  const { userId } = request.params;
-  const updateUserDTO = request.body;
+usersRouter.put<{ userId: User['_id'] }, UserDocument, UpdateUserDTO>(
+  '/:userId',
+  authMiddleware(),
+  async (request, response) => {
+    const { userId } = request.params;
+    const updateUserDTO = request.body;
 
-  if (!isValidObjectId(userId)) return respondWithInvalidId(userId, response, 'user');
+    if (request.userId !== userId || !isValidObjectId(userId)) return respondWithInvalidId(userId, response, 'user');
 
-  const updatedUser = await userService.updateById(userId, updateUserDTO);
+    const updatedUser = await userService.updateById(userId, updateUserDTO);
 
-  if (!updatedUser) return respondWithNotFoundUser(userId, response);
+    if (!updatedUser) return respondWithNotFoundUser(userId, response);
 
-  response.send(updatedUser);
-});
+    response.send(updatedUser);
+  },
+);
 
 /* Delete User */
 /**
@@ -113,10 +138,10 @@ usersRouter.put<{ userId: User['_id'] }, UserDocument, UpdateUserDTO>('/:userId'
  *       200:
  *         description: Deleted user
  */
-usersRouter.delete<{ userId: User['_id'] }>('/:userId', async (request, response) => {
+usersRouter.delete<{ userId: User['_id'] }>('/:userId', authMiddleware(), async (request, response) => {
   const { userId } = request.params;
 
-  if (!isValidObjectId(userId)) return respondWithInvalidId(userId, response, 'user');
+  if (request.userId !== userId || !isValidObjectId(userId)) return respondWithInvalidId(userId, response, 'user');
 
   const deletedUser = await userService.deleteById(userId);
 

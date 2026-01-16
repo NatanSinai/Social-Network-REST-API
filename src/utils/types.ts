@@ -1,4 +1,12 @@
+import type { User } from '@user/user.types';
 import type { Document } from 'mongoose';
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    userId?: User['_id'];
+    authCookies: { refreshToken?: string };
+  }
+}
 
 export type Prettify<T> = { [K in keyof T]: T[K] } & {};
 

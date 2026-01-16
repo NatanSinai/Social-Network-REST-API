@@ -1,17 +1,19 @@
+import { authMiddleware } from '@middlewares';
 import PostService from '@post/post.service';
 import UserService from '@user/user.service';
-import { respondWithInvalidId, respondWithNotFound } from '@utils';
+import { respondWithInvalidId, respondWithNotFoundById } from '@utils';
 import { Router, type Response } from 'express';
 import { isValidObjectId } from 'mongoose';
 import CommentService from './comment.service';
-import { type Comment, type CommentDocument, type CreateCommentDTO, type UpdateCommentDTO } from './comment.types';
+import type { Comment, CommentDocument, CreateCommentDTO, UpdateCommentDTO } from './comment.types';
 
 const commentsRouter = Router();
 const commentService = new CommentService();
 const userService = new UserService();
 const postService = new PostService();
+
 const respondWithNotFoundComment = (commentId: Comment['_id'], response: Response) =>
-  respondWithNotFound(commentId, response, 'comment');
+  respondWithNotFoundById(commentId, response, 'comment');
 
 /* Create Comment */
 /**
@@ -29,24 +31,31 @@ const respondWithNotFoundComment = (commentId: Comment['_id'], response: Respons
  *       200:
  *         description: Comment created
  */
-commentsRouter.post<unknown, CommentDocument, CreateCommentDTO>('', async (request, response) => {
-  const createCommentDTO = request.body;
+commentsRouter.post<unknown, CommentDocument, Omit<CreateCommentDTO, 'senderId'>>(
+  '',
+  authMiddleware(),
+  async (request, response) => {
+    const createCommentDTO = request.body;
+    const senderId = request.userId;
 
-  if (!isValidObjectId(createCommentDTO.postId)) return respondWithInvalidId(createCommentDTO.postId, response, 'post');
+    if (!isValidObjectId(createCommentDTO.postId))
+      return respondWithInvalidId(createCommentDTO.postId, response, 'post');
 
-  if (!isValidObjectId(createCommentDTO.senderId))
-    return respondWithInvalidId(createCommentDTO.senderId, response, 'sender');
+    if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
-  const user = await userService.getById(createCommentDTO.senderId);
-  if (!user) return respondWithNotFound(createCommentDTO.senderId, response, 'sender');
+    const isUserExists = await userService.existsById(senderId);
 
-  const post = await postService.getById(createCommentDTO.postId);
-  if (!post) return respondWithNotFound(createCommentDTO.postId, response, 'post');
+    if (!isUserExists) return respondWithNotFoundById(senderId, response, 'sender');
 
-  const newComment = await commentService.createSingle(createCommentDTO);
+    const isPostExists = await postService.existsById(createCommentDTO.postId);
 
-  response.send(newComment);
-});
+    if (!isPostExists) return respondWithNotFoundById(createCommentDTO.postId, response, 'post');
+
+    const newComment = await commentService.createSingle({ ...createCommentDTO, senderId });
+
+    response.send(newComment);
+  },
+);
 
 /* Update Comment */
 /**
@@ -62,16 +71,21 @@ commentsRouter.post<unknown, CommentDocument, CreateCommentDTO>('', async (reque
  */
 commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateCommentDTO>(
   '/:commentId',
+  authMiddleware(),
   async (request, response) => {
     const { commentId } = request.params;
     const updateCommentDTO = request.body;
+    const senderId = request.userId;
 
     if (!isValidObjectId(commentId)) return respondWithInvalidId(commentId, response, 'comment');
 
-    if (updateCommentDTO.senderId) {
-      const user = await userService.getById(updateCommentDTO.senderId);
-      if (!user) return respondWithNotFound(updateCommentDTO.senderId, response, 'sender');
-    }
+    if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
+
+    const isUserExist = await userService.existsById(senderId);
+    const currentComment = await commentService.getById(commentId);
+
+    if (!isUserExist || !currentComment || currentComment.senderId.toString() !== senderId.toString())
+      return respondWithNotFoundById(senderId, response, 'sender');
 
     const updatedComment = await commentService.updateById(commentId, updateCommentDTO);
 
@@ -142,10 +156,19 @@ commentsRouter.get<{ commentId: Comment['_id'] }>('/:commentId', async (request,
  *     summary: Delete comment
  *     tags: [Comments]
  */
-commentsRouter.delete<{ commentId: Comment['_id'] }>('/:commentId', async (request, response) => {
+commentsRouter.delete<{ commentId: Comment['_id'] }>('/:commentId', authMiddleware(), async (request, response) => {
   const { commentId } = request.params;
+  const senderId = request.userId;
+
+  if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
   if (!isValidObjectId(commentId)) return respondWithInvalidId(commentId, response, 'comment');
+
+  const isUserExist = await userService.existsById(senderId);
+  const currentComment = await commentService.getById(commentId);
+
+  if (!isUserExist || !currentComment || currentComment.senderId.toString() !== senderId.toString())
+    return respondWithNotFoundById(senderId, response, 'sender');
 
   const deletedComment = await commentService.deleteById(commentId);
 

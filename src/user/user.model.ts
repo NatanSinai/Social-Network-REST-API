@@ -4,15 +4,14 @@ import type { UserDocument } from './user.types';
 
 const UserSchema = new Schema<UserDocument>(
   {
-    name: { type: String, required: true },
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
     bio: { type: String },
     postsCount: { type: Number, default: 0 },
-
-    email: { type: String, required: true, unique: true },
     isPrivate: { type: Boolean, default: false },
   },
-
-  { timestamps: true },
+  { timestamps: true, collection: ModelName.USER },
 );
 
 const userModel = model<UserDocument>(ModelName.USER, UserSchema);

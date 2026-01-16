@@ -1,3 +1,4 @@
+import authRouter from '@/auth/auth.controller';
 import commentsRouter from '@comment/comment.controller';
 import postsRouter from '@post/post.controller';
 import usersRouter from '@user/user.controller';
@@ -9,6 +10,7 @@ const routePathToRouter = {
   posts: postsRouter,
   comments: commentsRouter,
   users: usersRouter,
+  auth: authRouter,
 } satisfies Record<string, Router>;
 
 export const initializeRouters = (app: Express) => {

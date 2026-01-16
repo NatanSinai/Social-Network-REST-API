@@ -1,42 +1,33 @@
 {
   "compilerOptions": {
-    // File Layout
     "rootDir": "./src",
     "outDir": "./dist",
-    // Environment Settings
     "module": "commonjs",
     "esModuleInterop": true,
     "target": "esnext",
     "lib": ["esnext"],
     "types": ["node"],
-    // "moduleResolution": "bundler",
-    // Other Outputs
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-    // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-    // Style Options
-    // "noImplicitReturns": true,
-    // "noImplicitOverride": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    // "noFallthroughCasesInSwitch": true,
-    // "noPropertyAccessFromIndexSignature": true,
-    // Recommended Options
+    "resolveJsonModule": true,
     "strict": true,
     "jsx": "react-jsx",
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
+    "baseUrl": "./src",
     "paths": {
-      "@user/*": ["./src/user/*"],
-      "@post/*": ["./src/post/*"],
-      "@comment/*": ["./src/comment/*"],
-      "@utils": ["./src/utils/index.ts"],
-      "@/*": ["./src/*"]
+      "@userSession/*": ["userSession/*"],
+      "@user/*": ["user/*"],
+      "@post/*": ["post/*"],
+      "@comment/*": ["comment/*"],
+      "@middlewares": ["middlewares/index.ts"],
+      "@utils": ["utils/index.ts"],
+      "@/*": ["*"]
     }
   },
   "include": ["src/**/*.ts"],

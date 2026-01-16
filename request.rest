@@ -6,18 +6,85 @@
 @postId = 694582383d983573299dc89b
 @senderId = 6945824e5cb700d554aa53a0
 @commentId = 694582383d983573299dc89c
+@baseUsersURL = {{baseURL}}/users
+@baseAuthURL = {{baseURL}}/auth
+
+@accessToken = Bearer {{loginRequest.response.body.accessToken}}
+@refreshedAccessToken = Bearer {{refreshAccessTokenRequest.response.body.newAccessToken}}
+
+# If `accessToken` expires, call the `Refresh access token` method, and
+# replace it with `refreshedAccessToken`.
+
+# ==================================================================================== #
+# Users API
+# ==================================================================================== #
+
+### Create a New User
+POST {{baseUsersURL}}
+content-type: application/json
+
+{
+  "username": "example_user",
+  "password": "1234567",
+  "email": "example@gmail.com",
+  "isPrivate": true,
+  "postsCount": 1,
+  "bio": "This is an example user"
+}
+
+### Get User by ID
+GET {{baseUsersURL}}/{{senderId}}
+Authorization: {{accessToken}}
+
+### Update User Profile
+PUT {{baseUsersURL}}/{{senderId}}
+content-type: application/json
+Authorization: {{accessToken}}
+
+{
+  "username": "John Updated",
+  "password": "updated1234567",
+  "email": "updated@gmail.com",
+  "isPrivate": false,
+  "bio": "Software Engineer & Traveler"
+}
+
+### Delete User
+DELETE {{baseUsersURL}}/{{senderId}}
+Authorization: {{accessToken}}
+
+# ==================================================================================== #
+# Authentication API
+# ==================================================================================== #
+
+### Login User
+# @name loginRequest
+POST {{baseAuthURL}}/login
+content-type: application/json
+
+{
+  "username": "example_user",
+  "password": "1234567"
+}
+
+### Refresh access token
+# @name refreshAccessTokenRequest
+POST {{baseAuthURL}}/refresh
+
+### Logout User
+POST {{baseAuthURL}}/logout
+Authorization: {{accessToken}}
 
 # ==================================================================================== #
 # Posts API
 # ==================================================================================== #
 
 ### Add a New Post
-### For general use replace {{senderId}} with your actual sender ID.
 POST {{basePostsURL}}
 content-type: application/json
+Authorization: {{accessToken}}
 
 {
-  "senderId": "{{senderId}}",
   "title": "Title 1",
   "content": "Content 1"
 }
@@ -37,6 +104,7 @@ GET {{basePostsURL}}/?sender={{senderId}}
 ### For general use replace {{postId}} with your actual post ID.
 PUT {{basePostsURL}}/{{postId}}
 content-type: application/json
+Authorization: {{accessToken}}
 
 {
   "title": "Updated title",
@@ -51,19 +119,19 @@ DELETE {{basePostsURL}}
 ### Delete Post by ID
 ### For general use replace {{postId}} with your actual post ID.
 DELETE {{basePostsURL}}/{{postId}}
+Authorization: {{accessToken}}
 
 # ==================================================================================== #
 # Comments API
 # ==================================================================================== #
 
 ### Add a New Comment
-### For general use replace {{postId}} and {{senderId}} with your actual IDs.
 POST {{baseCommentsURL}}
 content-type: application/json
+Authorization: {{accessToken}}
 
 {
   "postId": "{{postId}}",
-  "senderId": "{{senderId}}",
   "content": "This is a comment"
 }
 
@@ -82,6 +150,7 @@ GET {{baseCommentsURL}}/{{commentId}}
 ### For general use replace {{commentId}} with your actual comment ID.
 PUT {{baseCommentsURL}}/{{commentId}}
 content-type: application/json
+Authorization: {{accessToken}}
 
 {
   "content": "Updated comment content"
@@ -90,36 +159,4 @@ content-type: application/json
 ### Delete Comment
 ### For general use replace {{commentId}} with your actual comment ID.
 DELETE {{baseCommentsURL}}/{{commentId}}
-
-# ==================================================================================== #
-# Users API
-# ==================================================================================== #
-
-### Create a New User
-# POST {{baseUsersURL}}
-# content-type: application/json
-
-# {
-#   "name": "example_user",
-#   "email": "example@test.com",
-#   "isPrivate": true,
-#   "postsCount": 1,
-#   "bio": "This is an example user"
-# }
-
-### Get User by ID
-GET {{baseUsersURL}}/{{senderId}}
-
-### Update User Profile
-PUT {{baseUsersURL}}/{{senderId}}
-content-type: application/json
-
-{
-  "name": "John Updated",
-  "email": "john.updated@example.com",
-  "isPrivate": false,
-  "bio": "Software Engineer & Traveler"
-}
-
-### Delete User
-DELETE {{baseUsersURL}}/{{senderId}}
+Authorization: {{accessToken}}

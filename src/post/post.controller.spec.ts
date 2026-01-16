@@ -1,10 +1,11 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
-import { connectToMongoDB } from '@utils';
+import { connectToMongoDB, envVar } from '@utils';
 import express from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose, { Types } from 'mongoose';
 import request from 'supertest';
+import AuthService from '../auth/auth.service';
 import userModel from '../user/user.model';
 import UserService from '../user/user.service';
 import postsRouter from './post.controller';
@@ -20,7 +21,8 @@ let mongoServer: MongoMemoryServer;
 
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
-  process.env.MONGO_CONNECTION_STRING = mongoServer.getUri();
+  envVar.MONGO_CONNECTION_STRING = mongoServer.getUri();
+
   await connectToMongoDB();
 });
 
@@ -30,61 +32,70 @@ afterAll(async () => {
 });
 
 afterEach(async () => {
-  await postModel.deleteMany({});
-  await userModel.deleteMany({});
+  await postModel.deleteMany();
+  await userModel.deleteMany();
 });
 
 describe('Post Controller', () => {
   let app: express.Application;
+  let accessToken: string;
+
   const userService = new UserService();
   const postService = new PostService();
+  const authService = new AuthService();
 
   beforeEach(async () => {
     app = express();
     app.use(express.json());
     app.use('/posts', postsRouter);
 
-    await userService.createSingle({
+    const user = await userService.createSingle({
       _id: new Types.ObjectId(VALID_SENDER_ID),
-      name: 'Author',
+      username: 'Author',
+      password: '123456',
       email: 'author@test.com',
       isPrivate: false,
-      postsCount: 0,
       bio: 'Bio',
     });
+
+    accessToken = authService.generateAccessToken({ userId: user._id });
   });
 
   describe('POST /posts', () => {
     it('should create a post if user exists', async () => {
-      const createPostDTO: CreatePostDTO = {
-        title: 'Test Title',
-        content: 'Test Content',
-        senderId: new Types.ObjectId(VALID_SENDER_ID),
-      };
+      const createPostDTO: Omit<CreatePostDTO, 'senderId'> = { title: 'Test Title', content: 'Test Content' };
 
-      const response = await request(app).post('/posts').send(createPostDTO);
+      const response = await request(app)
+        .post('/posts')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(createPostDTO);
       expect(response.status).toBe(StatusCodes.OK);
       expect(response.body.title).toBe(createPostDTO.title);
     });
 
     it('should return 404 if senderId does not exist in database', async () => {
-      const createPostDTO = {
-        title: 'Title',
-        content: 'Content',
-        senderId: new Types.ObjectId().toString(),
-      };
-      const response = await request(app).post('/posts').send(createPostDTO);
+      const createPostDTO: Omit<CreatePostDTO, 'senderId'> = { title: 'Title', content: 'Content' };
+
+      const nonExistingUserAccessToken = authService.generateAccessToken({
+        userId: new Types.ObjectId(NON_EXISTENT_ID),
+      });
+
+      const response = await request(app)
+        .post('/posts')
+        .set('Authorization', `Bearer ${nonExistingUserAccessToken}`)
+        .send(createPostDTO);
       expect(response.status).toBe(StatusCodes.NOT_FOUND);
     });
 
-    it('should return 400 for invalid senderId format', async () => {
-      const createPostDTO = {
-        title: 'Title',
-        content: 'Content',
-        senderId: INVALID_ID,
-      };
-      const response = await request(app).post('/posts').send(createPostDTO);
-      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    it('should return 401 for invalid senderId format', async () => {
+      const createPostDTO: Omit<CreatePostDTO, 'senderId'> = { title: 'Title', content: 'Content' };
+
+      const response = await request(app)
+        .post('/posts')
+        .set('Authorization', `Bearer ${accessToken.slice(0, accessToken.length - 2)}`)
+        .send(createPostDTO);
+
+      expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
     });
   });
 
@@ -127,7 +138,10 @@ describe('Post Controller', () => {
       });
 
       const updateDTO: UpdatePostDTO = { title: 'New Title' };
-      const response = await request(app).put(`/posts/${post._id}`).send(updateDTO);
+      const response = await request(app)
+        .put(`/posts/${post._id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(updateDTO);
 
       expect(response.status).toBe(StatusCodes.OK);
       expect(response.body.title).toBe('New Title');
@@ -140,9 +154,14 @@ describe('Post Controller', () => {
         senderId: new Types.ObjectId(VALID_SENDER_ID),
       });
 
+      const nonExistingUserAccessToken = authService.generateAccessToken({
+        userId: new Types.ObjectId(NON_EXISTENT_ID),
+      });
+
       const response = await request(app)
         .put(`/posts/${post._id}`)
-        .send({ senderId: new Types.ObjectId(NON_EXISTENT_ID) });
+        .set('Authorization', `Bearer ${nonExistingUserAccessToken}`)
+        .send({ title: 'title 2' });
 
       expect(response.status).toBe(StatusCodes.NOT_FOUND);
     });
@@ -156,7 +175,7 @@ describe('Post Controller', () => {
         senderId: new Types.ObjectId(VALID_SENDER_ID),
       });
 
-      const response = await request(app).delete(`/posts/${post._id}`);
+      const response = await request(app).delete(`/posts/${post._id}`).set('Authorization', `Bearer ${accessToken}`);
       expect(response.status).toBe(StatusCodes.OK);
 
       const remains = await postModel.findById(post._id);
@@ -164,7 +183,9 @@ describe('Post Controller', () => {
     });
 
     it('should return 404 when trying to delete a non-existent post', async () => {
-      const response = await request(app).delete(`/posts/${NON_EXISTENT_ID}`);
+      const response = await request(app)
+        .delete(`/posts/${NON_EXISTENT_ID}`)
+        .set('Authorization', `Bearer ${accessToken}`);
       expect(response.status).toBe(StatusCodes.NOT_FOUND);
     });
   });

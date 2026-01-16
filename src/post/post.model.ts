@@ -8,7 +8,7 @@ const PostSchema = new Schema<PostDocument>(
     content: { type: String, required: true },
     senderId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.USER },
   },
-  { timestamps: true },
+  { timestamps: true, collection: ModelName.POST },
 );
 
 const postModel = model<PostDocument>(ModelName.POST, PostSchema);
