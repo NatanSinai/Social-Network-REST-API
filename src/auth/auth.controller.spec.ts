@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
-import { connectToMongoDB, envVar } from '@utils';
+import { connectToMongoMemoryServer, createMongoMemoryServer } from '@utils';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import { StatusCodes } from 'http-status-codes';
@@ -48,10 +48,9 @@ const refresh = (app: express.Application, cookies?: string[]) =>
 let mongoServer: MongoMemoryServer;
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  envVar.MONGO_CONNECTION_STRING = mongoServer.getUri();
+  mongoServer = await createMongoMemoryServer();
 
-  await connectToMongoDB();
+  await connectToMongoMemoryServer(mongoServer);
 });
 
 afterAll(async () => {

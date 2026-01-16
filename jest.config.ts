@@ -8,6 +8,7 @@ const config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   modulePaths: ['<rootDir>/src'],
+  collectCoverageFrom: ['src/**/*.controller.ts'],
   ...(moduleNameMapper ? { moduleNameMapper } : {}),
 } satisfies JestConfigWithTsJest;
 
