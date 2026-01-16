@@ -19,13 +19,11 @@ const NON_EXISTENT_ID = '507f1f77bcf86cd799439012';
 
 let mongoServer: MongoMemoryServer;
 
-export const createMongoMemoryServerAndConnect = async () => {
+beforeAll(async () => {
   mongoServer = await createMongoMemoryServer();
 
   await connectToMongoMemoryServer(mongoServer);
-};
-
-beforeAll(createMongoMemoryServerAndConnect);
+});
 
 afterAll(async () => {
   await mongoServer.stop();

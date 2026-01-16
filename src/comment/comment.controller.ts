@@ -16,6 +16,21 @@ const respondWithNotFoundComment = (commentId: Comment['_id'], response: Respons
   respondWithNotFoundById(commentId, response, 'comment');
 
 /* Create Comment */
+/**
+ * @swagger
+ * /comments:
+ *   post:
+ *     summary: Create comment
+ *     tags: [Comments]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/CreateCommentDTO' }
+ *     responses:
+ *       200:
+ *         description: Comment created
+ */
 commentsRouter.post<unknown, CommentDocument, Omit<CreateCommentDTO, 'senderId'>>(
   '',
   authMiddleware(),
@@ -43,6 +58,17 @@ commentsRouter.post<unknown, CommentDocument, Omit<CreateCommentDTO, 'senderId'>
 );
 
 /* Update Comment */
+/**
+ * @swagger
+ * /comments/{commentId}:
+ *   put:
+ *     summary: Update comment
+ *     tags: [Comments]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/UpdateCommentDTO' }
+ */
 commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateCommentDTO>(
   '/:commentId',
   authMiddleware(),
@@ -70,6 +96,25 @@ commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateComment
 );
 
 /* Get All Comments By Post Id*/
+/**
+ * @swagger
+ * /comments:
+ *   get:
+ *     summary: Get comments by Post ID
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: query
+ *         name: postId
+ *         schema: { $ref: '#/components/schemas/DocumentMetadata/properties/_id' }
+ *     responses:
+ *       200:
+ *         description: List of comments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/Comment' }
+ */
 commentsRouter.get<unknown, CommentDocument[], unknown, Partial<Pick<Comment, 'postId'>>>(
   '',
   async (request, response) => {
@@ -84,6 +129,13 @@ commentsRouter.get<unknown, CommentDocument[], unknown, Partial<Pick<Comment, 'p
 );
 
 /* Get Comment By ID */
+/**
+ * @swagger
+ * /comments/{commentId}:
+ *   get:
+ *     summary: Get comment by ID
+ *     tags: [Comments]
+ */
 commentsRouter.get<{ commentId: Comment['_id'] }>('/:commentId', async (request, response) => {
   const { commentId } = request.params;
 
@@ -97,6 +149,13 @@ commentsRouter.get<{ commentId: Comment['_id'] }>('/:commentId', async (request,
 });
 
 /* Delete Comment */
+/**
+ * @swagger
+ * /comments/{commentId}:
+ *   delete:
+ *     summary: Delete comment
+ *     tags: [Comments]
+ */
 commentsRouter.delete<{ commentId: Comment['_id'] }>('/:commentId', authMiddleware(), async (request, response) => {
   const { commentId } = request.params;
   const senderId = request.userId;

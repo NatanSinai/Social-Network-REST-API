@@ -14,6 +14,24 @@ const respondWithNotFoundPost = (postId: Post['_id'], response: Response) =>
   respondWithNotFoundById(postId, response, 'post');
 
 /* Create Post */
+/**
+ * @swagger
+ * /posts:
+ *   post:
+ *     summary: Create post
+ *     tags: [Posts]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/CreatePostDTO' }
+ *     responses:
+ *       200:
+ *         description: Post created
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Post' }
+ */
 postsRouter.post<unknown, PostDocument, Omit<CreatePostDTO, 'senderId'>>(
   '',
   authMiddleware(),
@@ -35,6 +53,17 @@ postsRouter.post<unknown, PostDocument, Omit<CreatePostDTO, 'senderId'>>(
 );
 
 /* Update Post */
+/**
+ * @swagger
+ * /posts/{postId}:
+ *   put:
+ *     summary: Update post
+ *     tags: [Posts]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/UpdatePostDTO' }
+ */
 postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
   '/:postId',
   authMiddleware(),
@@ -62,6 +91,25 @@ postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
 );
 
 /* Get Posts (Optionally By Sender ID) */
+/**
+ * @swagger
+ * /posts:
+ *   get:
+ *     summary: Get posts by sender ID
+ *     tags: [Posts]
+ *     parameters:
+ *       - in: query
+ *         name: sender
+ *         schema: { $ref: '#/components/schemas/DocumentMetadata/properties/_id' }
+ *     responses:
+ *       200:
+ *         description: List of posts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/Post' }
+ */
 postsRouter.get<unknown, PostDocument[], unknown, { sender?: Post['senderId'] }>('', async (request, response) => {
   const { sender: senderId } = request.query;
 
@@ -73,6 +121,21 @@ postsRouter.get<unknown, PostDocument[], unknown, { sender?: Post['senderId'] }>
 });
 
 /* Get Post By ID */
+/**
+ * @swagger
+ * /posts/{postId}:
+ *   get:
+ *     summary: Get post by ID
+ *     tags: [Posts]
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema: { $ref: '#/components/schemas/DocumentMetadata/properties/_id' }
+ *     responses:
+ *       200:
+ *         description: Post found
+ */
 postsRouter.get<{ postId: Post['_id'] }>('/:postId', async (request, response) => {
   const { postId } = request.params;
 
@@ -86,6 +149,13 @@ postsRouter.get<{ postId: Post['_id'] }>('/:postId', async (request, response) =
 });
 
 /* Delete Post */
+/**
+ * @swagger
+ * /posts/{postId}:
+ *   delete:
+ *     summary: Delete post by ID
+ *     tags: [Posts]
+ */
 postsRouter.delete<{ postId: Post['_id'] }>('/:postId', authMiddleware(), async (request, response) => {
   const { postId } = request.params;
   const senderId = request.userId;
