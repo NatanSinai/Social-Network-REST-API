@@ -1,9 +1,10 @@
-import { envVar } from '@utils';
 import dotenv from 'dotenv';
 import { Types } from 'mongoose';
 import swaggerJsdoc from 'swagger-jsdoc';
+
 dotenv.config();
-const port = envVar.PORT;
+
+const port = process.env.PORT || '3000';
 
 const swaggerSpec = swaggerJsdoc({
   definition: {
