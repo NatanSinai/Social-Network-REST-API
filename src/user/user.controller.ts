@@ -18,19 +18,6 @@ const respondWithNotFoundUser = (userId: User['_id'], response: Response) =>
   respondWithNotFoundById(userId, response, 'user');
 
 /* Create User */
-usersRouter.post<unknown, { message: string }, CreateUserDTO>('', async (request, response) => {
-  const createUserDTO = request.body;
-
-  try {
-    const newUser = await userService.createSingle(createUserDTO);
-
-    respondWithJSONMessage(response, `User was registered successfully with id ${newUser._id}`);
-  } catch (error) {
-    if (isDuplicateKeyMongoError(error))
-      respondWithBadRequest(response, `Username '${createUserDTO.username}' already exists`);
-  }
-});
-
 /**
  * @swagger
  * /users:
@@ -45,11 +32,23 @@ usersRouter.post<unknown, { message: string }, CreateUserDTO>('', async (request
  *             $ref: '#/components/schemas/CreateUserDTO'
  *     responses:
  *       200:
- *         description: Created user
+ *         description: User created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
  */
-usersRouter.post('', async (req, res) => {
-  const user = await userService.createSingle(req.body);
-  res.send(user);
+usersRouter.post<unknown, { message: string }, CreateUserDTO>('', async (request, response) => {
+  const createUserDTO = request.body;
+
+  try {
+    const newUser = await userService.createSingle(createUserDTO);
+
+    respondWithJSONMessage(response, `User was registered successfully with id ${newUser._id}`);
+  } catch (error) {
+    if (isDuplicateKeyMongoError(error))
+      return respondWithBadRequest(response, `Username '${createUserDTO.username}' already exists`);
+  }
 });
 
 /* Get User by ID */
@@ -63,13 +62,15 @@ usersRouter.post('', async (req, res) => {
  *       - in: path
  *         name: userId
  *         required: true
- *         schema: { $ref: '#/components/schemas/DocumentMetadata/properties/_id' }
+ *         schema:
+ *           $ref: '#/components/schemas/ObjectId'
  *     responses:
  *       200:
  *         description: User found
  *         content:
  *           application/json:
- *             schema: { $ref: '#/components/schemas/User' }
+ *             schema:
+ *               $ref: '#/components/schemas/User'
  *       404:
  *         description: User not found
  */
@@ -92,15 +93,19 @@ usersRouter.get<{ userId: User['_id'] }>('/:userId', async (request, response) =
  *   put:
  *     summary: Update user
  *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
- *         schema: { $ref: '#/components/schemas/DocumentMetadata/properties/_id' }
+ *         schema:
+ *           $ref: '#/components/schemas/ObjectId'
  *     requestBody:
  *       content:
  *         application/json:
- *           schema: { $ref: '#/components/schemas/UpdateUserDTO' }
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateUserDTO'
  *     responses:
  *       200:
  *         description: Updated user
@@ -129,11 +134,14 @@ usersRouter.put<{ userId: User['_id'] }, UserDocument, UpdateUserDTO>(
  *   delete:
  *     summary: Delete user
  *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
- *         schema: { $ref: '#/components/schemas/DocumentMetadata/properties/_id' }
+ *         schema:
+ *           $ref: '#/components/schemas/ObjectId'
  *     responses:
  *       200:
  *         description: Deleted user

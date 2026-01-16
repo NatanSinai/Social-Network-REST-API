@@ -22,14 +22,21 @@ const respondWithNotFoundComment = (commentId: Comment['_id'], response: Respons
  *   post:
  *     summary: Create comment
  *     tags: [Comments]
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
- *           schema: { $ref: '#/components/schemas/CreateCommentDTO' }
+ *           schema:
+ *             $ref: '#/components/schemas/CreateCommentDTO'
  *     responses:
  *       200:
  *         description: Comment created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Comment'
  */
 commentsRouter.post<unknown, CommentDocument, Omit<CreateCommentDTO, 'senderId'>>(
   '',
@@ -64,10 +71,22 @@ commentsRouter.post<unknown, CommentDocument, Omit<CreateCommentDTO, 'senderId'>
  *   put:
  *     summary: Update comment
  *     tags: [Comments]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           $ref: '#/components/schemas/ObjectId'
  *     requestBody:
  *       content:
  *         application/json:
- *           schema: { $ref: '#/components/schemas/UpdateCommentDTO' }
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateCommentDTO'
+ *     responses:
+ *       200:
+ *         description: Comment updated
  */
 commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateCommentDTO>(
   '/:commentId',
@@ -100,12 +119,13 @@ commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateComment
  * @swagger
  * /comments:
  *   get:
- *     summary: Get comments by Post ID
+ *     summary: Get comments by post ID
  *     tags: [Comments]
  *     parameters:
  *       - in: query
  *         name: postId
- *         schema: { $ref: '#/components/schemas/DocumentMetadata/properties/_id' }
+ *         schema:
+ *           $ref: '#/components/schemas/ObjectId'
  *     responses:
  *       200:
  *         description: List of comments
@@ -113,7 +133,8 @@ commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateComment
  *           application/json:
  *             schema:
  *               type: array
- *               items: { $ref: '#/components/schemas/Comment' }
+ *               items:
+ *                 $ref: '#/components/schemas/Comment'
  */
 commentsRouter.get<unknown, CommentDocument[], unknown, Partial<Pick<Comment, 'postId'>>>(
   '',
@@ -135,6 +156,15 @@ commentsRouter.get<unknown, CommentDocument[], unknown, Partial<Pick<Comment, 'p
  *   get:
  *     summary: Get comment by ID
  *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           $ref: '#/components/schemas/ObjectId'
+ *     responses:
+ *       200:
+ *         description: Comment found
  */
 commentsRouter.get<{ commentId: Comment['_id'] }>('/:commentId', async (request, response) => {
   const { commentId } = request.params;
@@ -155,6 +185,17 @@ commentsRouter.get<{ commentId: Comment['_id'] }>('/:commentId', async (request,
  *   delete:
  *     summary: Delete comment
  *     tags: [Comments]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           $ref: '#/components/schemas/ObjectId'
+ *     responses:
+ *       200:
+ *         description: Comment deleted
  */
 commentsRouter.delete<{ commentId: Comment['_id'] }>('/:commentId', authMiddleware(), async (request, response) => {
   const { commentId } = request.params;
