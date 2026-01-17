@@ -1,5 +1,4 @@
 import dotenv from 'dotenv';
-import { Types } from 'mongoose';
 import swaggerJsdoc from 'swagger-jsdoc';
 
 dotenv.config();
@@ -16,11 +15,29 @@ const swaggerSpec = swaggerJsdoc({
     servers: [{ url: `http://localhost:${port}` }],
 
     components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+        RefreshTokenCookie: {
+          type: 'apiKey',
+          in: 'cookie',
+          name: 'refreshToken',
+        },
+      },
+
       schemas: {
+        ObjectId: {
+          type: 'string',
+          example: '507f1f77bcf86cd799439011',
+        },
+
         DocumentMetadata: {
           type: 'object',
           properties: {
-            _id: Types.ObjectId,
+            _id: { $ref: '#/components/schemas/ObjectId' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
           },
@@ -32,7 +49,7 @@ const swaggerSpec = swaggerJsdoc({
             {
               type: 'object',
               properties: {
-                name: { type: 'string' },
+                username: { type: 'string' },
                 email: { type: 'string', format: 'email' },
                 isPrivate: { type: 'boolean' },
                 postsCount: { type: 'number' },
@@ -44,10 +61,11 @@ const swaggerSpec = swaggerJsdoc({
 
         CreateUserDTO: {
           type: 'object',
-          required: ['name', 'email', 'isPrivate', 'postsCount'],
+          required: ['username', 'email', 'password', 'isPrivate'],
           properties: {
-            name: { type: 'string' },
+            username: { type: 'string' },
             email: { type: 'string', format: 'email' },
+            password: { type: 'string', format: 'password' },
             isPrivate: { type: 'boolean' },
             postsCount: { type: 'number' },
             bio: { type: 'string', nullable: true },
@@ -57,11 +75,21 @@ const swaggerSpec = swaggerJsdoc({
         UpdateUserDTO: {
           type: 'object',
           properties: {
-            name: { type: 'string' },
+            username: { type: 'string' },
             email: { type: 'string', format: 'email' },
+            password: { type: 'string', format: 'password' },
             isPrivate: { type: 'boolean' },
             postsCount: { type: 'number' },
             bio: { type: 'string', nullable: true },
+          },
+        },
+
+        UserCredentials: {
+          type: 'object',
+          required: ['username', 'password'],
+          properties: {
+            username: { type: 'string' },
+            password: { type: 'string', format: 'password' },
           },
         },
 
@@ -73,7 +101,7 @@ const swaggerSpec = swaggerJsdoc({
               properties: {
                 title: { type: 'string' },
                 content: { type: 'string' },
-                senderId: Types.ObjectId,
+                senderId: { $ref: '#/components/schemas/ObjectId' },
               },
             },
           ],
@@ -81,11 +109,10 @@ const swaggerSpec = swaggerJsdoc({
 
         CreatePostDTO: {
           type: 'object',
-          required: ['title', 'content', 'senderId'],
+          required: ['title', 'content'],
           properties: {
             title: { type: 'string' },
             content: { type: 'string' },
-            senderId: Types.ObjectId,
           },
         },
 
@@ -94,7 +121,6 @@ const swaggerSpec = swaggerJsdoc({
           properties: {
             title: { type: 'string' },
             content: { type: 'string' },
-            senderId: Types.ObjectId,
           },
         },
 
@@ -105,8 +131,8 @@ const swaggerSpec = swaggerJsdoc({
               type: 'object',
               properties: {
                 content: { type: 'string' },
-                postId: Types.ObjectId,
-                senderId: Types.ObjectId,
+                postId: { $ref: '#/components/schemas/ObjectId' },
+                senderId: { $ref: '#/components/schemas/ObjectId' },
               },
             },
           ],
@@ -114,11 +140,10 @@ const swaggerSpec = swaggerJsdoc({
 
         CreateCommentDTO: {
           type: 'object',
-          required: ['content', 'postId', 'senderId'],
+          required: ['content', 'postId'],
           properties: {
             content: { type: 'string' },
-            postId: Types.ObjectId,
-            senderId: Types.ObjectId,
+            postId: { $ref: '#/components/schemas/ObjectId' },
           },
         },
 
@@ -126,7 +151,6 @@ const swaggerSpec = swaggerJsdoc({
           type: 'object',
           properties: {
             content: { type: 'string' },
-            senderId: Types.ObjectId,
           },
         },
       },

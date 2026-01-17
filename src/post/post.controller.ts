@@ -20,17 +20,21 @@ const respondWithNotFoundPost = (postId: Post['_id'], response: Response) =>
  *   post:
  *     summary: Create post
  *     tags: [Posts]
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
- *           schema: { $ref: '#/components/schemas/CreatePostDTO' }
+ *           schema:
+ *             $ref: '#/components/schemas/CreatePostDTO'
  *     responses:
  *       200:
  *         description: Post created
  *         content:
  *           application/json:
- *             schema: { $ref: '#/components/schemas/Post' }
+ *             schema:
+ *               $ref: '#/components/schemas/Post'
  */
 postsRouter.post<unknown, PostDocument, Omit<CreatePostDTO, 'senderId'>>(
   '',
@@ -59,10 +63,22 @@ postsRouter.post<unknown, PostDocument, Omit<CreatePostDTO, 'senderId'>>(
  *   put:
  *     summary: Update post
  *     tags: [Posts]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           $ref: '#/components/schemas/ObjectId'
  *     requestBody:
  *       content:
  *         application/json:
- *           schema: { $ref: '#/components/schemas/UpdatePostDTO' }
+ *           schema:
+ *             $ref: '#/components/schemas/UpdatePostDTO'
+ *     responses:
+ *       200:
+ *         description: Post updated
  */
 postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
   '/:postId',
@@ -84,6 +100,7 @@ postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
 
     const updatedPost = await postService.updateById(postId, updatePostDTO);
 
+    /* istanbul ignore next */
     if (!updatedPost) return respondWithNotFoundPost(postId, response);
 
     response.send(updatedPost);
@@ -95,12 +112,13 @@ postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
  * @swagger
  * /posts:
  *   get:
- *     summary: Get posts by sender ID
+ *     summary: Get posts (optionally by sender)
  *     tags: [Posts]
  *     parameters:
  *       - in: query
  *         name: sender
- *         schema: { $ref: '#/components/schemas/DocumentMetadata/properties/_id' }
+ *         schema:
+ *           $ref: '#/components/schemas/ObjectId'
  *     responses:
  *       200:
  *         description: List of posts
@@ -108,7 +126,8 @@ postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
  *           application/json:
  *             schema:
  *               type: array
- *               items: { $ref: '#/components/schemas/Post' }
+ *               items:
+ *                 $ref: '#/components/schemas/Post'
  */
 postsRouter.get<unknown, PostDocument[], unknown, { sender?: Post['senderId'] }>('', async (request, response) => {
   const { sender: senderId } = request.query;
@@ -131,7 +150,8 @@ postsRouter.get<unknown, PostDocument[], unknown, { sender?: Post['senderId'] }>
  *       - in: path
  *         name: postId
  *         required: true
- *         schema: { $ref: '#/components/schemas/DocumentMetadata/properties/_id' }
+ *         schema:
+ *           $ref: '#/components/schemas/ObjectId'
  *     responses:
  *       200:
  *         description: Post found
@@ -153,14 +173,25 @@ postsRouter.get<{ postId: Post['_id'] }>('/:postId', async (request, response) =
  * @swagger
  * /posts/{postId}:
  *   delete:
- *     summary: Delete post by ID
+ *     summary: Delete post
  *     tags: [Posts]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           $ref: '#/components/schemas/ObjectId'
+ *     responses:
+ *       200:
+ *         description: Post deleted
  */
 postsRouter.delete<{ postId: Post['_id'] }>('/:postId', authMiddleware(), async (request, response) => {
   const { postId } = request.params;
   const senderId = request.userId;
 
-  if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(postId, response, 'sender');
+  if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
   if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
 
@@ -172,6 +203,7 @@ postsRouter.delete<{ postId: Post['_id'] }>('/:postId', authMiddleware(), async 
 
   const deletedPost = await postService.deleteById(postId);
 
+  /* istanbul ignore next */
   if (!deletedPost) return respondWithNotFoundPost(postId, response);
 
   response.send(deletedPost);

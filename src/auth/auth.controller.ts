@@ -20,6 +20,36 @@ const authRouter = Router();
 const authService = new AuthService();
 const userService = new UserService();
 
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Login user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [username, password]
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Access token returned, refresh token set in cookie
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ */
 authRouter.post<unknown, { accessToken: string }, UserCredentials>('/login', async (request, response) => {
   const credentials = request.body;
 
@@ -37,6 +67,19 @@ authRouter.post<unknown, { accessToken: string }, UserCredentials>('/login', asy
   response.json({ accessToken });
 });
 
+/**
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Logout user
+ *     security:
+ *       - BearerAuth: []
+ *       - RefreshTokenCookie: []
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ */
 authRouter.post('/logout', authMiddleware(), async (request, response) => {
   const {
     userId,
@@ -52,6 +95,25 @@ authRouter.post('/logout', authMiddleware(), async (request, response) => {
   respondWithJSONMessage(response, 'Logged out successfully');
 });
 
+/**
+ * @swagger
+ * /auth/refresh:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Refresh access token
+ *     security:
+ *       - RefreshTokenCookie: []
+ *     responses:
+ *       200:
+ *         description: New access token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 newAccessToken:
+ *                   type: string
+ */
 authRouter.post('/refresh', async (request, response) => {
   const refreshToken = request.cookies?.refreshToken;
 

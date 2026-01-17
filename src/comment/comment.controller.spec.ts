@@ -162,8 +162,44 @@ describe('Comment Controller', () => {
 
     it('should return an empty array if no comments exist', async () => {
       const response = await request(app).get('/comments');
+
       expect(response.status).toBe(StatusCodes.OK);
       expect(response.body).toHaveLength(0);
+    });
+
+    it('should return 400 for invalid postId query', async () => {
+      const response = await request(app).get('/comments/invalid-id');
+
+      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 200 for single comment', async () => {
+      const createCommentDTO: CreateCommentDTO = {
+        content: 'Comment1',
+        postId: new Types.ObjectId(VALID_POST_ID),
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      };
+
+      const comment = await commentService.createSingle(createCommentDTO);
+
+      const response = await request(app).get(`/comments/${comment._id}`);
+
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body.content).toMatch(createCommentDTO.content);
+      expect(response.body.postId).toMatch(createCommentDTO.postId.toString());
+      expect(response.body.senderId).toMatch(createCommentDTO.senderId.toString());
+    });
+
+    it('should return 200 for invalid commentId', async () => {
+      const response = await request(app).get(`/comments/${INVALID_ID}`);
+
+      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 200 for non existing comment', async () => {
+      const response = await request(app).get(`/comments/${NON_EXISTENT_ID}`);
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
     });
   });
 
@@ -204,6 +240,40 @@ describe('Comment Controller', () => {
 
       expect(response.status).toBe(StatusCodes.BAD_REQUEST);
     });
+
+    it('should return 403 for no sender', async () => {
+      const comment = await commentService.createSingle({
+        content: 'Old Content',
+        postId: new Types.ObjectId(VALID_POST_ID),
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const updateDTO: UpdateCommentDTO = { content: 'New Content' };
+      const response = await request(app).put(`/comments/${comment._id}`).send(updateDTO);
+
+      expect(response.status).toBe(StatusCodes.FORBIDDEN);
+    });
+
+    it('should return 404 for invalid sender id format', async () => {
+      const comment = await commentService.createSingle({
+        content: 'Old Content',
+        postId: new Types.ObjectId(VALID_POST_ID),
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const updateDTO: UpdateCommentDTO = { content: 'New Content' };
+
+      const nonExistingUserAccessToken = authService.generateAccessToken({
+        userId: new Types.ObjectId(NON_EXISTENT_ID),
+      });
+
+      const response = await request(app)
+        .put(`/comments/${comment._id}`)
+        .set('Authorization', `Bearer ${nonExistingUserAccessToken}`)
+        .send(updateDTO);
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
   });
 
   describe('DELETE /comments/:commentId', () => {
@@ -227,6 +297,7 @@ describe('Comment Controller', () => {
       const response = await request(app)
         .delete(`/comments/${NON_EXISTENT_ID}`)
         .set('Authorization', `Bearer ${accessToken}`);
+
       expect(response.status).toBe(StatusCodes.NOT_FOUND);
     });
   });
