@@ -1,5 +1,5 @@
 {
-  "cSpell.words": ["Magrafta", "Shira"],
+  "cSpell.words": ["DTOs", "Magrafta", "Shira", "signup"],
   "workbench.startupEditor": "none",
   "files.autoSave": "onWindowChange",
   "liveServer.settings.donotShowInfoMsg": true,
@@ -67,5 +67,6 @@
   "terminal.integrated.smoothScrolling": true,
   "terminal.integrated.suggest.enabled": true,
   "terminal.integrated.stickyScroll.enabled": false,
-  "typescript.preferences.preferTypeOnlyAutoImports": true
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
+  "rest-client.rememberCookiesForSubsequentRequests": true
 }
