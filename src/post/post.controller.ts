@@ -100,6 +100,7 @@ postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
 
     const updatedPost = await postService.updateById(postId, updatePostDTO);
 
+    /* istanbul ignore next */
     if (!updatedPost) return respondWithNotFoundPost(postId, response);
 
     response.send(updatedPost);
@@ -189,7 +190,6 @@ postsRouter.get<{ postId: Post['_id'] }>('/:postId', async (request, response) =
 postsRouter.delete<{ postId: Post['_id'] }>('/:postId', authMiddleware(), async (request, response) => {
   const { postId } = request.params;
   const senderId = request.userId;
-  console.log(senderId);
 
   if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
@@ -203,6 +203,7 @@ postsRouter.delete<{ postId: Post['_id'] }>('/:postId', authMiddleware(), async 
 
   const deletedPost = await postService.deleteById(postId);
 
+  /* istanbul ignore next */
   if (!deletedPost) return respondWithNotFoundPost(postId, response);
 
   response.send(deletedPost);

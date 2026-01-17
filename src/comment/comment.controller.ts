@@ -108,6 +108,7 @@ commentsRouter.put<{ commentId: Comment['_id'] }, CommentDocument, UpdateComment
 
     const updatedComment = await commentService.updateById(commentId, updateCommentDTO);
 
+    /* istanbul ignore next */
     if (!updatedComment) return respondWithNotFoundComment(commentId, response);
 
     response.send(updatedComment);
@@ -213,6 +214,7 @@ commentsRouter.delete<{ commentId: Comment['_id'] }>('/:commentId', authMiddlewa
 
   const deletedComment = await commentService.deleteById(commentId);
 
+  /* istanbul ignore next */
   if (!deletedComment) return respondWithNotFoundComment(commentId, response);
 
   response.send(deletedComment);

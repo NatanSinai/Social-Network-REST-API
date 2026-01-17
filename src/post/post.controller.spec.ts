@@ -164,6 +164,29 @@ describe('Post Controller', () => {
 
       expect(response.status).toBe(StatusCodes.NOT_FOUND);
     });
+
+    it('should return 404 if updating with a post not by the sender', async () => {
+      const secondUser = await userService.createSingle({
+        username: 'Author2',
+        password: '123456',
+        email: 'author2@test.com',
+        isPrivate: false,
+        bio: 'Bio',
+      });
+
+      const post = await postService.createSingle({
+        title: 'Title',
+        content: 'Content',
+        senderId: secondUser._id,
+      });
+
+      const response = await request(app)
+        .put(`/posts/${post._id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ title: 'title 2' });
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
   });
 
   describe('DELETE /posts/:postId', () => {
@@ -185,6 +208,44 @@ describe('Post Controller', () => {
       const response = await request(app)
         .delete(`/posts/${NON_EXISTENT_ID}`)
         .set('Authorization', `Bearer ${accessToken}`);
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
+
+    it('should return 404 when trying to delete a post with invalid sender', async () => {
+      const post = await postService.createSingle({
+        title: 'Delete',
+        content: 'Content',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const nonExistingUserAccessToken = authService.generateAccessToken({
+        userId: new Types.ObjectId(NON_EXISTENT_ID),
+      });
+
+      const response = await request(app)
+        .delete(`/posts/${post._id}`)
+        .set('Authorization', `Bearer ${nonExistingUserAccessToken}`);
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
+
+    it('should return 404 if deleting a post not by the sender', async () => {
+      const secondUser = await userService.createSingle({
+        username: 'Author2',
+        password: '123456',
+        email: 'author2@test.com',
+        isPrivate: false,
+        bio: 'Bio',
+      });
+
+      const post = await postService.createSingle({
+        title: 'Title',
+        content: 'Content',
+        senderId: secondUser._id,
+      });
+
+      const response = await request(app).delete(`/posts/${post._id}`).set('Authorization', `Bearer ${accessToken}`);
+
       expect(response.status).toBe(StatusCodes.NOT_FOUND);
     });
   });
