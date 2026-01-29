@@ -27,7 +27,7 @@
       "@constants": ["utils/constants.ts"],
       "@helpers": ["utils/helpers.ts"],
       "@types": ["utils/types.ts"],
-      "@hebrew": ["utils/hebrew.ts"],
+      "@hebrew": ["utils/lang/he-IL.ts"],
       "@components": ["components/index.ts"],
       "@pages": ["pages/index.ts"],
       "@/*": ["*"]
