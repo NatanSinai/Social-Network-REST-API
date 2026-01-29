@@ -1,3 +1,4 @@
+import { PostsFeedPage } from '@/pages/PostsFeedPage';
 import { userState } from '@constants';
 import { Box } from '@mui/material';
 import { memo, useMemo } from 'react';
@@ -12,11 +13,11 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
       {
         path: RoutePath._HOME,
         element: (
-          <Box height="100%">
+          <Box height='100%'>
             <Outlet />
           </Box>
         ),
-        children: [{ path: RoutePath.POSTS_FEED, element: <div>hello</div> }],
+        children: [{ path: RoutePath.POSTS_FEED, element: <PostsFeedPage /> }],
       },
     ];
 
@@ -38,7 +39,7 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
       {
         path: RoutePath._ROOT,
         element: (
-          <Box bgcolor="primary.main" height="100%">
+          <Box bgcolor='primary.main' height='100%'>
             <Outlet />
           </Box>
         ),

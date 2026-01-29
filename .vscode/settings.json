@@ -23,13 +23,17 @@
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "html.format.extraLiners": "",
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit",
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll.eslint": "never"
   },
+  "prettier.requireConfig": true,
   "editor.accessibilitySupport": "off",
   "workbench.productIconTheme": "fluent-icons",
   "typescript.updateImportsOnFileMove.enabled": "always",
