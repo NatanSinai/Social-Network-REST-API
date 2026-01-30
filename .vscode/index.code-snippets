@@ -1,6 +1,6 @@
 {
-  "Memo Functional Component Template": {
-    "prefix": "mfc",
+  "Functional Component Template": {
+    "prefix": "fc",
     "body": [
       "import type { FC } from 'react';",
       "",
@@ -11,7 +11,7 @@
       "};",
       "",
     ],
-    "description": "Creates a memo version of a functional component with the file name",
+    "description": "Creates a functional component with the file name",
   },
   "Hook Template": {
     "prefix": "hook",

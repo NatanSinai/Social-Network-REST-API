@@ -1,6 +1,6 @@
-import { PostsFeedPage } from '@/pages/PostsFeedPage';
 import { userState } from '@constants';
 import { Box } from '@mui/material';
+import { PostsFeedPage } from '@pages';
 import { memo, useMemo } from 'react';
 import { Navigate, Outlet, type RouteObject, useRoutes } from 'react-router-dom';
 import { INITIAL_USER_ROUTE, type ProtectedRouteObject, RoutePath, UserProtectedRoute, protectRoute } from './';

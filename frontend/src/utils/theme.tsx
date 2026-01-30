@@ -14,7 +14,9 @@ const theme = createTheme({
   direction: 'rtl',
   components: {
     MuiAlert: { defaultProps: { closeText: CLOSE } },
-    MuiButton: { defaultProps: { variant: 'contained', color: 'secondary', style: { borderRadius: '2em' } } },
+    MuiButton: {
+      defaultProps: { variant: 'contained', color: 'secondary', style: { borderRadius: '2em', textTransform: 'none' } },
+    },
     MuiIconButton: { defaultProps: { style: { color: 'secondary.main' } } },
     MuiOutlinedInput: { styleOverrides: { root: { backgroundColor: '#FFFFFF', color: '#000000' } } },
   },
