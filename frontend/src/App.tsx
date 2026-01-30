@@ -1,5 +1,7 @@
+import { RouterProvider } from './utils/routes';
+
 const App = () => {
-  return <div>NASH Network</div>;
+  return <RouterProvider />;
 };
 
 export default App;

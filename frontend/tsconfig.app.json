@@ -24,6 +24,12 @@
 
     "baseUrl": "src",
     "paths": {
+      "@constants": ["utils/constants.ts"],
+      "@helpers": ["utils/helpers.ts"],
+      "@types": ["utils/types.ts"],
+      "@hebrew": ["utils/lang/he-IL.ts"],
+      "@components": ["components/index.ts"],
+      "@pages": ["pages/index.ts"],
       "@/*": ["*"]
     }
   },
