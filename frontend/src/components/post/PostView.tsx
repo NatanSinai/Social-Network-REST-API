@@ -1,4 +1,4 @@
-import type { Post } from '@/pages/PostsFeedPage';
+import type { Post } from '@entities';
 import { ChatBubbleOutline, Favorite, FavoriteBorder } from '@mui/icons-material';
 import {
   Avatar,

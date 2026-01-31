@@ -24,6 +24,7 @@
 
     "baseUrl": "src",
     "paths": {
+      "@entities": ["entities/index.ts"],
       "@constants": ["utils/constants.ts"],
       "@helpers": ["utils/helpers.ts"],
       "@types": ["utils/types.ts"],

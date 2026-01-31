@@ -1,1 +1,2 @@
-export * from './PostCard';
+export * from './generic';
+export * from './post';
