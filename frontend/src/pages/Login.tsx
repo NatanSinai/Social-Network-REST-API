@@ -1,18 +1,48 @@
+import { BACKEND_URL } from '@/config';
 import { RoutePath } from '@/utils/routes';
 import { Box, Button, Container, Link, Paper, TextField, Typography } from '@mui/material';
+import axios from 'axios';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
+    const data = new FormData(event.currentTarget as HTMLFormElement);
 
-    // TODO: ADD LOGIN LOGIC HERE
-    // Example: const email = data.get('email');
-    console.log('Login logic placeholder', Object.fromEntries(data));
+    try {
+      // ensure cookies (refresh token) are accepted if cross-site
+      axios.defaults.withCredentials = true;
+
+      const res = await axios.post(
+        `${BACKEND_URL}/auth/login`,
+        {
+          username: data.get('username'),
+          password: data.get('password'),
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+
+      const accessToken = res.data?.accessToken;
+      if (!accessToken) throw new Error('No access token returned');
+
+      // Save access token (choose store strategy: memory / redux / localStorage)
+      // localStorage is simple but vulnerable to XSS — consider in-memory store for production
+      localStorage.setItem('accessToken', accessToken);
+
+      // Set default Authorization header for future requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+      // navigate to protected area
+      navigate(RoutePath.POSTS_FEED);
+    } catch (err) {
+      console.error('Login failed', err);
+      // show user-facing error (toast / form error) as needed
+    }
   };
 
   return (
