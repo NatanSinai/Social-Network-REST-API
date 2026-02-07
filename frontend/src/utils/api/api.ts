@@ -1,5 +1,5 @@
-import axios from 'axios';
 import { BACKEND_URL } from '@/config';
+import axios from 'axios';
 
 const api = axios.create({
   baseURL: BACKEND_URL,
@@ -19,7 +19,6 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // If the error is 401 and we haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
@@ -29,10 +28,10 @@ api.interceptors.response.use(
         localStorage.setItem('accessToken', newAccessToken);
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
-        return api(originalRequest); // Retry the original request
+        return api(originalRequest);
       } catch (refreshError) {
         localStorage.removeItem('accessToken');
-        window.location.href = '/login'; // Force redirect
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }

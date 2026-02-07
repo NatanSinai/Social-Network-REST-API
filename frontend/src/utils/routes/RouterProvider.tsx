@@ -1,5 +1,6 @@
 import useAuth from '@/hooks/useAuth';
 import Login from '@/pages/Login';
+import ProfilePage from '@/pages/Profile';
 import SignUp from '@/pages/SignUp';
 import { Box } from '@mui/material';
 import { memo, useMemo } from 'react';
@@ -20,7 +21,7 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
             <Outlet />
           </Box>
         ),
-        children: [{ path: RoutePath.POSTS_FEED, element: <div>hello</div> }],
+        children: [{ path: RoutePath.POSTS_FEED, element: <ProfilePage /> }],
       },
     ];
 
