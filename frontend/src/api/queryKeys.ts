@@ -9,4 +9,7 @@ export const queryKeys = {
   users: {
     specific: (id: string) => ['users', id],
   },
+  comments: {
+    byPostId: (postId: string) => ['comments', 'post', postId],
+  },
 };
