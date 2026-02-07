@@ -1,3 +1,5 @@
+import Login from '@/pages/Login';
+import SignUp from '@/pages/SignUp';
 import { userState } from '@constants';
 import { Box } from '@mui/material';
 import { memo, useMemo } from 'react';
@@ -28,7 +30,15 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
   const loginRoute = useMemo<RouteObject>(
     () => ({
       path: RoutePath.LOGIN,
-      element: !userState.data ? <div>login page</div> : <Navigate to={INITIAL_USER_ROUTE} />,
+      element: !userState.data ? <Login /> : <Navigate to={INITIAL_USER_ROUTE} />,
+    }),
+    [],
+  );
+
+  const signUpRoute = useMemo<RouteObject>(
+    () => ({
+      path: RoutePath.SIGNUP,
+      element: !userState.data ? <SignUp /> : <Navigate to={INITIAL_USER_ROUTE} />,
     }),
     [],
   );
@@ -42,12 +52,12 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
             <Outlet />
           </Box>
         ),
-        children: [loginRoute, ...userProtectedRoutes],
+        children: [loginRoute, signUpRoute, ...userProtectedRoutes],
       },
       { path: '*', element: <Navigate to={INITIAL_USER_ROUTE} /> },
       { path: `${RoutePath._ROOT}/`, element: <Navigate to={INITIAL_USER_ROUTE} /> },
     ],
-    [loginRoute, userProtectedRoutes],
+    [loginRoute, signUpRoute, userProtectedRoutes],
   );
 
   const router = useRoutes(routes);
