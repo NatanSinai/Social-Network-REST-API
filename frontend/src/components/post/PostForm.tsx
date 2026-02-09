@@ -1,7 +1,7 @@
 import { postFormSchema, type PostFormValues } from '@entities';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Stack, TextField } from '@mui/material';
-import type { FC } from 'react';
+import { useEffect, type FC, type RefObject } from 'react';
 import { useForm } from 'react-hook-form';
 
 export type PostFormProps = {
@@ -9,6 +9,7 @@ export type PostFormProps = {
   onSubmit: (values: PostFormValues) => void;
   submitLabel?: string;
   isSubmitting?: boolean;
+  isDirtyFormRef: RefObject<boolean>;
 };
 
 export const PostForm: FC<PostFormProps> = ({
@@ -16,21 +17,24 @@ export const PostForm: FC<PostFormProps> = ({
   onSubmit,
   submitLabel = 'Submit',
   isSubmitting = false,
+  isDirtyFormRef,
 }) => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<PostFormValues>({ resolver: zodResolver(postFormSchema), defaultValues });
+    formState: { errors, isDirty },
+  } = useForm<PostFormValues>({ resolver: zodResolver(postFormSchema), defaultValues, mode: 'onTouched' });
+
+  useEffect(() => {
+    if (isDirty && !isDirtyFormRef.current) isDirtyFormRef.current = true;
+  }, [isDirty, isDirtyFormRef]);
 
   // TODO: Add characters counter
-
-  // TODO: Make helper text (error) not move entire field
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={1} justifyContent='center' alignItems='center'>
-        <Stack spacing={3} width='100%' p={1} py={2}>
+        <Stack spacing={4} width='100%' p={1} py={2}>
           <TextField
             label='Title'
             {...register('title')}

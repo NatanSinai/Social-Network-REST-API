@@ -25,21 +25,26 @@ const theme = createTheme({
         root: {
           backgroundColor: '#FFFFFF',
           color: '#000000',
-          '&.Mui-focused': {
+          '&.Mui-focused:not(.Mui-error)': {
             '& .MuiOutlinedInput-notchedOutline': { borderColor: secondaryMainColor },
           },
-          '&:hover:not(.Mui-focused)': {
+          '&:hover:not(.Mui-focused):not(.Mui-error)': {
             '& .MuiOutlinedInput-notchedOutline': { border: `1.5px solid ${secondaryMainColor}` },
           },
         },
       },
     },
+    MuiFormHelperText: {
+      styleOverrides: {
+        root: { position: 'absolute', bottom: '-1.6em', margin: 0, marginLeft: '1em' },
+      },
+    },
     MuiInputLabel: {
       styleOverrides: {
         root: {
-          '&.Mui-focused': { color: secondaryMainColor },
+          '&.Mui-focused:not(.Mui-error)': { color: secondaryMainColor },
           '&.MuiInputLabel-shrink': { top: -5 },
-          '&.MuiInputLabel-shrink:not(.Mui-focused)': { color: 'white' },
+          '&.MuiInputLabel-shrink:not(.Mui-focused):not(.Mui-error)': { color: 'white' },
         },
       },
     },
