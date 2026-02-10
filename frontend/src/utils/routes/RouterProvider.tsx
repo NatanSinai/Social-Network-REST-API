@@ -1,3 +1,4 @@
+import useAuth from '@/hooks/useAuth';
 import Login from '@/pages/Login';
 import SignUp from '@/pages/SignUp';
 import { Box } from '@mui/material';
@@ -8,6 +9,8 @@ import { INITIAL_USER_ROUTE, type ProtectedRouteObject, RoutePath, UserProtected
 export type RouterProviderProps = {};
 
 export const RouterProvider = memo<RouterProviderProps>(() => {
+  const { isUserLoggedIn } = useAuth();
+
   const userProtectedRoutes = useMemo(() => {
     const routes: ProtectedRouteObject[] = [
       {
@@ -29,17 +32,17 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
   const loginRoute = useMemo<RouteObject>(
     () => ({
       path: RoutePath.LOGIN,
-      element: <Login />,
+      element: !isUserLoggedIn ? <Login /> : <Navigate to={INITIAL_USER_ROUTE} />,
     }),
-    [],
+    [isUserLoggedIn],
   );
 
   const signUpRoute = useMemo<RouteObject>(
     () => ({
       path: RoutePath.SIGNUP,
-      element: <SignUp />,
+      element: !isUserLoggedIn ? <SignUp /> : <Navigate to={INITIAL_USER_ROUTE} />,
     }),
-    [],
+    [isUserLoggedIn],
   );
 
   const routes = useMemo<RouteObject[]>(

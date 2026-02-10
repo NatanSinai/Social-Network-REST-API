@@ -1,47 +1,32 @@
-import { BACKEND_URL } from '@/config';
+import useAuth from '@/hooks/useAuth';
 import { RoutePath } from '@/utils/routes';
 import { Box, Button, Container, Link, Paper, TextField, Typography } from '@mui/material';
-import axios from 'axios';
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const [error, setError] = useState<string>('');
+  const [usernameError, setUsernameError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const { login } = useAuth();
 
   const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError('');
+    setUsernameError(false);
+    setPasswordError(false);
+
     const data = new FormData(event.currentTarget as HTMLFormElement);
 
     try {
-      // ensure cookies (refresh token) are accepted if cross-site
-      axios.defaults.withCredentials = true;
-
-      const res = await axios.post(
-        `${BACKEND_URL}/auth/login`,
-        {
-          username: data.get('username'),
-          password: data.get('password'),
-        },
-        {
-          headers: { 'Content-Type': 'application/json' },
-        },
-      );
-
-      const accessToken = res.data?.accessToken;
-      if (!accessToken) throw new Error('No access token returned');
-
-      // Save access token (choose store strategy: memory / redux / localStorage)
-      // localStorage is simple but vulnerable to XSS — consider in-memory store for production
-      localStorage.setItem('accessToken', accessToken);
-
-      // Set default Authorization header for future requests
-      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-
-      // navigate to protected area
+      await login(data.get('username') as string, data.get('password') as string);
       navigate(RoutePath.POSTS_FEED);
     } catch (err) {
       console.error('Login failed', err);
-      // show user-facing error (toast / form error) as needed
+      setUsernameError(true);
+      setPasswordError(true);
+      setError('Invalid username or password. Please try again.');
     }
   };
 
@@ -53,7 +38,15 @@ const Login: React.FC = () => {
             Sign In
           </Typography>
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-            <TextField required fullWidth id="username" label="Username" name="username" autoFocus />
+            <TextField
+              required
+              fullWidth
+              id="username"
+              label="Username"
+              name="username"
+              autoFocus
+              error={usernameError}
+            />
 
             <TextField
               margin="normal"
@@ -64,11 +57,19 @@ const Login: React.FC = () => {
               type="password"
               id="password"
               autoComplete="current-password"
+              error={passwordError}
             />
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2, py: 1.5 }}>
               Log In
             </Button>
-            <Box sx={{ textAlign: 'center' }}>
+
+            {error && (
+              <Typography color="error" variant="body2" align="center" sx={{ mt: 1 }}>
+                {error}
+              </Typography>
+            )}
+
+            <Box sx={{ textAlign: 'center', mt: 2 }}>
               <Link component="button" type="button" variant="body2" onClick={() => navigate(RoutePath.SIGNUP)}>
                 {"Don't have an account? Sign Up"}
               </Link>
