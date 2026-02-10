@@ -3,14 +3,11 @@ import SignUp from '@/pages/SignUp';
 import { Box } from '@mui/material';
 import { memo, useMemo } from 'react';
 import { Navigate, Outlet, type RouteObject, useRoutes } from 'react-router-dom';
-import { useAuth } from '../auth/AuthProvider';
 import { INITIAL_USER_ROUTE, type ProtectedRouteObject, RoutePath, UserProtectedRoute, protectRoute } from './';
 
 export type RouterProviderProps = {};
 
 export const RouterProvider = memo<RouterProviderProps>(() => {
-  const { user } = useAuth();
-
   const userProtectedRoutes = useMemo(() => {
     const routes: ProtectedRouteObject[] = [
       {
@@ -32,17 +29,17 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
   const loginRoute = useMemo<RouteObject>(
     () => ({
       path: RoutePath.LOGIN,
-      element: !user ? <Login /> : <Navigate to={INITIAL_USER_ROUTE} />,
+      element: <Login />,
     }),
-    [user],
+    [],
   );
 
   const signUpRoute = useMemo<RouteObject>(
     () => ({
       path: RoutePath.SIGNUP,
-      element: !user ? <SignUp /> : <Navigate to={INITIAL_USER_ROUTE} />,
+      element: <SignUp />,
     }),
-    [user],
+    [],
   );
 
   const routes = useMemo<RouteObject[]>(
