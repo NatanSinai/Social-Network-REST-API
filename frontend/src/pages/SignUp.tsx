@@ -1,16 +1,47 @@
+import useAuth from '@/hooks/useAuth';
 import { RoutePath } from '@/utils/routes';
 import { Box, Button, Container, Link, Paper, Stack, TextField, Typography } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
+  const [error, setError] = useState<string>('');
+  const [usernameError, setUsernameError] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const { signup } = useAuth();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    // TODO: ADD REGISTRATION LOGIC HERE
-    console.log('Sign up logic placeholder', Object.fromEntries(data));
+    setError('');
+    setUsernameError(false);
+    setEmailError(false);
+    setPasswordError(false);
+
+    const data = new FormData(event.currentTarget as HTMLFormElement);
+    const username = data.get('username') as string;
+    const email = data.get('email') as string;
+    const password = data.get('password') as string;
+
+    if (!username || !email || !password) {
+      if (!username) setUsernameError(true);
+      if (!email) setEmailError(true);
+      if (!password) setPasswordError(true);
+      setError('Please fill in all fields.');
+      return;
+    }
+
+    try {
+      await signup(username, email, password);
+      navigate(RoutePath.POSTS_FEED);
+    } catch (error) {
+      console.error('Sign up failed', error);
+      setUsernameError(true);
+      setEmailError(true);
+      setPasswordError(true);
+      setError('Sign up failed. Please try again.');
+    }
   };
 
   return (
@@ -23,9 +54,25 @@ const SignUp: React.FC = () => {
 
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
             <Stack spacing={2}>
-              <TextField required fullWidth id="username" label="Username" name="username" autoFocus />
+              <TextField
+                required
+                fullWidth
+                id="username"
+                label="Username"
+                name="username"
+                autoFocus
+                error={usernameError}
+              />
 
-              <TextField required fullWidth id="email" label="Email Address" name="email" autoComplete="email" />
+              <TextField
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                error={emailError}
+              />
 
               <TextField
                 required
@@ -35,12 +82,19 @@ const SignUp: React.FC = () => {
                 type="password"
                 id="password"
                 autoComplete="new-password"
+                error={passwordError}
               />
 
               <Button type="submit" fullWidth variant="contained" sx={{ mt: 1, mb: 1, py: 1.5 }}>
                 Sign Up
               </Button>
             </Stack>
+
+            {error && (
+              <Typography color="error" variant="body2" align="center" sx={{ mt: 2 }}>
+                {error}
+              </Typography>
+            )}
 
             <Box sx={{ textAlign: 'center', mt: 2 }}>
               <Link component="button" type="button" variant="body2" onClick={() => navigate(RoutePath.LOGIN)}>

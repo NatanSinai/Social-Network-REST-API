@@ -30,6 +30,11 @@ const useAuth = () => {
     },
   );
 
+  const signup = async (username: string, email: string, password: string) => {
+    await api.post('/users', { username, email, password });
+    await login(username, password);
+  };
+
   const login = async (username: string, password: string) => {
     const res = await api.post('/auth/login', { username, password });
     const { accessToken } = res.data;
@@ -49,7 +54,7 @@ const useAuth = () => {
     }
   };
 
-  return { login, logout, isUserLoggedIn };
+  return { signup, login, logout, isUserLoggedIn };
 };
 
 export default useAuth;
