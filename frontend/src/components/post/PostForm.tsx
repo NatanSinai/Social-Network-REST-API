@@ -1,8 +1,15 @@
-import { postFormSchema, type PostFormValues } from '@entities';
+import { imageSchema } from '@/utils/zod';
+import { postSchema } from '@entities';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, Stack, TextField } from '@mui/material';
+import { Button, FormHelperText, Stack, TextField } from '@mui/material';
 import { useEffect, type FC, type RefObject } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import type z from 'zod';
+import { ImageUpload } from '../generic';
+
+export const postFormSchema = postSchema.pick({ title: true, content: true }).extend({ image: imageSchema });
+
+export type PostFormValues = z.infer<typeof postFormSchema>;
 
 export type PostFormProps = {
   defaultValues?: Partial<PostFormValues>;
@@ -22,8 +29,13 @@ export const PostForm: FC<PostFormProps> = ({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isDirty },
-  } = useForm<PostFormValues>({ resolver: zodResolver(postFormSchema), defaultValues, mode: 'onTouched' });
+  } = useForm<PostFormValues>({
+    resolver: zodResolver(postFormSchema),
+    defaultValues: { title: '', content: '', ...defaultValues },
+    mode: 'onTouched',
+  });
 
   useEffect(() => {
     if (isDirty && !isDirtyFormRef.current) isDirtyFormRef.current = true;
@@ -34,33 +46,39 @@ export const PostForm: FC<PostFormProps> = ({
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={1} justifyContent='center' alignItems='center'>
-        <Stack spacing={4} width='100%' p={1} py={2}>
-          <TextField
-            label='Title'
-            {...register('title')}
-            error={!!errors.title}
-            helperText={errors.title?.message}
-            fullWidth
+        <Stack direction='row' p={1} gap={2} width='100%'>
+          <Controller
+            name='image'
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+              <>
+                <ImageUpload {...field} />
+
+                {!!error && <FormHelperText error>{error.message}</FormHelperText>}
+              </>
+            )}
           />
 
-          <TextField
-            label='Content'
-            {...register('content')}
-            error={!!errors.content}
-            helperText={errors.content?.message}
-            multiline
-            minRows={2}
-            maxRows={4}
-            fullWidth
-          />
+          <Stack spacing={4} width='100%'>
+            <TextField
+              label='Title'
+              {...register('title')}
+              error={!!errors.title}
+              helperText={errors.title?.message}
+              fullWidth
+            />
 
-          <TextField
-            label='Image URL'
-            {...register('imageURL')}
-            error={!!errors.imageURL}
-            helperText={errors.imageURL?.message}
-            fullWidth
-          />
+            <TextField
+              label='Content'
+              {...register('content')}
+              error={!!errors.content}
+              helperText={errors.content?.message}
+              multiline
+              minRows={3}
+              maxRows={4}
+              fullWidth
+            />
+          </Stack>
         </Stack>
 
         <Button type='submit' variant='contained' disabled={isSubmitting}>
