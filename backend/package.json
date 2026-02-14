@@ -30,8 +30,10 @@
     "express": "^5.2.1",
     "http-status-codes": "^2.3.0",
     "jsonwebtoken": "^9.0.3",
+    "lodash": "^4.17.23",
     "mongoose": "^9.1.5",
     "morgan": "^1.10.1",
+    "multer": "^2.0.2",
     "rambda": "^11.0.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
@@ -43,9 +45,10 @@
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
     "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.0.0",
     "@types/node": "^25.0.10",
     "@types/supertest": "^6.0.3",
     "@types/swagger-jsdoc": "^6.0.4",
@@ -62,13 +65,13 @@
     "mongodb-memory-server": "^11.0.1",
     "nodemon": "^3.1.11",
     "prettier": "^3.8.1",
+    "social-network-nash": "file:..",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.54.0",
-    "social-network-nash": "file:.."
+    "typescript-eslint": "^8.54.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

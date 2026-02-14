@@ -27,6 +27,7 @@ const initializeServer = async () => {
 
   initializeAppConfig(app);
   initializeRouters(app);
+
   app.use(errorHandler);
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

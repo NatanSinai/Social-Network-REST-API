@@ -7,6 +7,7 @@
     "skipLibCheck": true,
 
     "outDir": "./dist",
+    "types": ["node"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -25,10 +26,14 @@
 
     "paths": {
       "@entities": ["./src/entities/index.ts"],
+      "@env": ["./src/utils/env.ts"],
+      "@api": ["./src/utils/api.ts"],
+      "@zod": ["./src/utils/zod.ts"],
       "@constants": ["./src/utils/constants.ts"],
       "@helpers": ["./src/utils/helpers.ts"],
       "@types": ["./src/utils/types.ts"],
       "@hebrew": ["./src/utils/lang/he-IL.ts"],
+      "@utils": ["./src/utils/*"],
       "@components": ["./src/components/index.ts"],
       "@pages": ["./src/pages/index.ts"],
       "@/*": ["./src/*"]

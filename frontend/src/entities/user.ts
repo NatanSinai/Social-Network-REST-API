@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const userSchema = z.object({
   id: z.uuid({ message: 'User ID must be a valid UUID' }),
-  name: z.string().min(1, { message: 'User name is required' }),
+  username: z.string().min(1, { message: 'User name is required' }),
   profilePictureURL: z.url({ message: 'User profile picture must be a valid URL' }),
 });
 

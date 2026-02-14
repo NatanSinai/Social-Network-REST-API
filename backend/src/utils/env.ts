@@ -28,6 +28,7 @@ const envVarSchema = z.object({
   JWT_REFRESH_EXPIRATION: z.string(),
   JWT_REFRESH_HASH_SALT_ROUNDS: z.coerce.number(),
   PASSWORD_HASH_SALT_ROUNDS: z.coerce.number(),
+  FILE_UPLOADS_BASE_PATH: z.string().default('uploads'),
 });
 
 export const envVar = envVarSchema.parse(process.env);

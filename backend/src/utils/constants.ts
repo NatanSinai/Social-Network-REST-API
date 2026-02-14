@@ -1,3 +1,6 @@
+import { Types } from 'mongoose';
+import { z } from 'zod';
+
 export enum ModelName {
   USER = 'user',
   POST = 'post',
@@ -18,3 +21,8 @@ export enum NoAuthorizationReason {
   NO_TOKEN = 'NO_TOKEN',
   NO_SESSION = 'NO_SESSION',
 }
+
+export const objectIdSchema = z
+  .string()
+  .refine((val) => Types.ObjectId.isValid(val), 'Invalid ObjectId')
+  .transform((val) => new Types.ObjectId(val));

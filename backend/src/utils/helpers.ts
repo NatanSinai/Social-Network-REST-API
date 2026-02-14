@@ -28,7 +28,7 @@ export const errorHandler: ErrorRequestHandler = (error: Error, request, respons
 
 export const initializeAppConfig = (app: Express) => {
   app.use(json());
-  app.use(cors());
+  app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
   app.use(morgan('dev'));
   app.use(cookieParser());
 };
@@ -48,6 +48,7 @@ export const initializeExamplePost = async () => {
   const examplePost = await postService.createSingle({
     title: 'Title Example',
     content: 'Content Example',
+    imageURL: null,
     senderId: exampleSenderId,
     _id: examplePostId,
   });
@@ -87,6 +88,7 @@ export const initializeExampleUser = async () => {
     isPrivate: true,
     postsCount: 1,
     bio: 'This is an example user',
+    profilePictureURL: null,
   });
 
   console.log(`Created example user with id '${exampleUser._id}'\n`);
@@ -159,3 +161,6 @@ export const connectToMongoMemoryServer = async (mongoServer: MongoMemoryServer)
 
   await connectToMongoDB();
 };
+
+export const createUploadedFilePath = (file: Express.Multer.File | undefined) =>
+  file ? (`/${envVar.FILE_UPLOADS_BASE_PATH}/${file.filename}` as const) : null;

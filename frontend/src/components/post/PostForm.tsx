@@ -15,22 +15,15 @@ export type PostFormProps = {
   defaultValues?: Partial<PostFormValues>;
   onSubmit: (values: PostFormValues) => void;
   submitLabel?: string;
-  isSubmitting?: boolean;
   isDirtyFormRef: RefObject<boolean>;
 };
 
-export const PostForm: FC<PostFormProps> = ({
-  defaultValues,
-  onSubmit,
-  submitLabel = 'Submit',
-  isSubmitting = false,
-  isDirtyFormRef,
-}) => {
+export const PostForm: FC<PostFormProps> = ({ defaultValues, onSubmit, submitLabel = 'Submit', isDirtyFormRef }) => {
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors, isDirty },
+    formState: { errors, isDirty, isSubmitting },
   } = useForm<PostFormValues>({
     resolver: zodResolver(postFormSchema),
     defaultValues: { title: '', content: '', ...defaultValues },

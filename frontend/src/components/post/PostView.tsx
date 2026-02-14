@@ -21,7 +21,7 @@ export const PostView: FC<PostViewProps> = ({
     imageURL,
     title,
     content,
-    author: { name: authorName, profilePictureURL: authorProfilePictureURL },
+    author: { username: authorName, profilePictureURL: authorProfilePictureURL },
     commentsAmount,
   },
 }) => {
