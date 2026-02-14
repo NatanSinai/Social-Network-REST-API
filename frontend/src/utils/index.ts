@@ -1,4 +1,4 @@
-export * from './api';
+export * from '../api/api';
 export * from './constants';
 export * from './env';
 export * from './helpers';

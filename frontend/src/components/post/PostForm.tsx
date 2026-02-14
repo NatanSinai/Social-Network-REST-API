@@ -26,7 +26,7 @@ export const PostForm: FC<PostFormProps> = ({ defaultValues, onSubmit, submitLab
     formState: { errors, isDirty, isSubmitting },
   } = useForm<PostFormValues>({
     resolver: zodResolver(postFormSchema),
-    defaultValues: { title: '', content: '', ...defaultValues },
+    defaultValues: { title: '', content: '', image: null, ...defaultValues },
     mode: 'onTouched',
   });
 

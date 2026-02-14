@@ -2,9 +2,12 @@ import UserSessionService from '@userSession/userSession.service';
 import type { UpdateUserSessionDTO, UserSession } from '@userSession/userSession.types';
 import { CookieName, envVar, NoAuthorizationReason, respondWithUnauthorized } from '@utils';
 import type { Response } from 'express';
+import { OAuth2Client } from 'google-auth-library';
 import { sign } from 'jsonwebtoken';
 import type { StringValue } from 'ms';
 import type { AccessTokenJWTPayload, RefreshTokenJWTPayload } from './auth.types';
+
+const client = new OAuth2Client(envVar.GOOGLE_CLIENT_ID);
 
 export default class AuthService {
   private userSessionService = new UserSessionService();
@@ -75,5 +78,27 @@ export default class AuthService {
     await this.userSessionService.updateById(session._id, { refreshToken: newRefreshToken });
 
     return { tokens: { newAccessToken, newRefreshToken } };
+  };
+
+  verifyGoogleToken = async (idToken: string) => {
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken,
+        audience: envVar.GOOGLE_CLIENT_ID,
+      });
+
+      const payload = ticket.getPayload();
+
+      if (!payload || !payload.email) return { error: 'Invalid Google Token' };
+
+      return {
+        email: payload.email,
+        name: payload.name,
+        googleId: payload.sub,
+        picture: payload.picture,
+      };
+    } catch (error) {
+      return { error: `Google verification failed: ${error}` };
+    }
   };
 }

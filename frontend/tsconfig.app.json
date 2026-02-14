@@ -27,7 +27,7 @@
     "paths": {
       "@entities": ["./src/entities/index.ts"],
       "@env": ["./src/utils/env.ts"],
-      "@api": ["./src/utils/api.ts"],
+      "@api": ["src/api/api.ts"],
       "@zod": ["./src/utils/zod.ts"],
       "@constants": ["./src/utils/constants.ts"],
       "@helpers": ["./src/utils/helpers.ts"],

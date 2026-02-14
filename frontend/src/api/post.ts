@@ -1,4 +1,4 @@
-import { backendAPI } from '@api';
+import { backendAPI } from '@/api/api';
 import type { Post } from '@entities';
 import { entries } from 'lodash';
 
