@@ -12,16 +12,22 @@ export default class UserService extends Service<UserDocument, CreateUserDTO, Up
     return this.getOne({ email });
   };
 
-  getOrCreateByGoogle = async (googleData: { email: string; name: string; googleId: string }) => {
+  getOrCreateByGoogle = async (googleData: {
+    email: string;
+    name: string;
+    googleId: string;
+    profilePictureURL: string | undefined;
+  }) => {
     let user = await this.getOneByEmail(googleData.email);
 
     if (!user) {
       user = await this.createSingle({
         email: googleData.email,
         username: googleData.name,
-        password: googleData.googleId, 
+        password: googleData.googleId,
         bio: null,
         isPrivate: true,
+        profilePictureURL: googleData.profilePictureURL ?? null,
       });
     }
 

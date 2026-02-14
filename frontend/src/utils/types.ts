@@ -34,6 +34,10 @@ export type MakeKeysOptional<T, KeysToMakeOptional extends RequiredKeys<T>> = Pr
   }
 >;
 
+export type MakeOptional<T, Keys extends keyof T> = Omit<T, Keys> & {
+  [Key in Keys]?: T[Key];
+};
+
 export type ConvertKeysToType<T, Keys extends keyof T, Type> = Prettify<Omit<T, Keys> & { [Key in Keys]: Type }>;
 
 export type Prettify<T> = { [K in keyof T]: T[K] } & {};

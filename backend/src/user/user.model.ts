@@ -10,6 +10,7 @@ const UserSchema = new Schema<UserDocument>(
     bio: { type: String },
     postsCount: { type: Number, default: 0 },
     isPrivate: { type: Boolean, default: false },
+    profilePictureURL: { type: String },
   },
   { timestamps: true, collection: ModelName.USER },
 );

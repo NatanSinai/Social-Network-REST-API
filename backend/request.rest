@@ -113,9 +113,6 @@ Authorization: {{accessToken}}
 
 # Bonus - Deletion Routes
 
-### Delete All Posts
-DELETE {{basePostsURL}}
-
 ### Delete Post by ID
 ### For general use replace {{postId}} with your actual post ID.
 DELETE {{basePostsURL}}/{{postId}}

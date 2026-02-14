@@ -2,17 +2,17 @@ import useAuth from '@/hooks/useAuth';
 import { RoutePath } from '@/utils/routes';
 import { Box, Button, Container, Link, Paper, TextField, Typography } from '@mui/material';
 import { GoogleLogin } from '@react-oauth/google';
-import React, { useState } from 'react';
+import { useState, type FC, type SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Login: React.FC = () => {
+export const Login: FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string>('');
   const [usernameError, setUsernameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const { login, loginWithGoogle } = useAuth();
 
-  const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
     setUsernameError(false);
@@ -47,35 +47,35 @@ const Login: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="xs" sx={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
+    <Container component='main' maxWidth='xs' sx={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
         <Paper elevation={3} sx={{ padding: 4, width: '100%', borderRadius: 2 }}>
-          <Typography component="h1" variant="h5" align="center" gutterBottom>
+          <Typography component='h1' variant='h5' align='center' gutterBottom>
             Sign In
           </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
             <TextField
               required
               fullWidth
-              id="username"
-              label="Username"
-              name="username"
+              id='username'
+              label='Username'
+              name='username'
               autoFocus
               error={usernameError}
             />
 
             <TextField
-              margin="normal"
+              margin='normal'
               required
               fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
+              name='password'
+              label='Password'
+              type='password'
+              id='password'
+              autoComplete='current-password'
               error={passwordError}
             />
-            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2, py: 1.5 }}>
+            <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2, py: 1.5 }}>
               Log In
             </Button>
 
@@ -85,13 +85,13 @@ const Login: React.FC = () => {
             />
 
             {error && (
-              <Typography color="error" variant="body2" align="center" sx={{ mt: 1 }}>
+              <Typography color='error' variant='body2' align='center' sx={{ mt: 1 }}>
                 {error}
               </Typography>
             )}
 
             <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Link component="button" type="button" variant="body2" onClick={() => navigate(RoutePath.SIGNUP)}>
+              <Link component='button' type='button' variant='body2' onClick={() => navigate(RoutePath.SIGNUP)}>
                 {"Don't have an account? Sign Up"}
               </Link>
             </Box>
@@ -101,5 +101,3 @@ const Login: React.FC = () => {
     </Container>
   );
 };
-
-export default Login;

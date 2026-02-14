@@ -84,22 +84,21 @@ export default class AuthService {
     try {
       const ticket = await client.verifyIdToken({
         idToken,
-        audience: envVar.GOOGLE_CLIENT_ID, 
+        audience: envVar.GOOGLE_CLIENT_ID,
       });
+
       const payload = ticket.getPayload();
-      
-      if (!payload || !payload.email) {
-        return { error: 'Invalid Google Token' };
-      }
+
+      if (!payload || !payload.email) return { error: 'Invalid Google Token' };
 
       return {
         email: payload.email,
         name: payload.name,
         googleId: payload.sub,
-        picture: payload.picture
+        picture: payload.picture,
       };
     } catch (error) {
-      return { error: 'Google verification failed' };
+      return { error: `Google verification failed: ${error}` };
     }
   };
 }

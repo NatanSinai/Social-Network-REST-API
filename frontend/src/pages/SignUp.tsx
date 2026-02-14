@@ -2,10 +2,10 @@ import useAuth from '@/hooks/useAuth';
 import { RoutePath } from '@/utils/routes';
 import { Box, Button, Container, Link, Paper, Stack, TextField, Typography } from '@mui/material';
 import { GoogleLogin } from '@react-oauth/google';
-import React, { useState } from 'react';
+import { useState, type FC, type SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const SignUp: React.FC = () => {
+export const SignUp: FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string>('');
   const [usernameError, setUsernameError] = useState(false);
@@ -13,7 +13,7 @@ const SignUp: React.FC = () => {
   const [passwordError, setPasswordError] = useState(false);
   const { signup, loginWithGoogle } = useAuth();
 
-  const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
     setUsernameError(false);
@@ -61,21 +61,21 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="xs" sx={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
+    <Container component='main' maxWidth='xs' sx={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
         <Paper elevation={3} sx={{ padding: 4, width: '100%', borderRadius: 2 }}>
-          <Typography component="h1" variant="h5" align="center" gutterBottom>
+          <Typography component='h1' variant='h5' align='center' gutterBottom>
             Create Account
           </Typography>
 
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
+          <Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
             <Stack spacing={2}>
               <TextField
                 required
                 fullWidth
-                id="username"
-                label="Username"
-                name="username"
+                id='username'
+                label='Username'
+                name='username'
                 autoFocus
                 error={usernameError}
               />
@@ -83,25 +83,25 @@ const SignUp: React.FC = () => {
               <TextField
                 required
                 fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
+                id='email'
+                label='Email Address'
+                name='email'
+                autoComplete='email'
                 error={emailError}
               />
 
               <TextField
                 required
                 fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="new-password"
+                name='password'
+                label='Password'
+                type='password'
+                id='password'
+                autoComplete='new-password'
                 error={passwordError}
               />
 
-              <Button type="submit" fullWidth variant="contained" sx={{ mt: 1, mb: 1, py: 1.5 }}>
+              <Button type='submit' fullWidth variant='contained' sx={{ mt: 1, mb: 1, py: 1.5 }}>
                 Sign Up
               </Button>
 
@@ -112,13 +112,13 @@ const SignUp: React.FC = () => {
             </Stack>
 
             {error && (
-              <Typography color="error" variant="body2" align="center" sx={{ mt: 2 }}>
+              <Typography color='error' variant='body2' align='center' sx={{ mt: 2 }}>
                 {error}
               </Typography>
             )}
 
             <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Link component="button" type="button" variant="body2" onClick={() => navigate(RoutePath.LOGIN)}>
+              <Link component='button' type='button' variant='body2' onClick={() => navigate(RoutePath.LOGIN)}>
                 Already have an account? Sign in
               </Link>
             </Box>
@@ -128,5 +128,3 @@ const SignUp: React.FC = () => {
     </Container>
   );
 };
-
-export default SignUp;
