@@ -29,6 +29,7 @@ const envVarSchema = z.object({
   JWT_REFRESH_HASH_SALT_ROUNDS: z.coerce.number(),
   PASSWORD_HASH_SALT_ROUNDS: z.coerce.number(),
   GOOGLE_CLIENT_ID: z.string(),
+  FRONTEND_URL: z.string().default('http://localhost:5173'),
 });
 
 export const envVar = envVarSchema.parse(process.env);

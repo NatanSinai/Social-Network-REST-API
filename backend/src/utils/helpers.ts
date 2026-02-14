@@ -26,11 +26,13 @@ export const errorHandler: ErrorRequestHandler = (error: Error, request, respons
   response.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error.message);
 };
 
+const { EXAMPLE_COMMENT_ID, EXAMPLE_POST_ID, EXAMPLE_SENDER_ID, FRONTEND_URL } = envVar;
+
 export const initializeAppConfig = (app: Express) => {
   app.use(json());
   app.use(
     cors({
-      origin: 'http://localhost:5173',
+      origin: FRONTEND_URL,
       credentials: true,
     }),
   );
@@ -38,7 +40,6 @@ export const initializeAppConfig = (app: Express) => {
   app.use(cookieParser());
 };
 
-const { EXAMPLE_COMMENT_ID, EXAMPLE_POST_ID, EXAMPLE_SENDER_ID } = envVar;
 const exampleCommentId = EXAMPLE_COMMENT_ID as unknown as Types.ObjectId; // This has to be string, but the type is ObjectId
 const examplePostId = EXAMPLE_POST_ID as unknown as Types.ObjectId; // This has to be string, but the type is ObjectId
 const exampleSenderId = EXAMPLE_SENDER_ID as unknown as Types.ObjectId; // This has to be string, but the type is ObjectId
