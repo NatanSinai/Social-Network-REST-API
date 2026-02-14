@@ -1,6 +1,7 @@
 import useAuth from '@/hooks/useAuth';
 import { RoutePath } from '@/utils/routes';
 import { Box, Button, Container, Link, Paper, Stack, TextField, Typography } from '@mui/material';
+import { GoogleLogin } from '@react-oauth/google';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,7 +11,7 @@ const SignUp: React.FC = () => {
   const [usernameError, setUsernameError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
-  const { signup } = useAuth();
+  const { signup, loginWithGoogle } = useAuth();
 
   const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -41,6 +42,21 @@ const SignUp: React.FC = () => {
       setEmailError(true);
       setPasswordError(true);
       setError('Sign up failed. Please try again.');
+    }
+  };
+
+  const handleGoogleLoginSuccess = async (credentialResponse: any) => {
+    try {
+      const credential = credentialResponse?.credential;
+      if (!credential) {
+        setError('Google login failed. Please try again.');
+        return;
+      }
+      await loginWithGoogle(credential);
+      navigate(RoutePath.POSTS_FEED);
+    } catch (err) {
+      console.error('Google signup error', err);
+      setError('Google login failed. Please try again.');
     }
   };
 
@@ -88,6 +104,11 @@ const SignUp: React.FC = () => {
               <Button type="submit" fullWidth variant="contained" sx={{ mt: 1, mb: 1, py: 1.5 }}>
                 Sign Up
               </Button>
+
+              <GoogleLogin
+                onSuccess={handleGoogleLoginSuccess}
+                onError={() => setError('Google login failed. Please try again.')}
+              />
             </Stack>
 
             {error && (

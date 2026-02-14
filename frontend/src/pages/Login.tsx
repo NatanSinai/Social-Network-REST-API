@@ -1,6 +1,7 @@
 import useAuth from '@/hooks/useAuth';
 import { RoutePath } from '@/utils/routes';
 import { Box, Button, Container, Link, Paper, TextField, Typography } from '@mui/material';
+import { GoogleLogin } from '@react-oauth/google';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,7 +10,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [usernameError, setUsernameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
 
   const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,6 +28,21 @@ const Login: React.FC = () => {
       setUsernameError(true);
       setPasswordError(true);
       setError('Invalid username or password. Please try again.');
+    }
+  };
+
+  const handleGoogleLoginSuccess = async (credentialResponse: any) => {
+    try {
+      const credential = credentialResponse?.credential;
+      if (!credential) {
+        setError('Google login failed. Please try again.');
+        return;
+      }
+      await loginWithGoogle(credential);
+      navigate(RoutePath.POSTS_FEED);
+    } catch (err) {
+      console.error('Google login error', err);
+      setError('Google login failed. Please try again.');
     }
   };
 
@@ -62,6 +78,11 @@ const Login: React.FC = () => {
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2, py: 1.5 }}>
               Log In
             </Button>
+
+            <GoogleLogin
+              onSuccess={handleGoogleLoginSuccess}
+              onError={() => setError('Google login failed. Please try again.')}
+            />
 
             {error && (
               <Typography color="error" variant="body2" align="center" sx={{ mt: 1 }}>

@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import api from '../utils/api/api';
 
-const useAuth = () => {
+type UseAuthReturnType = {
+  signup: (username: string, email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
+  logout: () => Promise<void>;
+  isUserLoggedIn: boolean;
+};  
+
+const useAuth: () => UseAuthReturnType = () => {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(!!localStorage.getItem('accessToken'));
 
   api.interceptors.response.use(
@@ -45,6 +53,16 @@ const useAuth = () => {
     }
   };
 
+  const loginWithGoogle = async (idToken: string) => {
+    const res = await api.post('/auth/google', { idToken });
+    const { accessToken } = res.data;
+
+    if (accessToken) {
+      localStorage.setItem('accessToken', accessToken);
+      setIsUserLoggedIn(true);
+    }
+  };
+
   const logout = async () => {
     try {
       await api.post('/auth/logout');
@@ -54,7 +72,7 @@ const useAuth = () => {
     }
   };
 
-  return { signup, login, logout, isUserLoggedIn };
+  return { signup, login, logout, isUserLoggedIn, loginWithGoogle };
 };
 
 export default useAuth;
