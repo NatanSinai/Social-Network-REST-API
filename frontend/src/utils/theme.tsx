@@ -6,12 +6,12 @@ import { memo, type PropsWithChildren } from 'react';
 const theme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: '#4560BA' },
-    secondary: { main: '#BA9F45' },
-    text: { primary: '#FFFFFF' },
+    primary: { main: '#79C9C5' },
+    secondary: { main: '#FFE2AF' },
+    text: { primary: '#3F9AAE' },
   },
   typography: { fontFamily: 'Heebo' },
-  direction: 'rtl',
+  direction: 'ltr',
   components: {
     MuiAlert: { defaultProps: { closeText: CLOSE } },
     MuiButton: { defaultProps: { variant: 'contained', color: 'secondary', style: { borderRadius: '2em' } } },

@@ -8,6 +8,26 @@ export default class UserService extends Service<UserDocument, CreateUserDTO, Up
     super(userModel);
   }
 
+  getOneByEmail = (email: string) => {
+    return this.getOne({ email });
+  };
+
+  getOrCreateByGoogle = async (googleData: { email: string; name: string; googleId: string }) => {
+    let user = await this.getOneByEmail(googleData.email);
+
+    if (!user) {
+      user = await this.createSingle({
+        email: googleData.email,
+        username: googleData.name,
+        password: googleData.googleId, 
+        bio: null,
+        isPrivate: true,
+      });
+    }
+
+    return user;
+  };
+
   createSingle({ password: rawPassword, ...createUserDTO }: CreateUserDTO) {
     const { PASSWORD_HASH_SALT_ROUNDS } = envVar;
 

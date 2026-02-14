@@ -1,6 +1,7 @@
 export enum RoutePath {
   _ROOT = '/v1',
   LOGIN = `${_ROOT}/login`,
+  SIGNUP = `${_ROOT}/signup`,
   _HOME = `${_ROOT}/home`,
   POSTS_FEED = `${_HOME}/feed`,
 }

@@ -1,11 +1,12 @@
-import { userState } from '@constants';
+import useAuth from '@/hooks/useAuth';
 import { memo, useMemo } from 'react';
 import { ProtectedRoute, type ProtectedRouteProps } from '..';
 
 export type UserProtectedRouteProps = ProtectedRouteProps;
 
 const UserProtectedRoute = memo<UserProtectedRouteProps>(({ isRedirect, ...protectedRouteProps }) => {
-  const totalIsRedirect = useMemo(() => isRedirect || !userState.data, [isRedirect]);
+  const { isUserLoggedIn: isLoggedIn } = useAuth();
+  const totalIsRedirect = useMemo(() => isRedirect || !isLoggedIn, [isRedirect, isLoggedIn]);
 
   return <ProtectedRoute {...{ isRedirect: totalIsRedirect, ...protectedRouteProps }} />;
 });

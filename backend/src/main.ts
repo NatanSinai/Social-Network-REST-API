@@ -8,6 +8,7 @@ import {
   initializeExampleUser,
   initializeRouters,
 } from '@utils';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
@@ -26,6 +27,7 @@ const initializeServer = async () => {
   await initializeExampleUser();
 
   initializeAppConfig(app);
+  app.use(cookieParser());
   initializeRouters(app);
   app.use(errorHandler);
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

@@ -131,4 +131,37 @@ authRouter.post('/refresh', async (request, response) => {
   response.json({ newAccessToken });
 });
 
+/**
+ * @swagger
+ * /auth/google:
+ * post:
+ * tags: [Auth]
+ * summary: Google Sign-In
+ */
+authRouter.post('/google', async (request, response) => {
+  const { idToken } = request.body;
+
+  if (!idToken) return respondWithUnauthorized(response, 'No ID Token provided',  NoAuthorizationReason.NO_TOKEN);
+
+  const googleUser = await authService.verifyGoogleToken(idToken);
+  if ('error' in googleUser) {
+    return respondWithUnauthorized(response, googleUser.error, NoAuthorizationReason.GOOGLE_TOKEN_INVALID);
+  }
+
+  const user = await userService.getOrCreateByGoogle({email: googleUser.email, name: googleUser.name || googleUser.email.split('@')[0]!, googleId: googleUser.googleId});
+
+  const { accessToken, refreshToken } = await authService.generateUserTokens({
+    userId: user._id,
+    ipAddress: request.ip,
+  });
+
+  addCookieToResponse({ 
+    response, 
+    cookieName: CookieName.REFRESH_TOKEN, 
+    cookieValue: refreshToken 
+  });
+
+  response.json({ accessToken });
+});
+
 export default authRouter;
