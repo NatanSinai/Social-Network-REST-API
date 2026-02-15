@@ -1,14 +1,7 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Container,
-  IconButton,
-  Typography,
-  useMediaQuery,
-  useTheme
-} from '@mui/material';
+import useUser from '@/hooks/useUser';
+import { Avatar, Box, Button, Container, IconButton, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { Settings } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 // --- CONFIGURATION / MOCK DATA ---
 const USER_DATA = {
@@ -27,15 +20,13 @@ const USER_DATA = {
   },
 };
 
-const POSTS = Array(6).fill("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop");
-
 // --- STYLES ---
 const styles: Record<string, any> = {
   pageWrapper: {
     height: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden', 
+    overflow: 'hidden',
     py: '3vh',
   },
   headerSection: (isMobile: boolean) => ({
@@ -44,7 +35,7 @@ const styles: Record<string, any> = {
     alignItems: 'center',
     mb: '4rem',
     gap: isMobile ? '2rem' : '10%',
-    flexShrink: 0, 
+    flexShrink: 0,
   }),
   avatar: {
     width: 'clamp(5rem, 22vw, 9.5rem)',
@@ -111,21 +102,55 @@ const styles: Record<string, any> = {
   },
 };
 
+type Post = {
+  id: string;
+  createdAt: Date;
+  datedAt: Date;
+  title: string;
+  content: string;
+  senderId: string;
+};
+
+type User = {
+  _id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  username: string;
+  password: string;
+  email: string;
+  isPrivate: boolean;
+  postsCount: number;
+  bio: string | null;
+};
+
 const ProfilePage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { getUserId, getUserPosts, getUserDetails } = useUser();
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [user, setUser] = useState<User>({});
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (getUserId()) {
+        const userPostsData = await getUserPosts(getUserId()!);
+        setPosts(userPostsData);
+        const userDetailsData = await getUserDetails(getUserId()!);
+        setUser(userDetailsData);
+      }
+    };
+    fetchUserData();
+  }, [getUserId, getUserPosts, getUserDetails]);
 
   return (
     <Container maxWidth="md" sx={styles.pageWrapper}>
-      
-      {/* --- HEADER SECTION --- */}
       <Box sx={styles.headerSection(isMobile)}>
-        <Avatar src={USER_DATA.avatarUrl} sx={styles.avatar} />
+        <Avatar src={/*user.avatarUrl ||*/ USER_DATA.avatarUrl} sx={styles.avatar} />
 
         <Box sx={{ flex: 1, width: isMobile ? '100%' : 'auto' }}>
           <Box sx={styles.actionRow}>
             <Typography variant="h6" sx={{ fontWeight: 400, fontSize: '1.25rem' }}>
-              {USER_DATA.username}
+              {user.username}
             </Typography>
             <Box sx={{ display: 'flex', gap: '0.5rem' }}>
               <Button variant="contained" size="small" sx={styles.editButton}>
@@ -138,15 +163,14 @@ const ProfilePage = () => {
           </Box>
 
           <Box sx={styles.statsRow}>
-            <Typography sx={{ fontSize: '1rem' }}><strong>{USER_DATA.stats.posts}</strong> posts</Typography>
+            <Typography sx={{ fontSize: '1rem' }}>
+              <strong>{user.postsCount}</strong> posts
+            </Typography>
           </Box>
 
           <Box>
-            <Typography sx={{ fontWeight: 600, fontSize: '0.95rem' }}>{USER_DATA.fullName}</Typography>
-            <Typography variant="body2" color="text.secondary">{USER_DATA.bio.category}</Typography>
-            <Typography variant="body2">{USER_DATA.bio.description}</Typography>
-            <Typography component="a" href={`https://${USER_DATA.bio.website}`} sx={styles.bioLink}>
-              {USER_DATA.bio.website}
+            <Typography variant="body2" color="text.secondary">
+              {user.bio || 'No category'}
             </Typography>
           </Box>
         </Box>
@@ -154,13 +178,12 @@ const ProfilePage = () => {
 
       {/* --- POSTS GALLERY --- */}
       <Box sx={styles.galleryContainer}>
-        {POSTS.map((url, index) => (
+        {posts.map((post, index) => (
           <Box key={index} sx={styles.postItem}>
-            <Box component="img" src={url} sx={styles.postImg} />
+            <Box component="img" src={post.content} sx={styles.postImg} />
           </Box>
         ))}
       </Box>
-
     </Container>
   );
 };
