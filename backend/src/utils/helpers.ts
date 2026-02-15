@@ -11,6 +11,7 @@ import {
   type Express,
   type Response,
 } from 'express';
+import { existsSync, mkdirSync } from 'fs';
 import { StatusCodes } from 'http-status-codes';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import type { Types } from 'mongoose';
@@ -165,3 +166,9 @@ export const connectToMongoMemoryServer = async (mongoServer: MongoMemoryServer)
 
 export const createUploadedFilePath = (file: Express.Multer.File | undefined) =>
   file ? (`/${envVar.FILE_UPLOADS_BASE_PATH}/${file.filename}` as const) : null;
+
+export const ensureDirectoryExists = (path: string) => {
+  if (existsSync(path)) return;
+
+  mkdirSync(path, { recursive: true });
+};

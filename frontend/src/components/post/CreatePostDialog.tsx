@@ -1,4 +1,5 @@
 import { createPost } from '@/api/post';
+import { queryKeys } from '@/api/queryKeys';
 import { useCloseDirtyFormDialog } from '@/hooks';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { FC } from 'react';
@@ -14,21 +15,16 @@ export const CreatePostDialog: FC<CreatePostDialogProps> = ({ isOpen, onClose })
 
   const createPostMutation = useMutation({
     mutationFn: createPost,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.posts.all() }),
     onError: (error) => {
+      // TODO: Raise error
+
       console.log(error);
     },
   });
 
-  const handleCreate: PostFormProps['onSubmit'] = async (postForm) => {
-    console.log('CREATE', postForm);
-
-    await createPostMutation.mutateAsync(postForm);
-
-    handleCloseOnSubmit();
-  };
+  const handleCreate: PostFormProps['onSubmit'] = (postForm) =>
+    createPostMutation.mutateAsync(postForm, { onSuccess: handleCloseOnSubmit });
 
   return (
     <GenericDialog {...{ isOpen, onClose: handleCloseDialog, title: 'Create Post' }}>

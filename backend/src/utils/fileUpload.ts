@@ -2,6 +2,9 @@ import { randomUUID } from 'crypto';
 import multer from 'multer';
 import { extname } from 'path';
 import { envVar } from './env';
+import { ensureDirectoryExists } from './helpers';
+
+ensureDirectoryExists(envVar.FILE_UPLOADS_BASE_PATH);
 
 const diskStorageEngine = multer.diskStorage({
   destination: (request, file, callback) => callback(null, `${envVar.FILE_UPLOADS_BASE_PATH}/`),

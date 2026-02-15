@@ -1,7 +1,7 @@
 import useAuth from '@/hooks/useAuth';
 import { RoutePath } from '@/utils/routes';
 import { Box, Button, Container, Link, Paper, Stack, TextField, Typography } from '@mui/material';
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin, type GoogleLoginProps } from '@react-oauth/google';
 import { useState, type FC, type SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -45,7 +45,7 @@ export const SignUp: FC = () => {
     }
   };
 
-  const handleGoogleLoginSuccess = async (credentialResponse: any) => {
+  const handleGoogleLoginSuccess: GoogleLoginProps['onSuccess'] = async (credentialResponse) => {
     try {
       const credential = credentialResponse?.credential;
       if (!credential) {

@@ -2,12 +2,14 @@ import { isImageFile } from '@helpers';
 import { useRef } from 'react';
 import { useEventListener } from 'usehooks-ts';
 
-export type UseImagePasteArgs = { onImagePaste: (file: File) => void };
+export type UseImagePasteArgs = { onImagePaste: (file: File) => void; disabled: boolean | undefined };
 
 export type UseImagePasteContent = ReturnType<typeof useImagePaste>;
 
-export const useImagePaste = ({ onImagePaste }: UseImagePasteArgs) => {
+export const useImagePaste = ({ onImagePaste, disabled }: UseImagePasteArgs) => {
   const handlePaste = (event: ClipboardEvent) => {
+    if (disabled) return;
+
     const pastedImage = [...(event.clipboardData?.files ?? [])].find(isImageFile);
 
     if (pastedImage) onImagePaste(pastedImage);

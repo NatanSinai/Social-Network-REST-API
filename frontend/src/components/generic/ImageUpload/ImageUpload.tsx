@@ -1,13 +1,20 @@
+import type { PostFormValues } from '@/components/post';
 import { Delete, Image, Upload } from '@mui/icons-material';
-import { Box, IconButton, Stack, Typography, type IconButtonProps } from '@mui/material';
+import { Box, FormHelperText, IconButton, Stack, Typography, type IconButtonProps } from '@mui/material';
 import { useRef, type FC } from 'react';
+import type { ControllerRenderProps } from 'react-hook-form';
 import { useImageDragAndDrop, useImagePaste, useImagePreview } from './hooks';
 
 export type FileOrURL = File | string | null;
 
-export type ImageUploadProps = { value: FileOrURL; onChange: (value: FileOrURL) => void; size?: number };
+export type ImageUploadProps = ControllerRenderProps<PostFormValues, 'image'> & {
+  value: FileOrURL;
+  onChange: (value: FileOrURL) => void;
+  size?: number;
+  error: string | undefined;
+};
 
-export const ImageUpload: FC<ImageUploadProps> = ({ value, onChange, size = 200 }) => {
+export const ImageUpload: FC<ImageUploadProps> = ({ value, onChange, size = 200, name, onBlur, disabled, error }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { previewUrl } = useImagePreview({ value });
@@ -16,7 +23,7 @@ export const ImageUpload: FC<ImageUploadProps> = ({ value, onChange, size = 200 
     onImageDrop: onChange,
   });
 
-  useImagePaste({ onImagePaste: onChange });
+  useImagePaste({ onImagePaste: onChange, disabled });
 
   const handleDeleteFile: IconButtonProps['onClick'] = (event) => {
     event.stopPropagation();
@@ -25,13 +32,13 @@ export const ImageUpload: FC<ImageUploadProps> = ({ value, onChange, size = 200 
   };
 
   return (
-    <Stack spacing={2} alignItems='flex-start'>
-      <Box
-        onClick={() => fileInputRef.current?.click()}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
+    <Stack spacing={2} alignItems='flex-start' position='relative'>
+      <Stack
+        onClick={() => (!disabled ? fileInputRef.current?.click() : undefined)}
+        onDragEnter={!disabled ? handleDragEnter : undefined}
+        onDragLeave={!disabled ? handleDragLeave : undefined}
+        onDragOver={!disabled ? handleDragOver : undefined}
+        onDrop={!disabled ? handleDrop : undefined}
         sx={{
           width: size,
           height: size,
@@ -39,9 +46,8 @@ export const ImageUpload: FC<ImageUploadProps> = ({ value, onChange, size = 200 
           borderRadius: 2,
           overflow: 'hidden',
           border: '1px solid',
-          borderColor: isDragging ? 'primary.main' : 'divider',
-          cursor: 'pointer',
-          display: 'flex',
+          borderColor: error ? 'error.main' : isDragging ? 'primary.main' : 'divider',
+          cursor: !disabled ? 'pointer' : 'initial',
           alignItems: 'center',
           justifyContent: 'center',
           bgcolor: isDragging ? 'action.hover' : 'transparent',
@@ -76,7 +82,7 @@ export const ImageUpload: FC<ImageUploadProps> = ({ value, onChange, size = 200 
           </Stack>
         )}
 
-        {previewUrl && (
+        {previewUrl && !disabled && (
           <Stack
             direction='row'
             spacing={2}
@@ -102,13 +108,16 @@ export const ImageUpload: FC<ImageUploadProps> = ({ value, onChange, size = 200 
         )}
 
         <input
+          {...{ name, onBlur, disabled }}
           ref={fileInputRef}
           hidden
           type='file'
           accept='image/*'
           onChange={(event) => onChange(event.target.files?.[0] ?? null)}
         />
-      </Box>
+      </Stack>
+
+      {!!error && <FormHelperText error>{error}</FormHelperText>}
     </Stack>
   );
 };

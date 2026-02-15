@@ -1,7 +1,7 @@
 import { imageSchema } from '@/utils/zod';
 import { postSchema } from '@entities';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, FormHelperText, Stack, TextField } from '@mui/material';
+import { Button, Stack, TextField } from '@mui/material';
 import { useEffect, type FC, type RefObject } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import type z from 'zod';
@@ -44,11 +44,7 @@ export const PostForm: FC<PostFormProps> = ({ defaultValues, onSubmit, submitLab
             name='image'
             control={control}
             render={({ field, fieldState: { error } }) => (
-              <>
-                <ImageUpload {...field} />
-
-                {!!error && <FormHelperText error>{error.message}</FormHelperText>}
-              </>
+              <ImageUpload {...field} disabled={field.disabled ?? isSubmitting} error={error?.message} />
             )}
           />
 
@@ -58,6 +54,7 @@ export const PostForm: FC<PostFormProps> = ({ defaultValues, onSubmit, submitLab
               {...register('title')}
               error={!!errors.title}
               helperText={errors.title?.message}
+              disabled={isSubmitting}
               fullWidth
             />
 
@@ -66,6 +63,7 @@ export const PostForm: FC<PostFormProps> = ({ defaultValues, onSubmit, submitLab
               {...register('content')}
               error={!!errors.content}
               helperText={errors.content?.message}
+              disabled={isSubmitting}
               multiline
               minRows={3}
               maxRows={4}
