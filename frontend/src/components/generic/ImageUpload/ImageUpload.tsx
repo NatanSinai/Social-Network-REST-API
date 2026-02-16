@@ -12,7 +12,15 @@ export type ImageUploadProps = ControllerRenderProps<PostFormValues, 'image'> & 
   error: string | undefined;
 };
 
-export const ImageUpload: FC<ImageUploadProps> = ({ value, onChange, size = 200, name, onBlur, disabled, error }) => {
+export const ImageUpload: FC<ImageUploadProps> = ({
+  value = null,
+  onChange,
+  size = 200,
+  name,
+  onBlur,
+  disabled,
+  error,
+}) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (updatedImage: typeof value) => {

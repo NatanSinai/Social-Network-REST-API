@@ -2,7 +2,8 @@ import { z } from 'zod';
 
 export const imageSchema = z
   .file()
-  .nullable()
+  .optional()
+  .refine((file) => file instanceof File, 'Image is required')
   .refine((file) => !file || file.type.startsWith('image/'), 'File must be an image');
 
 export const metadataSchema = z.object({

@@ -36,7 +36,7 @@ export const PostsFeedPage: FC<PostsFeedPageProps> = () => {
             spacing={3}
             overflow='auto'
             justifyContent='center'
-            sx={{ width: '90%', maxHeight: '80%', maxWidth: '65%', py: 3, '::-webkit-scrollbar': { width: 0 } }}
+            sx={{ width: '90%', maxHeight: '80%', maxWidth: '65%', py: 3, px: 2, '::-webkit-scrollbar': { width: 0 } }}
           >
             {posts.map((post) => (
               <Grid size={{ xs: 12, sm: 6 }} key={post.id}>

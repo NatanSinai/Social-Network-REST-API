@@ -20,15 +20,16 @@ export type PostFormProps = {
 
 export const PostForm: FC<PostFormProps> = ({ defaultValues, onSubmit, submitLabel = 'Submit', isDirtyFormRef }) => {
   const {
-    register,
     handleSubmit,
     control,
-    formState: { errors, isDirty, isSubmitting },
+    formState: { isDirty, isSubmitting, isValid, submitCount },
   } = useForm<PostFormValues>({
     resolver: zodResolver(postFormSchema),
-    defaultValues: { title: '', content: '', image: null, ...defaultValues },
+    defaultValues: { title: '', content: '', image: undefined, ...defaultValues },
     mode: 'onTouched',
   });
+
+  const isSubmitDisabled = (submitCount > 0 && !isValid) || isSubmitting;
 
   useEffect(() => {
     if (isDirty && !isDirtyFormRef.current) isDirtyFormRef.current = true;
@@ -49,30 +50,42 @@ export const PostForm: FC<PostFormProps> = ({ defaultValues, onSubmit, submitLab
           />
 
           <Stack spacing={4} width='100%'>
-            <TextField
-              label='Title'
-              {...register('title')}
-              error={!!errors.title}
-              helperText={errors.title?.message}
-              disabled={isSubmitting}
-              fullWidth
+            <Controller
+              name='title'
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <TextField
+                  label='Title'
+                  {...field}
+                  error={!!error}
+                  helperText={error?.message}
+                  disabled={isSubmitting}
+                  fullWidth
+                />
+              )}
             />
 
-            <TextField
-              label='Content'
-              {...register('content')}
-              error={!!errors.content}
-              helperText={errors.content?.message}
-              disabled={isSubmitting}
-              multiline
-              minRows={3}
-              maxRows={4}
-              fullWidth
+            <Controller
+              name='content'
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <TextField
+                  label='Content'
+                  {...field}
+                  error={!!error}
+                  helperText={error?.message}
+                  disabled={isSubmitting}
+                  multiline
+                  minRows={3}
+                  maxRows={4}
+                  fullWidth
+                />
+              )}
             />
           </Stack>
         </Stack>
 
-        <Button type='submit' variant='contained' disabled={isSubmitting}>
+        <Button type='submit' variant='contained' disabled={isSubmitDisabled}>
           {submitLabel}
         </Button>
       </Stack>

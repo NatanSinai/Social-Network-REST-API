@@ -31,12 +31,12 @@ export const PostView: FC<PostViewProps> = ({
   const fullImageURL = `${envVar.VITE_BACKEND_URL}${imageURL}`;
 
   return (
-    <Card sx={{ borderRadius: 4, height: '100%', width: '100%' }} elevation={10}>
+    <Card sx={{ borderRadius: 4, width: '100%' }} elevation={10}>
       <CardMedia component='img' height='180px' image={fullImageURL} alt={title} sx={{ objectFit: 'cover' }} />
 
       <CardContent component={Stack} spacing={1} bgcolor='secondary.main'>
         <Stack>
-          <Typography variant='h6' component='div'>
+          <Typography variant='h5' component='div'>
             {title}
           </Typography>
 
