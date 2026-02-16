@@ -1,5 +1,5 @@
 import type { PostFormValues } from '@/components/post';
-import { Delete, Image, Upload } from '@mui/icons-material';
+import { Delete, Upload } from '@mui/icons-material';
 import { Box, FormHelperText, IconButton, Stack, Typography, type IconButtonProps } from '@mui/material';
 import { useRef, type FC } from 'react';
 import type { ControllerRenderProps } from 'react-hook-form';
@@ -8,8 +8,6 @@ import { useImageDragAndDrop, useImagePaste, useImagePreview } from './hooks';
 export type FileOrURL = File | string | null;
 
 export type ImageUploadProps = ControllerRenderProps<PostFormValues, 'image'> & {
-  value: FileOrURL;
-  onChange: (value: FileOrURL) => void;
   size?: number;
   error: string | undefined;
 };
@@ -17,13 +15,19 @@ export type ImageUploadProps = ControllerRenderProps<PostFormValues, 'image'> & 
 export const ImageUpload: FC<ImageUploadProps> = ({ value, onChange, size = 200, name, onBlur, disabled, error }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleFileChange = (updatedImage: typeof value) => {
+    if (!updatedImage && !!value) return;
+
+    onChange(updatedImage);
+  };
+
   const { previewUrl } = useImagePreview({ value });
 
   const { isDragging, handleDragOver, handleDragLeave, handleDrop, handleDragEnter } = useImageDragAndDrop({
-    onImageDrop: onChange,
+    onImageDrop: handleFileChange,
   });
 
-  useImagePaste({ onImagePaste: onChange, disabled });
+  useImagePaste({ onImagePaste: handleFileChange, disabled });
 
   const handleDeleteFile: IconButtonProps['onClick'] = (event) => {
     event.stopPropagation();
@@ -62,7 +66,11 @@ export const ImageUpload: FC<ImageUploadProps> = ({ value, onChange, size = 200,
             sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
-          <Image color='disabled' fontSize='large' sx={{ pointerEvents: 'none' }} />
+          <Stack justifyContent='center' alignItems='center' spacing={1}>
+            <Upload color='disabled' fontSize='large' sx={{ pointerEvents: 'none' }} />
+
+            <Typography sx={{ opacity: 0.6 }}>Upload Image</Typography>
+          </Stack>
         )}
 
         {isDragging && (
@@ -97,11 +105,11 @@ export const ImageUpload: FC<ImageUploadProps> = ({ value, onChange, size = 200,
               '&:hover': { opacity: 1 },
             }}
           >
-            <IconButton color='primary' onClick={() => fileInputRef.current?.click()}>
+            <IconButton sx={{ color: 'white', opacity: 0.5 }}>
               <Upload />
             </IconButton>
 
-            <IconButton color='error' onClick={handleDeleteFile}>
+            <IconButton sx={{ color: 'white', opacity: 0.5 }} onClick={handleDeleteFile}>
               <Delete />
             </IconButton>
           </Stack>
@@ -113,7 +121,7 @@ export const ImageUpload: FC<ImageUploadProps> = ({ value, onChange, size = 200,
           hidden
           type='file'
           accept='image/*'
-          onChange={(event) => onChange(event.target.files?.[0] ?? null)}
+          onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
         />
       </Stack>
 

@@ -19,7 +19,6 @@ const theme = createTheme({
     MuiButton: {
       defaultProps: { variant: 'contained', color: 'secondary', style: { borderRadius: '2em', textTransform: 'none' } },
     },
-    MuiIconButton: { defaultProps: { style: { color: secondaryMainColor } } },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {

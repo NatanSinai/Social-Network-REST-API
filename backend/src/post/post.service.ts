@@ -1,21 +1,7 @@
-import { Service, type FilterQuery } from '@utils';
-import { pick } from 'lodash';
-import type { QueryFilter, QueryOptions } from 'mongoose';
+import { ModelName, Service, type FilterQuery } from '@utils';
+import type { QueryOptions } from 'mongoose';
 import postModel from './post.model';
-import type { CreatePostDTO, ParsedPost, PostDocument, PostWithSender, UpdatePostDTO } from './post.types';
-
-const parsePost = (post: PostWithSender): ParsedPost => {
-  return {
-    ...pick(post, 'title', 'content', 'imageURL', 'createdAt', 'updatedAt'),
-    id: post._id.toString(),
-    commentsAmount: 0,
-    //  post.commentsAmount ?? 0,
-    author: {
-      ...pick(post.senderId, 'username', 'profilePictureURL'),
-      id: post.senderId._id.toString(),
-    },
-  };
-};
+import type { CreatePostDTO, ParsedPost, PostDocument, UpdatePostDTO } from './post.types';
 
 export default class PostService extends Service<PostDocument, CreatePostDTO, UpdatePostDTO> {
   constructor() {
@@ -23,16 +9,70 @@ export default class PostService extends Service<PostDocument, CreatePostDTO, Up
   }
 
   async getParsedPosts({ senderId }: FilterQuery<PostDocument> = {}, options?: QueryOptions<PostDocument>) {
-    const postsFilter = (senderId ? { senderId } : {}) satisfies QueryFilter<PostDocument>;
+    const postsFilter = senderId ? { senderId } : {};
 
-    const posts = (await super.getMany(postsFilter, {
-      populate: { path: 'senderId' },
-      lean: true,
-      ...options,
-    })) as unknown as PostWithSender[];
+    const posts = await postModel.aggregate<ParsedPost>([
+      { $match: postsFilter },
 
-    const parsedPosts = posts.map(parsePost);
+      {
+        $lookup: {
+          from: ModelName.USER,
+          localField: 'senderId',
+          foreignField: '_id',
+          as: 'author',
+        },
+      },
+      { $unwind: '$author' },
 
-    return parsedPosts;
+      {
+        $lookup: {
+          from: ModelName.COMMENT,
+          let: { postId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$postId', '$$postId'] },
+              },
+            },
+            { $count: 'count' },
+          ],
+          as: 'commentsMeta',
+        },
+      },
+      {
+        $addFields: {
+          commentsAmount: {
+            $ifNull: [{ $arrayElemAt: ['$commentsMeta.count', 0] }, 0],
+          },
+        },
+      },
+      {
+        $project: {
+          id: { $toString: '$_id' },
+          _id: 0,
+
+          title: 1,
+          content: 1,
+          imageURL: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          commentsAmount: 1,
+
+          author: {
+            id: { $toString: '$author._id' },
+            username: '$author.username',
+            profilePictureURL: {
+              $ifNull: ['$author.profilePictureURL', null],
+            },
+          },
+        },
+      },
+
+      { $sort: options?.sort ?? { createdAt: -1 } },
+      { $skip: options?.skip ?? 0 },
+      { $limit: options?.limit ?? 10 },
+    ]);
+
+    return posts;
   }
 }

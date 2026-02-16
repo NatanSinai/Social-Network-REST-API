@@ -11,7 +11,7 @@ export type PostDocument = HydratedDocument<Post>;
 export type CreatePostDTO = MakeOptional<Pick<Post, '_id' | 'title' | 'content' | 'senderId' | 'imageURL'>, '_id'>;
 export type UpdatePostDTO = Partial<Pick<Post, 'title' | 'content' | 'senderId' | 'imageURL'>>;
 
-export type PostWithSender = Omit<Post, 'senderId'> & { senderId: User };
+export type PostWithSender = Omit<Post, 'senderId'> & { senderId: User; commentsAmount: number };
 
 export type ParsedPost = Pick<Post, 'title' | 'content' | 'imageURL' | 'createdAt' | 'updatedAt'> & {
   id: string;

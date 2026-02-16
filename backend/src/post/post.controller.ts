@@ -27,16 +27,23 @@ const respondWithNotFoundPost = (postId: Post['_id'], response: Response) =>
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/CreatePostDTO'
+ *             type: object
+ *             required:
+ *               - title
+ *               - content
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Post created
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Post'
  */
 postsRouter.post<{}, PostDocument, Omit<CreatePostDTO, 'senderId' | 'imageURL'>>(
   '',
@@ -76,9 +83,17 @@ postsRouter.post<{}, PostDocument, Omit<CreatePostDTO, 'senderId' | 'imageURL'>>
  *           $ref: '#/components/schemas/ObjectId'
  *     requestBody:
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/UpdatePostDTO'
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Post updated
@@ -88,8 +103,6 @@ postsRouter.put<{ postId: string }, PostDocument, Omit<UpdatePostDTO, 'imageURL'
   authMiddleware(),
   upload.single(POST_IMAGE_FIELD),
   async ({ params, body: updatePostDTOWithoutImageURL, userId: senderId, file }, response) => {
-    const imageURL = createUploadedFilePath(file);
-
     if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
     if (!isValidObjectId(params.postId)) return respondWithInvalidId(params.postId, response, 'post');
@@ -102,7 +115,10 @@ postsRouter.put<{ postId: string }, PostDocument, Omit<UpdatePostDTO, 'imageURL'
     if (!isUserExist || !currentPost || currentPost.senderId.toString() !== senderId.toString())
       return respondWithNotFoundById(senderId, response, 'sender');
 
-    const updatedPost = await postService.updateById(postId, { ...updatePostDTOWithoutImageURL, imageURL });
+    const imageURL = createUploadedFilePath(file);
+    const updatePostDTO = { ...updatePostDTOWithoutImageURL, imageURL } satisfies UpdatePostDTO;
+
+    const updatedPost = await postService.updateById(postId, updatePostDTO);
 
     /* istanbul ignore next */
     if (!updatedPost) return respondWithNotFoundPost(postId, response);
@@ -111,7 +127,7 @@ postsRouter.put<{ postId: string }, PostDocument, Omit<UpdatePostDTO, 'imageURL'
   },
 );
 
-/* Get Posts (Optionally By Sender ID) */
+/* Get Posts (Optionally By Sender ID and paginated) */
 /**
  * @swagger
  * /posts:
@@ -125,13 +141,11 @@ postsRouter.put<{ postId: string }, PostDocument, Omit<UpdatePostDTO, 'imageURL'
  *           $ref: '#/components/schemas/ObjectId'
  *     responses:
  *       200:
- *         description: List of posts
+ *         description: Paginated list of posts
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Post'
+ *               $ref: '#/components/schemas/PaginatedPosts'
  */
 postsRouter.get<
   unknown,
