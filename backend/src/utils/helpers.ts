@@ -11,6 +11,7 @@ import {
   type Express,
   type Response,
 } from 'express';
+import { existsSync, mkdirSync } from 'fs';
 import { StatusCodes } from 'http-status-codes';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import type { Types } from 'mongoose';
@@ -30,12 +31,7 @@ const { EXAMPLE_COMMENT_ID, EXAMPLE_POST_ID, EXAMPLE_SENDER_ID, FRONTEND_URL } =
 
 export const initializeAppConfig = (app: Express) => {
   app.use(json());
-  app.use(
-    cors({
-      origin: FRONTEND_URL,
-      credentials: true,
-    }),
-  );
+  app.use(cors({ origin: FRONTEND_URL, credentials: true }));
   app.use(morgan('dev'));
   app.use(cookieParser());
 };
@@ -54,6 +50,7 @@ export const initializeExamplePost = async () => {
   const examplePost = await postService.createSingle({
     title: 'Title Example',
     content: 'Content Example',
+    imageURL: null,
     senderId: exampleSenderId,
     _id: examplePostId,
   });
@@ -93,6 +90,7 @@ export const initializeExampleUser = async () => {
     isPrivate: true,
     postsCount: 1,
     bio: 'This is an example user',
+    profilePictureURL: null,
   });
 
   console.log(`Created example user with id '${exampleUser._id}'\n`);
@@ -164,4 +162,13 @@ export const connectToMongoMemoryServer = async (mongoServer: MongoMemoryServer)
   envVar.MONGO_CONNECTION_STRING = mongoServer.getUri();
 
   await connectToMongoDB();
+};
+
+export const createUploadedFilePath = (file: Express.Multer.File | undefined) =>
+  file ? (`/${envVar.FILE_UPLOADS_BASE_PATH}/${file.filename}` as const) : null;
+
+export const ensureDirectoryExists = (path: string) => {
+  if (existsSync(path)) return;
+
+  mkdirSync(path, { recursive: true });
 };

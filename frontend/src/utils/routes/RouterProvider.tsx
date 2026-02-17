@@ -1,7 +1,6 @@
 import useAuth from '@/hooks/useAuth';
-import Login from '@/pages/Login';
-import SignUp from '@/pages/SignUp';
 import { Box } from '@mui/material';
+import { Login, PostsFeedPage, SignUp } from '@pages';
 import { memo, useMemo } from 'react';
 import { Navigate, Outlet, type RouteObject, useRoutes } from 'react-router-dom';
 import { INITIAL_USER_ROUTE, type ProtectedRouteObject, RoutePath, UserProtectedRoute, protectRoute } from './';
@@ -16,11 +15,11 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
       {
         path: RoutePath._HOME,
         element: (
-          <Box height="100%">
+          <Box height='100%'>
             <Outlet />
           </Box>
         ),
-        children: [{ path: RoutePath.POSTS_FEED, element: <div>hello</div> }],
+        children: [{ path: RoutePath.POSTS_FEED, element: <PostsFeedPage /> }],
       },
     ];
 
@@ -50,7 +49,7 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
       {
         path: RoutePath._ROOT,
         element: (
-          <Box bgcolor="primary.main" height="100%">
+          <Box bgcolor='primary.main' height='100%'>
             <Outlet />
           </Box>
         ),

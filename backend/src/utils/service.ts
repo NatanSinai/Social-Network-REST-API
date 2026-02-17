@@ -38,8 +38,8 @@ export default class Service<
     return this.model.create(createDTOs, options);
   }
 
-  getMany(filter?: FilterQuery<T>) {
-    return this.model.find(filter);
+  async getMany(filter?: FilterQuery<T>, options?: QueryOptions<T>) {
+    return this.model.find(filter, {}, options);
   }
 
   getById(id: T['_id']) {
@@ -72,5 +72,9 @@ export default class Service<
 
   existsById(_id: T['_id']) {
     return this.exists({ _id });
+  }
+
+  count(filter?: QueryFilter<T>) {
+    return this.model.countDocuments(filter);
   }
 }

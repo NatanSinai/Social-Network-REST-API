@@ -54,6 +54,7 @@ const swaggerSpec = swaggerJsdoc({
                 isPrivate: { type: 'boolean' },
                 postsCount: { type: 'number' },
                 bio: { type: 'string', nullable: true },
+                profilePictureURL: { type: 'string', nullable: true },
               },
             },
           ],
@@ -69,6 +70,7 @@ const swaggerSpec = swaggerJsdoc({
             isPrivate: { type: 'boolean' },
             postsCount: { type: 'number' },
             bio: { type: 'string', nullable: true },
+            profilePictureURL: { type: 'string', nullable: true },
           },
         },
 
@@ -81,6 +83,7 @@ const swaggerSpec = swaggerJsdoc({
             isPrivate: { type: 'boolean' },
             postsCount: { type: 'number' },
             bio: { type: 'string', nullable: true },
+            profilePictureURL: { type: 'string', nullable: true },
           },
         },
 
@@ -101,7 +104,9 @@ const swaggerSpec = swaggerJsdoc({
               properties: {
                 title: { type: 'string' },
                 content: { type: 'string' },
-                senderId: { $ref: '#/components/schemas/ObjectId' },
+                imageURL: { type: 'string', nullable: true },
+                commentsAmount: { type: 'number', example: 5 },
+                sender: { $ref: '#/components/schemas/User' },
               },
             },
           ],
@@ -113,6 +118,7 @@ const swaggerSpec = swaggerJsdoc({
           properties: {
             title: { type: 'string' },
             content: { type: 'string' },
+            imageURL: { type: 'string', nullable: true },
           },
         },
 
@@ -121,6 +127,20 @@ const swaggerSpec = swaggerJsdoc({
           properties: {
             title: { type: 'string' },
             content: { type: 'string' },
+            imageURL: { type: 'string', nullable: true },
+          },
+        },
+
+        PaginatedPosts: {
+          type: 'object',
+          properties: {
+            posts: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/Post' },
+            },
+            total: { type: 'number', example: 100 },
+            page: { type: 'number', example: 1 },
+            pages: { type: 'number', example: 10 },
           },
         },
 

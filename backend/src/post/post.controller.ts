@@ -1,10 +1,12 @@
 import { authMiddleware } from '@middlewares';
 import UserService from '@user/user.service';
-import { respondWithInvalidId, respondWithNotFoundById } from '@utils';
+import { createUploadedFilePath, respondWithInvalidId, respondWithNotFoundById, upload } from '@utils';
 import { Router, type Response } from 'express';
 import { isValidObjectId } from 'mongoose';
 import PostService from './post.service';
-import type { CreatePostDTO, Post, PostDocument, UpdatePostDTO } from './post.types';
+import type { CreatePostDTO, ParsedPost, Post, PostDocument, UpdatePostDTO } from './post.types';
+
+const POST_IMAGE_FIELD = 'image';
 
 const postsRouter = Router();
 const postService = new PostService();
@@ -25,31 +27,39 @@ const respondWithNotFoundPost = (postId: Post['_id'], response: Response) =>
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/CreatePostDTO'
+ *             type: object
+ *             required:
+ *               - title
+ *               - content
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Post created
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Post'
  */
-postsRouter.post<unknown, PostDocument, Omit<CreatePostDTO, 'senderId'>>(
+postsRouter.post<{}, PostDocument, Omit<CreatePostDTO, 'senderId' | 'imageURL'>>(
   '',
   authMiddleware(),
-  async (request, response) => {
-    const senderId = request.userId;
-    const createPostDTO = request.body;
-
+  upload.single(POST_IMAGE_FIELD),
+  async ({ file, body: createPostDTOWithoutImageURL, userId: senderId }, response) => {
     if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
     const user = await userService.getById(senderId);
 
     if (!user) return respondWithNotFoundById(senderId, response, 'sender');
 
-    const newPost = await postService.createSingle({ ...createPostDTO, senderId });
+    const imageURL = createUploadedFilePath(file);
+    const createPostDTO = { ...createPostDTOWithoutImageURL, senderId, imageURL } satisfies CreatePostDTO;
+
+    const newPost = await postService.createSingle(createPostDTO);
     await userService.updateById(senderId, { postsCount: user.postsCount + 1 });
 
     response.send(newPost);
@@ -73,30 +83,40 @@ postsRouter.post<unknown, PostDocument, Omit<CreatePostDTO, 'senderId'>>(
  *           $ref: '#/components/schemas/ObjectId'
  *     requestBody:
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/UpdatePostDTO'
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Post updated
  */
-postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
+postsRouter.put<{ postId: string }, PostDocument, Omit<UpdatePostDTO, 'imageURL'>>(
   '/:postId',
   authMiddleware(),
-  async (request, response) => {
-    const { postId } = request.params;
-    const updatePostDTO = request.body;
-    const senderId = request.userId;
-
+  upload.single(POST_IMAGE_FIELD),
+  async ({ params, body: updatePostDTOWithoutImageURL, userId: senderId, file }, response) => {
     if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
-    if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
+    if (!isValidObjectId(params.postId)) return respondWithInvalidId(params.postId, response, 'post');
+
+    const postId = params.postId as unknown as Post['_id'];
 
     const isUserExist = await userService.existsById(senderId);
     const currentPost = await postService.getById(postId);
 
     if (!isUserExist || !currentPost || currentPost.senderId.toString() !== senderId.toString())
       return respondWithNotFoundById(senderId, response, 'sender');
+
+    const imageURL = createUploadedFilePath(file);
+    const updatePostDTO = { ...updatePostDTOWithoutImageURL, imageURL } satisfies UpdatePostDTO;
 
     const updatedPost = await postService.updateById(postId, updatePostDTO);
 
@@ -107,7 +127,7 @@ postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
   },
 );
 
-/* Get Posts (Optionally By Sender ID) */
+/* Get Posts (Optionally By Sender ID and paginated) */
 /**
  * @swagger
  * /posts:
@@ -121,22 +141,38 @@ postsRouter.put<{ postId: Post['_id'] }, PostDocument, UpdatePostDTO>(
  *           $ref: '#/components/schemas/ObjectId'
  *     responses:
  *       200:
- *         description: List of posts
+ *         description: Paginated list of posts
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Post'
+ *               $ref: '#/components/schemas/PaginatedPosts'
  */
-postsRouter.get<unknown, PostDocument[], unknown, { sender?: Post['senderId'] }>('', async (request, response) => {
-  const { sender: senderId } = request.query;
+postsRouter.get<
+  unknown,
+  { posts: ParsedPost[]; total: number; page: number; pages: number },
+  unknown,
+  { sender?: Post['senderId']; page?: string; limit?: string }
+>('', async (request, response) => {
+  const { sender: senderId, page: pageString = '1', limit: limitString = '10' } = request.query;
 
   if (!!senderId && !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
-  const posts = await postService.getMany({ senderId });
+  const page = Number(pageString);
+  const limit = Number(limitString);
 
-  response.send(posts);
+  const skip = (page - 1) * limit;
+
+  const [posts, total] = await Promise.all([
+    postService.getParsedPosts({ senderId }, { skip, limit, sort: { createdAt: -1 } }),
+    postService.count(),
+  ]);
+
+  response.send({
+    posts,
+    total,
+    page,
+    pages: Math.ceil(total / limit),
+  });
 });
 
 /* Get Post By ID */

@@ -1,5 +1,5 @@
 {
-  "cSpell.words": ["DTOs", "Heebo", "Magrafta", "Shira", "signup", "usehooks", "VITE", "סגירה"],
+  "cSpell.words": ["DTOs", "googleusercontent", "Heebo", "Magrafta", "Shira", "signup", "usehooks", "VITE", "סגירה"],
   "workbench.startupEditor": "none",
   "files.autoSave": "onWindowChange",
   "liveServer.settings.donotShowInfoMsg": true,
@@ -23,13 +23,17 @@
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "html.format.extraLiners": "",
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit",
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll.eslint": "never"
   },
+  "prettier.requireConfig": true,
   "editor.accessibilitySupport": "off",
   "workbench.productIconTheme": "fluent-icons",
   "typescript.updateImportsOnFileMove.enabled": "always",

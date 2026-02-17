@@ -1,17 +1,17 @@
 {
-  "Memo Functional Component Template": {
-    "prefix": "mfc",
+  "Functional Component Template": {
+    "prefix": "fc",
     "body": [
-      "import { memo } from 'react';",
+      "import type { FC } from 'react';",
       "",
       "export type ${TM_FILENAME_BASE/(^.)(.*)/${1:/upcase}${2}/}Props = {};",
       "",
-      "export const ${TM_FILENAME_BASE/(^.)(.*)/${1:/upcase}${2}/} = memo<${TM_FILENAME_BASE/(^.)(.*)/${1:/upcase}${2}/}Props>(() => {",
+      "export const ${TM_FILENAME_BASE/(^.)(.*)/${1:/upcase}${2}/}: FC<${TM_FILENAME_BASE/(^.)(.*)/${1:/upcase}${2}/}Props> = () => {",
       "  return <div>${TM_FILENAME_BASE/(^.)(.*)/${1:/upcase}${2}/}</div>;",
-      "});",
+      "};",
       "",
     ],
-    "description": "Creates a memo version of a functional component with the file name",
+    "description": "Creates a functional component with the file name",
   },
   "Hook Template": {
     "prefix": "hook",

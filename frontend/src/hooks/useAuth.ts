@@ -1,5 +1,5 @@
+import { backendAPI } from '@api';
 import { useState } from 'react';
-import api from '../utils/api/api';
 
 type UseAuthReturnType = {
   signup: (username: string, email: string, password: string) => Promise<void>;
@@ -13,12 +13,12 @@ const useAuth: () => UseAuthReturnType = () => {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(!!localStorage.getItem('accessToken'));
 
   const signup = async (username: string, email: string, password: string) => {
-    await api.post('/users', { username, email, password });
+    await backendAPI.post('/users', { username, email, password });
     await login(username, password);
   };
 
   const login = async (username: string, password: string) => {
-    const res = await api.post('/auth/login', { username, password });
+    const res = await backendAPI.post('/auth/login', { username, password });
     const { accessToken } = res.data;
 
     if (accessToken) {
@@ -28,7 +28,7 @@ const useAuth: () => UseAuthReturnType = () => {
   };
 
   const loginWithGoogle = async (idToken: string) => {
-    const res = await api.post('/auth/google', { idToken });
+    const res = await backendAPI.post('/auth/google', { idToken });
     const { accessToken } = res.data;
 
     if (accessToken) {
@@ -39,7 +39,7 @@ const useAuth: () => UseAuthReturnType = () => {
 
   const logout = async () => {
     try {
-      await api.post('/auth/logout');
+      await backendAPI.post('/auth/logout');
     } finally {
       localStorage.removeItem('accessToken');
       setIsUserLoggedIn(false);

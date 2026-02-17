@@ -29,6 +29,7 @@ const initializeServer = async () => {
   initializeAppConfig(app);
   app.use(cookieParser());
   initializeRouters(app);
+
   app.use(errorHandler);
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
