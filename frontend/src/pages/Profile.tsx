@@ -2,7 +2,8 @@
 import { getPostsBySenderId } from '@/api/post';
 import { queryKeys } from '@/api/queryKeys';
 import { getUser, getUserId, updateUserDetails } from '@/api/user';
-import EditProfileModal from '@/components/profile/EditProfileModal';
+import EditProfileForm from '@/components/profile/EditProfileModal';
+import { GenericDialog } from '@components';
 import { Avatar, Box, Button, Container, Typography } from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
@@ -110,9 +111,12 @@ const ProfilePage = () => {
 
   const user = userData?.pages[0];
 
-  const handleEditProfile = async (username: string, profilePictureURL: string) => {
+  const handleEditProfile = async (values: { username: string; image?: File | undefined }) => {
     try {
-      await updateUserDetails(getUserId()!, { username, profilePictureURL });
+      await updateUserDetails(getUserId()!, {
+        username: values.username,
+        profilePictureURL: values.image ? URL.createObjectURL(values.image) : undefined,
+      });
       setIsEditModalOpen(false);
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -157,13 +161,15 @@ const ProfilePage = () => {
         ))}
       </Box>
 
-      <EditProfileModal
-        open={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSave={handleEditProfile}
-        currentUsername={user?.username || ''}
-        currentAvatar={user?.profilePictureURL || ''}
-      />
+      <GenericDialog {...{ isOpen: isEditModalOpen, onClose: () => setIsEditModalOpen(false), title: 'Edit Profile' }}>
+        <EditProfileForm
+          {...{
+            onClose: () => setIsEditModalOpen(false),
+            onSubmit: handleEditProfile,
+            defaultValues: { username: user?.username },
+          }}
+        />
+      </GenericDialog>
     </Container>
   );
 };

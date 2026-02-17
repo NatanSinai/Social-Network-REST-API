@@ -1,80 +1,56 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Stack,
-  TextField,
-} from '@mui/material';
-import { Camera } from 'lucide-react';
-import { useState } from 'react';
+import { imageSchema } from '@/utils/zod';
+import { userSchema } from '@entities';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button, DialogActions, DialogContent, Stack, TextField } from '@mui/material';
+import { type FC } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import type z from 'zod';
+import { ImageUpload } from '../generic';
 
-interface EditProfileModalProps {
-  open: boolean;
+export const userFormSchema = userSchema.pick({ username: true }).extend({ image: imageSchema });
+
+export type UserFormValues = z.infer<typeof userFormSchema>;
+
+export type EditProfileFormProps = {
+  defaultValues?: Partial<UserFormValues>;
+  onSubmit: (values: UserFormValues) => void;
   onClose: () => void;
-  currentUsername: string;
-  currentAvatar: string;
-  onSave: (newUsername: string, newAvatar: string) => void;
-}
-
-const modalStyles = {
-  dialogPaper: {
-    borderRadius: '12px',
-    width: '100%',
-    maxWidth: '400px',
-    p: 1,
-  },
-  avatarWrapper: {
-    position: 'relative',
-    alignSelf: 'center',
-    cursor: 'pointer',
-    '&:hover .overlay': { opacity: 1 },
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    bgcolor: 'rgba(0,0,0,0.4)',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    opacity: 0,
-    transition: 'opacity 0.2s ease',
-  },
 };
 
-const EditProfileModal = ({ open, onClose, onSave, currentUsername, currentAvatar }: EditProfileModalProps) => {
-  const [username, setUsername] = useState(currentUsername);
+const EditProfileForm: FC<EditProfileFormProps> = ({ defaultValues, onSubmit, onClose }) => {
+  const { handleSubmit, control } = useForm<UserFormValues>({
+    resolver: zodResolver(userFormSchema),
+    defaultValues: { username: '', image: undefined, ...defaultValues },
+    mode: 'onTouched',
+  });
 
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle sx={{ textAlign: 'center', fontWeight: 600 }}>Edit Profile</DialogTitle>
-
+    <form onSubmit={handleSubmit(onSubmit)}>
       <DialogContent>
         <Stack spacing={4} sx={{ mt: 2 }}>
-          {/* Change Photo Section */}
-          <Box sx={modalStyles.avatarWrapper}>
-            <Avatar src={currentAvatar} sx={{ width: 100, height: 100, mx: 'auto' }} />
-            <Box className='overlay' sx={modalStyles.overlay}>
-              <Camera size={24} />
-            </Box>
-          </Box>
+          <Controller
+            name='image'
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+              <ImageUpload {...field} disabled={field.disabled} error={error?.message} />
+            )}
+          />
 
-          {/* Username Input */}
-          <TextField
-            fullWidth
-            label='Username'
-            variant='outlined'
-            defaultValue={currentUsername}
-            placeholder='Enter username'
-            onChange={(e) => setUsername(e.target.value)}
+          <Controller
+            name='username'
+            control={control}
+            rules={{ required: 'Username is required' }}
+            render={({ field, fieldState: { error } }) => (
+              <TextField
+                {...field}
+                fullWidth
+                label='Username'
+                variant='outlined'
+                placeholder='Enter username'
+                error={!!error}
+                helperText={error?.message}
+              />
+            )}
           />
         </Stack>
       </DialogContent>
@@ -84,7 +60,7 @@ const EditProfileModal = ({ open, onClose, onSave, currentUsername, currentAvata
           Cancel
         </Button>
         <Button
-          onClick={() => onSave(username, currentAvatar)}
+          type='submit'
           variant='contained'
           disableElevation
           sx={{ textTransform: 'none', px: 4, borderRadius: '8px' }}
@@ -92,8 +68,8 @@ const EditProfileModal = ({ open, onClose, onSave, currentUsername, currentAvata
           Save
         </Button>
       </DialogActions>
-    </Dialog>
+    </form>
   );
 };
 
-export default EditProfileModal;
+export default EditProfileForm;
