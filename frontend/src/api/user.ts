@@ -21,7 +21,9 @@ export const getUserId = () => {
   }
 };
 
-export type UpdateUserDetailsDTO = { username?: string; profilePictureURL?: string | null };
+type WithUserImage<T = unknown> = T & { image?: File | null };
+
+export type UpdateUserDetailsDTO = WithUserImage<Pick<User, 'username'>>;
 
 export const updateUserDetails = async (userId: string, body: UpdateUserDetailsDTO) => {
   return backendAPI.put(`${USERS_BASE_API}/${userId}`, body, {

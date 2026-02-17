@@ -2,7 +2,7 @@
 import { getPostsBySenderId } from '@/api/post';
 import { queryKeys } from '@/api/queryKeys';
 import { getUser, getUserId, updateUserDetails } from '@/api/user';
-import EditProfileForm from '@/components/profile/EditProfileModal';
+import EditProfileForm from '@/components/profile/EditProfileForm';
 import { GenericDialog } from '@components';
 import { Avatar, Box, Button, Container, Typography } from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -115,7 +115,7 @@ const ProfilePage = () => {
     try {
       await updateUserDetails(getUserId()!, {
         username: values.username,
-        profilePictureURL: values.image ? URL.createObjectURL(values.image) : undefined,
+        image: values.image,
       });
       setIsEditModalOpen(false);
     } catch (error) {
