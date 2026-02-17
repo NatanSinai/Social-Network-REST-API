@@ -1,27 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import EditProfileModal from '@/components/EditProfileModal';
-import useUser from '@/hooks/useUser';
-import { Avatar, Box, Button, Container, Typography, useMediaQuery, useTheme } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { getPostsBySenderId } from '@/api/post';
+import { queryKeys } from '@/api/queryKeys';
+import { getUser, getUserId, updateUserDetails } from '@/api/user';
+import EditProfileModal from '@/components/profile/EditProfileModal';
+import { Avatar, Box, Button, Container, Typography } from '@mui/material';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 
-// --- CONFIGURATION / MOCK DATA ---
-const USER_DATA = {
-  username: 'johndoe_official',
-  fullName: 'John Doe',
-  avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=400&fit=crop',
-  stats: {
-    posts: 128,
-    followers: '1.5k',
-    following: 432,
-  },
-  bio: {
-    category: 'Digital Creator 🎨',
-    description: 'Building cool things with React & Node. 🚀',
-    website: 'my-portfolio.com',
-  },
-};
-
-// --- STYLES ---
 const styles: Record<string, any> = {
   pageWrapper: {
     height: '100vh',
@@ -103,69 +88,49 @@ const styles: Record<string, any> = {
   },
 };
 
-type Post = {
-  id: string;
-  createdAt: Date;
-  datedAt: Date;
-  title: string;
-  content: string;
-  senderId: string;
-};
-
-type User = {
-  _id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  username: string;
-  password: string;
-  email: string;
-  isPrivate: boolean;
-  postsCount: number;
-  bio: string | null;
-};
-
 const ProfilePage = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { getUserId, getUserPosts, getUserDetails, updateUserDetails } = useUser();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [user, setUser] = useState<User>({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const userId = useMemo(() => getUserId(), []);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (getUserId()) {
-        const userPostsData = await getUserPosts(getUserId()!);
-        setPosts(userPostsData);
-        const userDetailsData = await getUserDetails(getUserId()!);
-        setUser(userDetailsData);
-      }
-    };
-    fetchUserData();
-  }, [getUserId, getUserPosts, getUserDetails]);
+  const { data: postsData } = useInfiniteQuery({
+    queryKey: queryKeys.posts.sender(userId!),
+    initialPageParam: 1,
+    queryFn: ({ pageParam = 1 }) => getPostsBySenderId(userId!, pageParam, 10),
+    getNextPageParam: (lastPage) => (lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined),
+  });
 
-  const handleEditProfile = async (username: string) => {
+  const posts = postsData?.pages.flatMap(({ posts }) => posts);
+
+  const { data: userData } = useInfiniteQuery({
+    queryKey: queryKeys.users.specific(userId!),
+    initialPageParam: 1,
+    queryFn: () => getUser(userId!),
+    getNextPageParam: () => undefined,
+  });
+
+  const user = userData?.pages[0];
+
+  const handleEditProfile = async (username: string, profilePictureURL: string) => {
     try {
-      await updateUserDetails(getUserId()!, { username });
+      await updateUserDetails(getUserId()!, { username, profilePictureURL });
       setIsEditModalOpen(false);
-      setUser((prev) => ({ ...prev, username }));
     } catch (error) {
       console.error('Failed to update profile:', error);
     }
   };
 
   return (
-    <Container maxWidth="md" sx={styles.pageWrapper}>
+    <Container maxWidth='md' sx={styles.pageWrapper}>
       <Box sx={styles.headerSection}>
-        <Avatar src={/*user.avatarUrl ||*/ USER_DATA.avatarUrl} sx={styles.avatar} />
+        <Avatar src={user?.profilePictureURL} sx={styles.avatar} />
 
-        <Box sx={{ flex: 1, width: isMobile ? '100%' : 'auto' }}>
+        <Box sx={{ flex: 1, width: 'auto' }}>
           <Box sx={styles.actionRow}>
-            <Typography variant="h6" sx={{ fontWeight: 400, fontSize: '1.25rem' }}>
-              {user.username}
+            <Typography variant='h6' sx={{ color: 'black' }}>
+              {user?.username}
             </Typography>
             <Box sx={{ display: 'flex', gap: '0.5rem' }}>
-              <Button variant="contained" size="small" sx={styles.editButton} onClick={() => setIsEditModalOpen(true)}>
+              <Button variant='contained' size='small' onClick={() => setIsEditModalOpen(true)}>
                 Edit profile
               </Button>
             </Box>
@@ -173,21 +138,21 @@ const ProfilePage = () => {
 
           <Box sx={styles.statsRow}>
             <Typography sx={{ fontSize: '1rem' }}>
-              <strong>{user.postsCount}</strong> posts
+              <strong>{user?.postCount || 0}</strong> posts
             </Typography>
           </Box>
 
           <Box>
-            <Typography variant="body2" color="text.secondary">
-              {user.bio || 'No Bio'}
+            <Typography variant='body2' color='text.secondary'>
+              {user?.bio || 'No Bio'}
             </Typography>
           </Box>
         </Box>
       </Box>
       <Box sx={styles.galleryContainer}>
-        {posts.map((post, index) => (
+        {posts?.map((post, index) => (
           <Box key={index} sx={styles.postItem}>
-            <Box component="img" src={post.content} sx={styles.postImg} />
+            <Box component='img' src={post.imageURL} sx={styles.postImg} />
           </Box>
         ))}
       </Box>
@@ -196,8 +161,8 @@ const ProfilePage = () => {
         open={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onSave={handleEditProfile}
-        currentUsername={user.username || ''}
-        currentAvatar={''}
+        currentUsername={user?.username || ''}
+        currentAvatar={user?.profilePictureURL || ''}
       />
     </Container>
   );

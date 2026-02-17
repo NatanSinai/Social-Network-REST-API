@@ -17,7 +17,7 @@ interface EditProfileModalProps {
   onClose: () => void;
   currentUsername: string;
   currentAvatar: string;
-  onSave: (newUsername: string) => void;
+  onSave: (newUsername: string, newAvatar: string) => void;
 }
 
 const modalStyles = {
@@ -54,7 +54,7 @@ const EditProfileModal = ({ open, onClose, onSave, currentUsername, currentAvata
   const [username, setUsername] = useState(currentUsername);
 
   return (
-    <Dialog open={open} onClose={onClose} PaperProps={{ sx: modalStyles.dialogPaper }}>
+    <Dialog open={open} onClose={onClose}>
       <DialogTitle sx={{ textAlign: 'center', fontWeight: 600 }}>Edit Profile</DialogTitle>
 
       <DialogContent>
@@ -62,7 +62,7 @@ const EditProfileModal = ({ open, onClose, onSave, currentUsername, currentAvata
           {/* Change Photo Section */}
           <Box sx={modalStyles.avatarWrapper}>
             <Avatar src={currentAvatar} sx={{ width: 100, height: 100, mx: 'auto' }} />
-            <Box className="overlay" sx={modalStyles.overlay}>
+            <Box className='overlay' sx={modalStyles.overlay}>
               <Camera size={24} />
             </Box>
           </Box>
@@ -70,22 +70,22 @@ const EditProfileModal = ({ open, onClose, onSave, currentUsername, currentAvata
           {/* Username Input */}
           <TextField
             fullWidth
-            label="Username"
-            variant="outlined"
+            label='Username'
+            variant='outlined'
             defaultValue={currentUsername}
-            placeholder="Enter username"
+            placeholder='Enter username'
             onChange={(e) => setUsername(e.target.value)}
           />
         </Stack>
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 3, justifyContent: 'space-between' }}>
-        <Button onClick={onClose} color="inherit" sx={{ textTransform: 'none' }}>
+        <Button onClick={onClose} color='inherit' sx={{ textTransform: 'none' }}>
           Cancel
         </Button>
         <Button
-          onClick={() => onSave(username)}
-          variant="contained"
+          onClick={() => onSave(username, currentAvatar)}
+          variant='contained'
           disableElevation
           sx={{ textTransform: 'none', px: 4, borderRadius: '8px' }}
         >

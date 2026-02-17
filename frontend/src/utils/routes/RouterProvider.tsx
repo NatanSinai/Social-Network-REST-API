@@ -1,4 +1,5 @@
 import useAuth from '@/hooks/useAuth';
+import ProfilePage from '@/pages/Profile';
 import { Box } from '@mui/material';
 import { Login, PostsFeedPage, SignUp } from '@pages';
 import { memo, useMemo } from 'react';
@@ -20,6 +21,15 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
           </Box>
         ),
         children: [{ path: RoutePath.POSTS_FEED, element: <PostsFeedPage /> }],
+      },
+      {
+        path: RoutePath._HOME,
+        element: (
+          <Box height='100%'>
+            <Outlet />
+          </Box>
+        ),
+        children: [{ path: RoutePath.PROFILE, element: <ProfilePage /> }],
       },
     ];
 
