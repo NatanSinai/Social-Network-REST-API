@@ -3,10 +3,11 @@ import { getPostsBySenderId } from '@/api/post';
 import { queryKeys } from '@/api/queryKeys';
 import { getUser, updateUserDetails } from '@/api/user';
 import EditProfileForm from '@/components/profile/EditProfileForm';
+import { useInfiniteScroll } from '@/hooks';
 import { useAuthContext } from '@/providers/AuthProvider';
 import { envVar } from '@/utils/env';
-import { GenericDialog } from '@components';
-import { Avatar, Box, Button, Container, Typography } from '@mui/material';
+import { GenericDialog, PostView } from '@components';
+import { Avatar, Box, Button, Container, Grid, Stack, Typography } from '@mui/material';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
@@ -45,33 +46,12 @@ const styles: Record<string, any> = {
     mb: '1.5rem',
   },
   galleryContainer: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: 'min(3vw, 1.8rem)',
     overflowY: 'auto',
     flexGrow: 1,
     paddingBottom: '2rem',
     alignContent: 'start',
-    '&::-webkit-scrollbar': { width: '4px' },
-    '&::-webkit-scrollbar-thumb': { borderRadius: '10px', bgcolor: 'grey.300' },
-  },
-  postItem: {
-    position: 'relative',
+    '&::-webkit-scrollbar': { width: 0 },
     width: '100%',
-    aspectRatio: '1 / 1',
-    bgcolor: 'grey.100',
-    cursor: 'pointer',
-    overflow: 'hidden',
-    '&:hover img': { filter: 'brightness(0.85)' },
-  },
-  postImg: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    transition: 'all 0.2s ease',
   },
 };
 
@@ -80,7 +60,7 @@ const ProfilePage = () => {
   const queryClient = useQueryClient();
   const { userId } = useAuthContext();
 
-  const { data: postsData } = useInfiniteQuery({
+  const { data: postsData, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: queryKeys.posts.sender(userId!),
     initialPageParam: 1,
     queryFn: ({ pageParam = 1 }) => getPostsBySenderId(userId!, pageParam, 10),
@@ -88,6 +68,7 @@ const ProfilePage = () => {
     enabled: !!userId,
   });
 
+  const loadMoreRef = useInfiniteScroll({ callback: fetchNextPage, isEnabled: hasNextPage && !isFetchingNextPage });
   const posts = postsData?.pages.flatMap((page: any) => page.posts) || [];
 
   const { data: user } = useQuery({
@@ -132,28 +113,19 @@ const ProfilePage = () => {
               </Button>
             </Box>
           </Box>
-
-          <Box sx={styles.statsRow}>
-            <Typography sx={{ fontSize: '1rem' }}>
-              <strong>{user?.postCount || 0}</strong> posts
-            </Typography>
-          </Box>
-
-          <Box>
-            <Typography variant='body2' color='text.secondary'>
-              {user?.bio || 'No Bio'}
-            </Typography>
-          </Box>
         </Box>
       </Box>
 
-      <Box sx={styles.galleryContainer}>
-        {posts.map((post: any, index: number) => (
-          <Box key={post.id || index} sx={styles.postItem}>
-            <Box component='img' src={post.imageURL} sx={styles.postImg} />
-          </Box>
-        ))}
-      </Box>
+      <Stack sx={styles.galleryContainer} alignItems='center'>
+        <Grid container spacing={3} justifyContent='center' sx={{ width: '100%', maxWidth: '65%' }}>
+          {posts.map((post: any) => (
+            <Grid size={{ xs: 12, sm: 6 }} key={post.id}>
+              <PostView post={post} />
+            </Grid>
+          ))}
+          <div ref={loadMoreRef} style={{ height: 40, width: '100%' }} />
+        </Grid>
+      </Stack>
 
       <GenericDialog isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title='Edit Profile'>
         <EditProfileForm
