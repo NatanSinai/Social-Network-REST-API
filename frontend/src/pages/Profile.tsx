@@ -81,7 +81,6 @@ const ProfilePage = () => {
     try {
       await updateUserDetails(userId!, {
         username: values.username,
-        // Only send image if the user picked a new File — ignore the existing URL string
         image: values.image instanceof File ? values.image : undefined,
       });
 

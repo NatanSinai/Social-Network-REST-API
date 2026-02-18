@@ -8,7 +8,6 @@ import type z from 'zod';
 import { z as zod } from 'zod';
 import { ImageUpload } from '../generic';
 
-// For the profile form, image can be a new File, an existing URL string, or undefined
 const profileImageSchema = zod.union([imageSchema, zod.string()]).optional();
 
 export const userFormSchema = userSchema.pick({ username: true }).extend({ image: profileImageSchema });

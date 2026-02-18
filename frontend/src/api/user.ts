@@ -30,7 +30,6 @@ export const updateUserDetails = async (userId: string, body: UpdateUserDetailsD
   const formData = new FormData();
 
   if (body.username) formData.append('username', body.username);
-  // Must use 'profilePicture' — this is the field name multer listens for on the backend
   if (body.image) formData.append('profilePicture', body.image);
 
   return backendAPI.put(`${USERS_BASE_API}/${userId}`, formData);

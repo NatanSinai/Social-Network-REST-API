@@ -127,7 +127,6 @@ usersRouter.put<{ userId: string }, UserDocument, Omit<UpdateUserDTO, 'profilePi
     const authenticatedUserId = request.userId;
     const { file, body: updateUserDTOWithoutImage } = request;
 
-    // Safety check: Compare as strings
     const isOwner = authenticatedUserId?.toString() === paramsId;
 
     if (!isOwner || !isValidObjectId(paramsId)) {
@@ -141,7 +140,6 @@ usersRouter.put<{ userId: string }, UserDocument, Omit<UpdateUserDTO, 'profilePi
       ...(profilePictureURL && { profilePictureURL }),
     };
 
-    // FIX: Cast paramsId to any to satisfy the Service's ObjectId requirement
     const updatedUser = await userService.updateById(authenticatedUserId, updateUserDTO);
 
     if (!updatedUser) return respondWithNotFoundUser(authenticatedUserId, response);

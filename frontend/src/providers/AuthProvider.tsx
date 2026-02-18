@@ -71,7 +71,6 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     }
   };
 
-  // Keep state in sync with localStorage if it changes elsewhere (e.g. manual deletion, though less likely)
   useEffect(() => {
     const checkAuth = () => {
       setIsUserLoggedIn(!!localStorage.getItem('accessToken'));
