@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getPostsBySenderId } from '@/api/post';
 import { queryKeys } from '@/api/queryKeys';
-import { getUser, getUserId, updateUserDetails } from '@/api/user';
+import { getUser, updateUserDetails } from '@/api/user';
 import EditProfileForm from '@/components/profile/EditProfileForm';
+import { useAuthContext } from '@/providers/AuthProvider';
 import { envVar } from '@/utils/env';
 import { GenericDialog } from '@components';
 import { Avatar, Box, Button, Container, Typography } from '@mui/material';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 const styles: Record<string, any> = {
   pageWrapper: {
@@ -77,7 +78,7 @@ const styles: Record<string, any> = {
 const ProfilePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const queryClient = useQueryClient();
-  const userId = useMemo(() => getUserId(), []);
+  const { userId } = useAuthContext();
 
   const { data: postsData } = useInfiniteQuery({
     queryKey: queryKeys.posts.sender(userId!),

@@ -1,21 +1,15 @@
 import { getPosts } from '@/api/post';
 import { queryKeys } from '@/api/queryKeys';
-import { getUser, getUserId } from '@/api/user';
-import ProfileButton from '@/components/profile/ProfileButton';
 import { useInfiniteScroll } from '@/hooks';
 import { PostView } from '@components';
-import { envVar } from '@env';
 import { Grid, Stack } from '@mui/material';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { useMemo, type FC } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { type FC } from 'react';
 import { CreatePostButton, NoPostsMessage } from './components';
 
 export type PostsFeedPageProps = {};
 
 export const PostsFeedPage: FC<PostsFeedPageProps> = () => {
-  const navigate = useNavigate();
-  const userId = useMemo(() => getUserId(), []);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: queryKeys.posts.all(),
@@ -28,21 +22,10 @@ export const PostsFeedPage: FC<PostsFeedPageProps> = () => {
 
   const posts = data?.pages.flatMap(({ posts }) => posts);
 
-  const { data: user } = useQuery({
-    queryKey: queryKeys.users.specific(userId!),
-    queryFn: () => getUser(userId!),
-    enabled: !!userId,
-  });
-
   // TODO: Add skeletons on loading
 
   return (
     <Stack justifyContent='center' alignItems='center' height='100%'>
-      <ProfileButton
-        src={user?.profilePictureURL ? `${envVar.VITE_BACKEND_URL}${user.profilePictureURL}` : ''}
-        onClick={() => navigate('/v1/home/profile')}
-        username={user?.username}
-      />
       {!posts?.length ? (
         <NoPostsMessage />
       ) : (

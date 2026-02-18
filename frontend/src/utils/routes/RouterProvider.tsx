@@ -1,5 +1,6 @@
 import useAuth from '@/hooks/useAuth';
 import ProfilePage from '@/pages/Profile';
+import { Navbar } from '@components';
 import { Box } from '@mui/material';
 import { Login, PostsFeedPage, SignUp } from '@pages';
 import { memo, useMemo } from 'react';
@@ -59,8 +60,11 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
       {
         path: RoutePath._ROOT,
         element: (
-          <Box bgcolor='primary.main' height='100%'>
-            <Outlet />
+          <Box bgcolor='primary.main' height='100vh' display='flex' flexDirection='column'>
+            <Navbar />
+            <Box flexGrow={1} overflow='auto'>
+              <Outlet />
+            </Box>
           </Box>
         ),
         children: [loginRoute, signUpRoute, ...userProtectedRoutes],
