@@ -5,14 +5,18 @@ import { Button, DialogActions, DialogContent, Stack, TextField } from '@mui/mat
 import { type FC } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import type z from 'zod';
+import { z as zod } from 'zod';
 import { ImageUpload } from '../generic';
 
-export const userFormSchema = userSchema.pick({ username: true }).extend({ image: imageSchema });
+// For the profile form, image can be a new File, an existing URL string, or undefined
+const profileImageSchema = zod.union([imageSchema, zod.string()]).optional();
+
+export const userFormSchema = userSchema.pick({ username: true }).extend({ image: profileImageSchema });
 
 export type UserFormValues = z.infer<typeof userFormSchema>;
 
 export type EditProfileFormProps = {
-  defaultValues?: Partial<UserFormValues>;
+  defaultValues?: Partial<UserFormValues> & { image?: string };
   onSubmit: (values: UserFormValues) => void;
   onClose: () => void;
 };

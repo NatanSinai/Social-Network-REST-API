@@ -3,9 +3,10 @@ import { getPostsBySenderId } from '@/api/post';
 import { queryKeys } from '@/api/queryKeys';
 import { getUser, getUserId, updateUserDetails } from '@/api/user';
 import EditProfileForm from '@/components/profile/EditProfileForm';
+import { envVar } from '@/utils/env';
 import { GenericDialog } from '@components';
 import { Avatar, Box, Button, Container, Typography } from '@mui/material';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 
 const styles: Record<string, any> = {
@@ -37,25 +38,10 @@ const styles: Record<string, any> = {
     gap: '1.2rem',
     flexWrap: 'wrap',
   },
-  editButton: {
-    bgcolor: 'grey.200',
-    color: 'text.primary',
-    textTransform: 'none',
-    fontWeight: 600,
-    px: '1.2rem',
-    '&:hover': { bgcolor: 'grey.300' },
-    boxShadow: 'none',
-  },
   statsRow: {
     display: 'flex',
     gap: '2.5rem',
     mb: '1.5rem',
-  },
-  bioLink: {
-    color: '#00376b',
-    fontWeight: 600,
-    textDecoration: 'none',
-    fontSize: '0.9rem',
   },
   galleryContainer: {
     display: 'grid',
@@ -64,10 +50,9 @@ const styles: Record<string, any> = {
     overflowY: 'auto',
     flexGrow: 1,
     paddingBottom: '2rem',
-    // Ensures items don't collapse or overlap
     alignContent: 'start',
     '&::-webkit-scrollbar': { width: '4px' },
-    '&::-webkit-scrollbar-thumb': { borderRadius: '10px' },
+    '&::-webkit-scrollbar-thumb': { borderRadius: '10px', bgcolor: 'grey.300' },
   },
   postItem: {
     position: 'relative',
@@ -91,32 +76,36 @@ const styles: Record<string, any> = {
 
 const ProfilePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const queryClient = useQueryClient();
   const userId = useMemo(() => getUserId(), []);
 
   const { data: postsData } = useInfiniteQuery({
     queryKey: queryKeys.posts.sender(userId!),
     initialPageParam: 1,
     queryFn: ({ pageParam = 1 }) => getPostsBySenderId(userId!, pageParam, 10),
-    getNextPageParam: (lastPage) => (lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined),
+    getNextPageParam: (lastPage: any) => (lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined),
+    enabled: !!userId,
   });
 
-  const posts = postsData?.pages.flatMap(({ posts }) => posts);
+  const posts = postsData?.pages.flatMap((page: any) => page.posts) || [];
 
-  const { data: userData } = useInfiniteQuery({
+  const { data: user } = useQuery({
     queryKey: queryKeys.users.specific(userId!),
-    initialPageParam: 1,
     queryFn: () => getUser(userId!),
-    getNextPageParam: () => undefined,
+    enabled: !!userId,
   });
 
-  const user = userData?.pages[0];
-
-  const handleEditProfile = async (values: { username: string; image?: File | undefined }) => {
+  const handleEditProfile = async (values: { username: string; image?: File | string | undefined }) => {
     try {
-      await updateUserDetails(getUserId()!, {
+      await updateUserDetails(userId!, {
         username: values.username,
-        image: values.image,
+        // Only send image if the user picked a new File — ignore the existing URL string
+        image: values.image instanceof File ? values.image : undefined,
       });
+
+      await queryClient.invalidateQueries({ queryKey: queryKeys.users.specific(userId!) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.posts.sender(userId!) });
+
       setIsEditModalOpen(false);
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -126,12 +115,15 @@ const ProfilePage = () => {
   return (
     <Container maxWidth='md' sx={styles.pageWrapper}>
       <Box sx={styles.headerSection}>
-        <Avatar src={user?.profilePictureURL} sx={styles.avatar} />
+        <Avatar
+          src={user?.profilePictureURL ? `${envVar.VITE_BACKEND_URL}${user.profilePictureURL}` : undefined}
+          sx={styles.avatar}
+        />
 
         <Box sx={{ flex: 1, width: 'auto' }}>
           <Box sx={styles.actionRow}>
             <Typography variant='h6' sx={{ color: 'black' }}>
-              {user?.username}
+              {user?.username || 'Loading...'}
             </Typography>
             <Box sx={{ display: 'flex', gap: '0.5rem' }}>
               <Button variant='contained' size='small' onClick={() => setIsEditModalOpen(true)}>
@@ -153,20 +145,24 @@ const ProfilePage = () => {
           </Box>
         </Box>
       </Box>
+
       <Box sx={styles.galleryContainer}>
-        {posts?.map((post, index) => (
-          <Box key={index} sx={styles.postItem}>
+        {posts.map((post: any, index: number) => (
+          <Box key={post.id || index} sx={styles.postItem}>
             <Box component='img' src={post.imageURL} sx={styles.postImg} />
           </Box>
         ))}
       </Box>
 
-      <GenericDialog {...{ isOpen: isEditModalOpen, onClose: () => setIsEditModalOpen(false), title: 'Edit Profile' }}>
+      <GenericDialog isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title='Edit Profile'>
         <EditProfileForm
-          {...{
-            onClose: () => setIsEditModalOpen(false),
-            onSubmit: handleEditProfile,
-            defaultValues: { username: user?.username },
+          onClose={() => setIsEditModalOpen(false)}
+          onSubmit={handleEditProfile}
+          defaultValues={{
+            username: user?.username,
+            image: user?.profilePictureURL
+              ? `${envVar.VITE_BACKEND_URL}${user.profilePictureURL}`
+              : undefined,
           }}
         />
       </GenericDialog>

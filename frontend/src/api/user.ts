@@ -21,12 +21,17 @@ export const getUserId = () => {
   }
 };
 
-type WithUserImage<T = unknown> = T & { image?: File | null };
-
-export type UpdateUserDetailsDTO = WithUserImage<Pick<User, 'username'>>;
+export type UpdateUserDetailsDTO = {
+  username?: string;
+  image?: File | null;
+};
 
 export const updateUserDetails = async (userId: string, body: UpdateUserDetailsDTO) => {
-  return backendAPI.put(`${USERS_BASE_API}/${userId}`, body, {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  const formData = new FormData();
+
+  if (body.username) formData.append('username', body.username);
+  // Must use 'profilePicture' — this is the field name multer listens for on the backend
+  if (body.image) formData.append('profilePicture', body.image);
+
+  return backendAPI.put(`${USERS_BASE_API}/${userId}`, formData);
 };

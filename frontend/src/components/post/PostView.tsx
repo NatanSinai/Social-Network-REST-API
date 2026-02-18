@@ -28,7 +28,8 @@ export const PostView: FC<PostViewProps> = ({
 }) => {
   const [liked, setLiked] = useState(false);
 
-  const fullImageURL = `${envVar.VITE_BACKEND_URL}${imageURL}`;
+  const fullImageURL = imageURL ? `${envVar.VITE_BACKEND_URL}${imageURL}` : undefined;
+  const fullAuthorAvatarURL = authorProfilePictureURL ? `${envVar.VITE_BACKEND_URL}${authorProfilePictureURL}` : undefined;
 
   return (
     <Card sx={{ borderRadius: 4, width: '100%' }} elevation={10}>
@@ -46,7 +47,7 @@ export const PostView: FC<PostViewProps> = ({
         </Stack>
 
         <Stack direction='row' spacing={1} alignItems='center'>
-          <Avatar src={authorProfilePictureURL} alt={authorName} />
+          <Avatar src={fullAuthorAvatarURL} alt={authorName} />
 
           <Typography variant='body2' color='text.primary'>
             {authorName}
