@@ -4,12 +4,13 @@ import { useInfiniteScroll } from '@/hooks';
 import { PostView } from '@components';
 import { Grid, Stack } from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import type { FC } from 'react';
+import { type FC } from 'react';
 import { CreatePostButton, NoPostsMessage } from './components';
 
 export type PostsFeedPageProps = {};
 
 export const PostsFeedPage: FC<PostsFeedPageProps> = () => {
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: queryKeys.posts.all(),
     initialPageParam: 1,

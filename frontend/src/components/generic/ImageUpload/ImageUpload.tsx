@@ -1,4 +1,3 @@
-import type { PostFormValues } from '@/components/post';
 import { Delete, Upload } from '@mui/icons-material';
 import { Box, FormHelperText, IconButton, Stack, Typography, type IconButtonProps } from '@mui/material';
 import { useRef, type FC } from 'react';
@@ -7,7 +6,7 @@ import { useImageDragAndDrop, useImagePaste, useImagePreview } from './hooks';
 
 export type FileOrURL = File | string | null;
 
-export type ImageUploadProps = ControllerRenderProps<PostFormValues, 'image'> & {
+export type ImageUploadProps = ControllerRenderProps<{ image: FileOrURL | undefined }, 'image'> & {
   size?: number;
   error: string | undefined;
 };

@@ -164,7 +164,7 @@ postsRouter.get<
 
   const [posts, total] = await Promise.all([
     postService.getParsedPosts({ senderId }, { skip, limit, sort: { createdAt: -1 } }),
-    postService.count(),
+    postService.count({ senderId } as any),
   ]);
 
   response.send({

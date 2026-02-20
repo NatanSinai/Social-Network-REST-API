@@ -50,7 +50,7 @@ export const Login: FC = () => {
     <Container component='main' maxWidth='xs' sx={{ height: '100vh', display: 'flex', alignItems: 'center' }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
         <Paper elevation={3} sx={{ padding: 4, width: '100%', borderRadius: 2 }}>
-          <Typography component='h1' variant='h5' align='center' gutterBottom>
+          <Typography color='primary.main' component='h1' variant='h5' align='center' gutterBottom>
             Sign In
           </Typography>
           <Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>

@@ -1,16 +1,18 @@
 import { authMiddleware } from '@middlewares';
 import {
+  createUploadedFilePath,
   isDuplicateKeyMongoError,
   respondWithBadRequest,
   respondWithInvalidId,
   respondWithJSONMessage,
   respondWithNotFoundById,
+  upload,
 } from '@utils';
 import { Router, type Response } from 'express';
 import { isValidObjectId } from 'mongoose';
 import UserService from './user.service';
 import type { CreateUserDTO, UpdateUserDTO, User, UserDocument } from './user.types';
-
+const USER_IMAGE_FIELD = 'profilePicture';
 const usersRouter = Router();
 const userService = new UserService();
 
@@ -103,25 +105,44 @@ usersRouter.get<{ userId: User['_id'] }>('/:userId', async (request, response) =
  *           $ref: '#/components/schemas/ObjectId'
  *     requestBody:
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/UpdateUserDTO'
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               profilePicture:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Updated user
  */
-usersRouter.put<{ userId: User['_id'] }, UserDocument, UpdateUserDTO>(
+usersRouter.put<{ userId: string }, UserDocument, Omit<UpdateUserDTO, 'profilePictureURL'>>(
   '/:userId',
   authMiddleware(),
+  upload.single(USER_IMAGE_FIELD),
   async (request, response) => {
-    const { userId } = request.params;
-    const updateUserDTO = request.body;
+    const { userId: paramsId } = request.params;
+    const authenticatedUserId = request.userId;
+    const { file, body: updateUserDTOWithoutImage } = request;
 
-    if (request.userId !== userId || !isValidObjectId(userId)) return respondWithInvalidId(userId, response, 'user');
+    const isOwner = authenticatedUserId?.toString() === paramsId;
 
-    const updatedUser = await userService.updateById(userId, updateUserDTO);
+    if (!isOwner || !isValidObjectId(paramsId)) {
+      return respondWithInvalidId(paramsId, response, 'user');
+    }
 
-    if (!updatedUser) return respondWithNotFoundUser(userId, response);
+    const profilePictureURL = createUploadedFilePath(file);
+
+    const updateUserDTO: UpdateUserDTO = {
+      ...updateUserDTOWithoutImage,
+      ...(profilePictureURL && { profilePictureURL }),
+    };
+
+    const updatedUser = await userService.updateById(authenticatedUserId, updateUserDTO);
+
+    if (!updatedUser) return respondWithNotFoundUser(authenticatedUserId, response);
 
     response.send(updatedUser);
   },
