@@ -1,18 +1,12 @@
 import { Delete, Upload } from '@mui/icons-material';
 import { Box, FormHelperText, IconButton, Stack, Typography, type IconButtonProps } from '@mui/material';
 import { useRef, type FC } from 'react';
-import type { Noop, RefCallBack } from 'react-hook-form';
+import type { ControllerRenderProps } from 'react-hook-form';
 import { useImageDragAndDrop, useImagePaste, useImagePreview } from './hooks';
 
 export type FileOrURL = File | string | null;
 
-export type ImageUploadProps = {
-  value?: FileOrURL;
-  onChange: (value: FileOrURL) => void;
-  onBlur: Noop;
-  name: string;
-  ref?: RefCallBack;
-  disabled?: boolean;
+export type ImageUploadProps = ControllerRenderProps<{ image: FileOrURL | undefined }, 'image'> & {
   size?: number;
   error: string | undefined;
 };

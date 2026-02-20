@@ -23,7 +23,7 @@ export type EditProfileFormProps = {
 const EditProfileForm: FC<EditProfileFormProps> = ({ defaultValues, onSubmit, onClose }) => {
   const { handleSubmit, control } = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
-    defaultValues: { username: '', image: undefined, ...defaultValues },
+    defaultValues,
     mode: 'onTouched',
   });
 
