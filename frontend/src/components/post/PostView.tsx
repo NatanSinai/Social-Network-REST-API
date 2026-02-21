@@ -14,6 +14,8 @@ import {
   Typography,
 } from '@mui/material';
 import { useState, type FC } from 'react';
+import { useBoolean } from 'usehooks-ts';
+import { CommentsDialog } from './CommentsDialog';
 
 export type PostViewProps = { post: Post };
 
@@ -24,9 +26,11 @@ export const PostView: FC<PostViewProps> = ({
     content,
     author: { username: authorName, profilePictureURL: authorProfilePictureURL },
     commentsAmount,
+    id: postId,
   },
 }) => {
   const [liked, setLiked] = useState(false);
+  const { value: isCommentsOpen, setTrue: openComments, setFalse: closeComments } = useBoolean();
 
   const fullImageURL = imageURL ? `${envVar.VITE_BACKEND_URL}${imageURL}` : undefined;
   const fullAuthorAvatarURL = authorProfilePictureURL ? `${envVar.VITE_BACKEND_URL}${authorProfilePictureURL}` : undefined;
@@ -63,11 +67,13 @@ export const PostView: FC<PostViewProps> = ({
         </IconButton>
 
         <Badge badgeContent={commentsAmount} overlap='circular' color='primary'>
-          <IconButton>
+          <IconButton onClick={openComments}>
             <ChatBubbleOutline />
           </IconButton>
         </Badge>
       </CardActions>
+
+      <CommentsDialog postId={postId} isOpen={isCommentsOpen} onClose={closeComments} />
     </Card>
   );
 };
