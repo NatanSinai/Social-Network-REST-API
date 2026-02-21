@@ -1,3 +1,4 @@
+import { createFullImageURL } from '@helpers';
 import { useEffect, useMemo } from 'react';
 import type { FileOrURL } from '../ImageUpload';
 
@@ -9,7 +10,11 @@ export const useImagePreview = ({ value }: UseImagePreviewArgs) => {
   const previewUrl = useMemo(() => {
     if (value instanceof File) return URL.createObjectURL(value);
 
-    if (typeof value === 'string') return value;
+    if (typeof value === 'string') {
+      const isTempImage = value.startsWith('blob');
+
+      return isTempImage ? value : createFullImageURL(value);
+    }
 
     return null;
   }, [value]);

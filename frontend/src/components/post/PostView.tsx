@@ -1,6 +1,7 @@
 import type { Post } from '@entities';
-import { envVar } from '@env';
-import { ChatBubbleOutline, Favorite, FavoriteBorder } from '@mui/icons-material';
+import { createFullImageURL } from '@helpers';
+import { useAuth } from '@hooks';
+import { ChatBubbleOutline, Edit, Favorite, FavoriteBorder } from '@mui/icons-material';
 import {
   Avatar,
   Badge,
@@ -13,26 +14,34 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { useState, type FC } from 'react';
+import { useRef, useState, type FC, type RefObject } from 'react';
+import { useHover } from 'usehooks-ts';
 
-export type PostViewProps = { post: Post };
+export type PostViewProps = { post: Post; openEditPostDialog: (post: Post) => void };
 
-export const PostView: FC<PostViewProps> = ({
-  post: {
+export const PostView: FC<PostViewProps> = ({ post, openEditPostDialog }) => {
+  const [liked, setLiked] = useState(false);
+
+  const { userId } = useAuth();
+
+  const postCardElementRef = useRef<HTMLDivElement>(null);
+  const isHovering = useHover(postCardElementRef as RefObject<HTMLDivElement>);
+
+  const {
     imageURL,
     title,
     content,
-    author: { username: authorName, profilePictureURL: authorProfilePictureURL },
+    author: { id: authorId, username: authorName, profilePictureURL: authorProfilePictureURL },
     commentsAmount,
-  },
-}) => {
-  const [liked, setLiked] = useState(false);
+  } = post;
 
-  const fullImageURL = `${envVar.VITE_BACKEND_URL}${imageURL}`;
+  const isUserAuthor = userId === authorId;
+
+  const fullImageURL = createFullImageURL(imageURL);
 
   return (
-    <Card sx={{ borderRadius: 4, width: '100%' }} elevation={10}>
-      <CardMedia component='img' height='180px' image={fullImageURL} alt={title} sx={{ objectFit: 'cover' }} />
+    <Card sx={{ borderRadius: 4, width: '100%' }} elevation={10} ref={postCardElementRef}>
+      <CardMedia component='img' height='180px' image={fullImageURL ?? title} alt={title} sx={{ objectFit: 'cover' }} />
 
       <CardContent component={Stack} spacing={1} bgcolor='secondary.main'>
         <Stack>
@@ -60,6 +69,15 @@ export const PostView: FC<PostViewProps> = ({
         <IconButton onClick={() => setLiked(!liked)} color={liked ? 'error' : 'default'}>
           {liked ? <Favorite /> : <FavoriteBorder />}
         </IconButton>
+
+        {isUserAuthor && (
+          <IconButton
+            onClick={() => openEditPostDialog(post)}
+            style={{ opacity: isHovering ? 1 : 0, transition: 'opacity 0.2s ease-in-out' }}
+          >
+            <Edit />
+          </IconButton>
+        )}
 
         <Badge badgeContent={commentsAmount} overlap='circular' color='primary'>
           <IconButton>

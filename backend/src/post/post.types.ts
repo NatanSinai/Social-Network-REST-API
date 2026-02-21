@@ -9,7 +9,10 @@ export type Post = Prettify<
 export type PostDocument = HydratedDocument<Post>;
 
 export type CreatePostDTO = MakeOptional<Pick<Post, '_id' | 'title' | 'content' | 'senderId' | 'imageURL'>, '_id'>;
-export type UpdatePostDTO = Partial<Pick<Post, 'title' | 'content' | 'senderId' | 'imageURL'>>;
+
+export type UpdatePostDTO = Partial<
+  Pick<Post, 'title' | 'content' | 'senderId' | 'imageURL'> & { isDeleteImage: 'true' | undefined }
+>;
 
 export type PostWithSender = Omit<Post, 'senderId'> & { senderId: User; commentsAmount: number };
 

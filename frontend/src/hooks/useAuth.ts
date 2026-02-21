@@ -1,52 +1,56 @@
 import { backendAPI } from '@api';
+import { getUserIdFromAccessToken } from '@helpers';
 import { useState } from 'react';
 
-type UseAuthReturnType = {
-  signup: (username: string, email: string, password: string) => Promise<void>;
-  login: (username: string, password: string) => Promise<void>;
-  loginWithGoogle: (idToken: string) => Promise<void>;
-  logout: () => Promise<void>;
-  isUserLoggedIn: boolean;
-};
+export type UseAuthArgs = {};
 
-const useAuth: () => UseAuthReturnType = () => {
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(!!localStorage.getItem('accessToken'));
+export type UseAuthContent = ReturnType<typeof useAuth>;
+
+export const useAuth = () => {
+  const [userId, setUserId] = useState(localStorage.getItem('userId'));
+
+  const updateUserIdFromAccessToken = (accessToken: string) => {
+    const userId = getUserIdFromAccessToken(accessToken);
+
+    localStorage.setItem('accessToken', accessToken);
+
+    if (userId) localStorage.setItem('userId', userId);
+
+    setUserId(userId);
+  };
 
   const signup = async (username: string, email: string, password: string) => {
     await backendAPI.post('/users', { username, email, password });
+
     await login(username, password);
   };
 
   const login = async (username: string, password: string) => {
-    const res = await backendAPI.post('/auth/login', { username, password });
-    const { accessToken } = res.data;
+    const {
+      data: { accessToken },
+    } = await backendAPI.post<{ accessToken: string }>('/auth/login', { username, password });
 
-    if (accessToken) {
-      localStorage.setItem('accessToken', accessToken);
-      setIsUserLoggedIn(true);
-    }
+    updateUserIdFromAccessToken(accessToken);
   };
 
   const loginWithGoogle = async (idToken: string) => {
-    const res = await backendAPI.post('/auth/google', { idToken });
-    const { accessToken } = res.data;
+    const {
+      data: { accessToken },
+    } = await backendAPI.post<{ accessToken: string }>('/auth/google', { idToken });
 
-    if (accessToken) {
-      localStorage.setItem('accessToken', accessToken);
-      setIsUserLoggedIn(true);
-    }
+    updateUserIdFromAccessToken(accessToken);
   };
 
   const logout = async () => {
     try {
       await backendAPI.post('/auth/logout');
+    } catch (error) {
+      console.error('Error while logout', error);
     } finally {
       localStorage.removeItem('accessToken');
-      setIsUserLoggedIn(false);
+      setUserId(null);
     }
   };
 
-  return { signup, login, logout, isUserLoggedIn, loginWithGoogle };
+  return { signup, login, logout, userId, loginWithGoogle };
 };
-
-export default useAuth;

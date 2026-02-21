@@ -1,13 +1,13 @@
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@hooks';
 import type { FC } from 'react';
 import { ProtectedRoute, type ProtectedRouteProps } from '..';
 
 export type UserProtectedRouteProps = ProtectedRouteProps;
 
 const UserProtectedRoute: FC<UserProtectedRouteProps> = ({ isRedirect, ...protectedRouteProps }) => {
-  const { isUserLoggedIn: isLoggedIn } = useAuth();
+  const { userId } = useAuth();
 
-  const totalIsRedirect = isRedirect || !isLoggedIn;
+  const totalIsRedirect = isRedirect || !userId;
 
   return <ProtectedRoute {...{ isRedirect: totalIsRedirect, ...protectedRouteProps }} />;
 };

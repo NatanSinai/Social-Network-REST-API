@@ -1,6 +1,6 @@
 import { CreatePostDialog } from '@components';
 import { Button } from '@mui/material';
-import { type FC } from 'react';
+import type { FC } from 'react';
 import { useBoolean } from 'usehooks-ts';
 
 export type CreatePostButtonProps = {};

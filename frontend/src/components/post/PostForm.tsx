@@ -7,7 +7,7 @@ import { Controller, useForm } from 'react-hook-form';
 import type z from 'zod';
 import { ImageUpload } from '../generic';
 
-export const postFormSchema = postSchema.pick({ title: true, content: true }).extend({ image: imageSchema });
+export const postFormSchema = postSchema.pick({ title: true, content: true }).extend({ image: imageSchema.nullable() });
 
 export type PostFormValues = z.infer<typeof postFormSchema>;
 
@@ -61,6 +61,7 @@ export const PostForm: FC<PostFormProps> = ({ defaultValues, onSubmit, submitLab
                   helperText={error?.message}
                   disabled={isSubmitting}
                   fullWidth
+                  autoFocus
                 />
               )}
             />

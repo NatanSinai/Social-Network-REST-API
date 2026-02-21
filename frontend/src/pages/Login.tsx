@@ -1,5 +1,5 @@
-import useAuth from '@/hooks/useAuth';
 import { RoutePath } from '@/utils/routes';
+import { useAuth } from '@hooks';
 import { Box, Button, Container, Link, Paper, TextField, Typography } from '@mui/material';
 import { GoogleLogin, type GoogleLoginProps } from '@react-oauth/google';
 import { useState, type FC, type SyntheticEvent } from 'react';

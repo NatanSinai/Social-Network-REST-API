@@ -1,6 +1,6 @@
 import { authMiddleware } from '@middlewares';
 import UserService from '@user/user.service';
-import { createUploadedFilePath, respondWithInvalidId, respondWithNotFoundById, upload } from '@utils';
+import { createUploadedFilePath, deleteFile, respondWithInvalidId, respondWithNotFoundById, upload } from '@utils';
 import { Router, type Response } from 'express';
 import { isValidObjectId } from 'mongoose';
 import PostService from './post.service';
@@ -102,7 +102,7 @@ postsRouter.put<{ postId: string }, PostDocument, Omit<UpdatePostDTO, 'imageURL'
   '/:postId',
   authMiddleware(),
   upload.single(POST_IMAGE_FIELD),
-  async ({ params, body: updatePostDTOWithoutImageURL, userId: senderId, file }, response) => {
+  async ({ params, body: { isDeleteImage, ...updatePostDTOWithoutImageURL }, userId: senderId, file }, response) => {
     if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
     if (!isValidObjectId(params.postId)) return respondWithInvalidId(params.postId, response, 'post');
@@ -115,8 +115,17 @@ postsRouter.put<{ postId: string }, PostDocument, Omit<UpdatePostDTO, 'imageURL'
     if (!isUserExist || !currentPost || currentPost.senderId.toString() !== senderId.toString())
       return respondWithNotFoundById(senderId, response, 'sender');
 
-    const imageURL = createUploadedFilePath(file);
-    const updatePostDTO = { ...updatePostDTOWithoutImageURL, imageURL } satisfies UpdatePostDTO;
+    const updatePostDTO = { ...updatePostDTOWithoutImageURL, imageURL: currentPost.imageURL } satisfies UpdatePostDTO;
+
+    if (file) {
+      if (currentPost.imageURL) await deleteFile(currentPost.imageURL);
+
+      updatePostDTO.imageURL = createUploadedFilePath(file);
+    } else if (isDeleteImage === 'true') {
+      if (currentPost.imageURL) await deleteFile(currentPost.imageURL);
+
+      updatePostDTO.imageURL = null;
+    }
 
     const updatedPost = await postService.updateById(postId, updatePostDTO);
 
