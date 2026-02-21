@@ -1,7 +1,7 @@
 import { editPost } from '@/api/post';
 import { queryKeys } from '@/api/queryKeys';
-import { useCloseDirtyFormDialog } from '@/hooks';
 import type { Post } from '@entities';
+import { useCloseDirtyFormDialog } from '@hooks';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { FC } from 'react';
 import { PostForm, type PostFormProps } from '.';

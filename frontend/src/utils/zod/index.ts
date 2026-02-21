@@ -6,7 +6,7 @@ export const imageFileSchema = z
   .refine((file) => file instanceof File, 'Image is required')
   .refine((file) => !file || file.type.startsWith('image/'), 'File must be an image');
 
-export const imageURLSchema = z.string('hello').optional();
+export const imageURLSchema = z.string('Not a string').optional();
 
 export const imageSchema = z.union([imageFileSchema, imageURLSchema]);
 

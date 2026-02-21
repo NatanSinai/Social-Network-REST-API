@@ -1,4 +1,6 @@
-import { useAuth } from '@hooks';
+import ProfilePage from '@/pages/Profile';
+import { useAuthContext } from '@/providers/AuthProvider';
+import { Navbar } from '@components';
 import { Box } from '@mui/material';
 import { Login, PostsFeedPage, SignUp } from '@pages';
 import { memo, useMemo } from 'react';
@@ -8,7 +10,7 @@ import { INITIAL_USER_ROUTE, type ProtectedRouteObject, RoutePath, UserProtected
 export type RouterProviderProps = {};
 
 export const RouterProvider = memo<RouterProviderProps>(() => {
-  const { userId } = useAuth();
+  const { userId } = useAuthContext();
 
   const userProtectedRoutes = useMemo(() => {
     const routes: ProtectedRouteObject[] = [
@@ -20,6 +22,15 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
           </Box>
         ),
         children: [{ path: RoutePath.POSTS_FEED, element: <PostsFeedPage /> }],
+      },
+      {
+        path: RoutePath._HOME,
+        element: (
+          <Box height='100%'>
+            <Outlet />
+          </Box>
+        ),
+        children: [{ path: RoutePath.PROFILE, element: <ProfilePage /> }],
       },
     ];
 
@@ -49,8 +60,12 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
       {
         path: RoutePath._ROOT,
         element: (
-          <Box bgcolor='primary.main' height='100%'>
-            <Outlet />
+          <Box bgcolor='primary.main' height='100vh' display='flex' flexDirection='column'>
+            <Navbar />
+
+            <Box flexGrow={1} overflow='auto'>
+              <Outlet />
+            </Box>
           </Box>
         ),
         children: [loginRoute, signUpRoute, ...userProtectedRoutes],

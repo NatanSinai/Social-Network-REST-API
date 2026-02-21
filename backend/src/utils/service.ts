@@ -1,11 +1,9 @@
 import type { DocumentMetadata, MakeAllOrUndefined } from '@utils';
-import type { DeleteOptions } from 'mongodb';
 import type {
   ApplyBasicCreateCasting,
   CreateOptions,
   DeepPartial,
   Model,
-  MongooseBaseQueryOptions,
   QueryFilter,
   QueryOptions,
   Require_id,
@@ -60,10 +58,6 @@ export default class Service<
 
   deleteById(id: T['_id']) {
     return this.model.findByIdAndDelete(id);
-  }
-
-  deleteMany(filter?: QueryFilter<T>, options?: DeleteOptions & MongooseBaseQueryOptions<T>) {
-    return this.model.deleteMany(filter, options);
   }
 
   async exists(filter: QueryFilter<T>) {

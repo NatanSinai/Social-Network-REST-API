@@ -1,5 +1,5 @@
 import { ModelName, Service, type FilterQuery } from '@utils';
-import type { QueryOptions } from 'mongoose';
+import { Types, type QueryOptions } from 'mongoose';
 import postModel from './post.model';
 import type { CreatePostDTO, ParsedPost, PostDocument, UpdatePostDTO } from './post.types';
 
@@ -9,7 +9,9 @@ export default class PostService extends Service<PostDocument, CreatePostDTO, Up
   }
 
   async getParsedPosts({ senderId }: FilterQuery<PostDocument> = {}, options?: QueryOptions<PostDocument>) {
-    const postsFilter = senderId ? { senderId } : {};
+    const postsFilter = senderId
+      ? { senderId: typeof senderId === 'string' ? new Types.ObjectId(senderId) : senderId }
+      : {};
 
     const posts = await postModel.aggregate<ParsedPost>([
       { $match: postsFilter },

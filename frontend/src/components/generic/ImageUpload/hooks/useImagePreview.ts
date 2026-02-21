@@ -1,3 +1,4 @@
+import { envVar } from '@env';
 import { createFullImageURL } from '@helpers';
 import { useEffect, useMemo } from 'react';
 import type { FileOrURL } from '../ImageUpload';
@@ -12,8 +13,9 @@ export const useImagePreview = ({ value }: UseImagePreviewArgs) => {
 
     if (typeof value === 'string') {
       const isTempImage = value.startsWith('blob');
+      const isFullURLImagePath = value.startsWith(envVar.VITE_BACKEND_URL);
 
-      return isTempImage ? value : createFullImageURL(value);
+      return isTempImage || isFullURLImagePath ? value : createFullImageURL(value);
     }
 
     return null;

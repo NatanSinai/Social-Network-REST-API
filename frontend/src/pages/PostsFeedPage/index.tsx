@@ -1,7 +1,8 @@
 import { getPosts } from '@/api/post';
 import { queryKeys } from '@/api/queryKeys';
-import { useEditPostDialog, useInfiniteScroll } from '@/hooks';
-import { EditPostDialog, PostView } from '@components';
+import { useInfiniteScroll } from '@/hooks';
+import { useEditPostContext } from '@/providers/EditPostProvider';
+import { PostView } from '@components';
 import { Grid, Stack, Typography } from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import type { FC } from 'react';
@@ -12,14 +13,14 @@ const POSTS_ERROR_MESSAGE = 'We have some trouble getting the posts, please refr
 export type PostsFeedPageProps = {};
 
 export const PostsFeedPage: FC<PostsFeedPageProps> = () => {
+  const { openEditPostDialog } = useEditPostContext();
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isError } = useInfiniteQuery({
     queryKey: queryKeys.posts.all(),
     initialPageParam: 1,
     queryFn: ({ pageParam = 1 }) => getPosts(pageParam, 10),
     getNextPageParam: (lastPage) => (lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined),
   });
-
-  const { isEditPostDialogOpen, openEditPostDialog, closeEditPostDialog, postToEdit } = useEditPostDialog();
 
   const loadMoreRef = useInfiniteScroll({ callback: fetchNextPage, isEnabled: hasNextPage && !isFetchingNextPage });
 
@@ -60,8 +61,6 @@ export const PostsFeedPage: FC<PostsFeedPageProps> = () => {
           </Grid>
         </Stack>
       )}
-
-      <EditPostDialog {...{ isOpen: isEditPostDialogOpen, onClose: closeEditPostDialog, post: postToEdit }} />
     </Stack>
   );
 };

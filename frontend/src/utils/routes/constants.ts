@@ -4,6 +4,7 @@ export enum RoutePath {
   SIGNUP = `${_ROOT}/signup`,
   _HOME = `${_ROOT}/home`,
   POSTS_FEED = `${_HOME}/feed`,
+  PROFILE = `${_HOME}/profile`,
 }
 
 export const INITIAL_USER_ROUTE = RoutePath.POSTS_FEED;

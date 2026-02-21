@@ -14,13 +14,19 @@ export const getPosts = async (page: number, limit: number) => {
   return posts;
 };
 
+export const getPostsBySenderId = async (senderId: string, page: number, limit: number) => {
+  const { data: posts } = await backendAPI.get<PaginatedPosts>(`${POSTS_BASE_API}`, {
+    params: { sender: senderId, page, limit },
+  });
+
+  return posts;
+};
+
 export type CreatePostDTO = WithPostImage<Pick<Post, 'title' | 'content'>>;
 export type UpdatePostDTO = Partial<CreatePostDTO>;
 
 export const createPost = (createPostDTO: CreatePostDTO) => {
   const formData = new FormData();
-
-  console.log(createPostDTO);
 
   entries(createPostDTO).forEach(([key, value]) => (value ? formData.append(key, value) : undefined));
 

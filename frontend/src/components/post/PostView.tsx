@@ -1,6 +1,6 @@
+import { useAuthContext } from '@/providers/AuthProvider';
 import type { Post } from '@entities';
 import { createFullImageURL } from '@helpers';
-import { useAuth } from '@hooks';
 import { ChatBubbleOutline, Edit, Favorite, FavoriteBorder } from '@mui/icons-material';
 import {
   Avatar,
@@ -15,14 +15,16 @@ import {
   Typography,
 } from '@mui/material';
 import { useRef, useState, type FC, type RefObject } from 'react';
-import { useHover } from 'usehooks-ts';
+import { useBoolean, useHover } from 'usehooks-ts';
+import { CommentsDialog } from './CommentsDialog';
 
 export type PostViewProps = { post: Post; openEditPostDialog: (post: Post) => void };
 
 export const PostView: FC<PostViewProps> = ({ post, openEditPostDialog }) => {
   const [liked, setLiked] = useState(false);
+  const { value: isCommentsOpen, setTrue: openComments, setFalse: closeComments } = useBoolean();
 
-  const { userId } = useAuth();
+  const { userId } = useAuthContext();
 
   const postCardElementRef = useRef<HTMLDivElement>(null);
   const isHovering = useHover(postCardElementRef as RefObject<HTMLDivElement>);
@@ -33,11 +35,13 @@ export const PostView: FC<PostViewProps> = ({ post, openEditPostDialog }) => {
     content,
     author: { id: authorId, username: authorName, profilePictureURL: authorProfilePictureURL },
     commentsAmount,
+    id: postId,
   } = post;
 
   const isUserAuthor = userId === authorId;
 
   const fullImageURL = createFullImageURL(imageURL);
+  const fullAuthorAvatarURL = createFullImageURL(authorProfilePictureURL) ?? undefined;
 
   return (
     <Card sx={{ borderRadius: 4, width: '100%' }} elevation={10} ref={postCardElementRef}>
@@ -55,7 +59,7 @@ export const PostView: FC<PostViewProps> = ({ post, openEditPostDialog }) => {
         </Stack>
 
         <Stack direction='row' spacing={1} alignItems='center'>
-          <Avatar src={authorProfilePictureURL} alt={authorName} />
+          <Avatar src={fullAuthorAvatarURL} alt={authorName} />
 
           <Typography variant='body2' color='text.primary'>
             {authorName}
@@ -80,11 +84,13 @@ export const PostView: FC<PostViewProps> = ({ post, openEditPostDialog }) => {
         )}
 
         <Badge badgeContent={commentsAmount} overlap='circular' color='primary'>
-          <IconButton>
+          <IconButton onClick={openComments}>
             <ChatBubbleOutline />
           </IconButton>
         </Badge>
       </CardActions>
+
+      <CommentsDialog postId={postId} isOpen={isCommentsOpen} onClose={closeComments} />
     </Card>
   );
 };
