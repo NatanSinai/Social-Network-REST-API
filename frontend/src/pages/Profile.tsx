@@ -5,6 +5,7 @@ import { getUser, updateUserDetails } from '@/api/user';
 import EditProfileForm from '@/components/profile/EditProfileForm';
 import { useInfiniteScroll } from '@/hooks';
 import { useAuthContext } from '@/providers/AuthProvider';
+import { useEditPostContext } from '@/providers/EditPostProvider';
 import { envVar } from '@/utils/env';
 import { GenericDialog, PostView } from '@components';
 import { Avatar, Box, Button, Container, Grid, Stack, Typography } from '@mui/material';
@@ -59,17 +60,23 @@ const ProfilePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const queryClient = useQueryClient();
   const { userId } = useAuthContext();
+  const { openEditPostDialog } = useEditPostContext();
 
-  const { data: postsData, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+  const {
+    data: postsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: queryKeys.posts.sender(userId!),
     initialPageParam: 1,
     queryFn: ({ pageParam = 1 }) => getPostsBySenderId(userId!, pageParam, 10),
-    getNextPageParam: (lastPage: any) => (lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined),
+    getNextPageParam: (lastPage) => (lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined),
     enabled: !!userId,
   });
 
   const loadMoreRef = useInfiniteScroll({ callback: fetchNextPage, isEnabled: hasNextPage && !isFetchingNextPage });
-  const posts = postsData?.pages.flatMap((page: any) => page.posts) || [];
+  const posts = postsData?.pages.flatMap((page) => page.posts) || [];
 
   const { data: user } = useQuery({
     queryKey: queryKeys.users.specific(userId!),
@@ -106,6 +113,7 @@ const ProfilePage = () => {
             <Typography variant='h6' sx={{ color: 'black' }}>
               {user?.username || 'Loading...'}
             </Typography>
+
             <Box sx={{ display: 'flex', gap: '0.5rem' }}>
               <Button variant='contained' size='small' onClick={() => setIsEditModalOpen(true)}>
                 Edit profile
@@ -117,9 +125,9 @@ const ProfilePage = () => {
 
       <Stack sx={styles.galleryContainer} alignItems='center'>
         <Grid container spacing={3} justifyContent='center' sx={{ width: '100%', maxWidth: '65%' }}>
-          {posts.map((post: any) => (
+          {posts.map((post) => (
             <Grid size={{ xs: 12, sm: 6 }} key={post.id}>
-              <PostView post={post} />
+              <PostView {...{ post, openEditPostDialog }} />
             </Grid>
           ))}
           <div ref={loadMoreRef} style={{ height: 40, width: '100%' }} />
@@ -132,9 +140,7 @@ const ProfilePage = () => {
           onSubmit={handleEditProfile}
           defaultValues={{
             username: user?.username,
-            image: user?.profilePictureURL
-              ? `${envVar.VITE_BACKEND_URL}${user.profilePictureURL}`
-              : undefined,
+            image: user?.profilePictureURL ? `${envVar.VITE_BACKEND_URL}${user.profilePictureURL}` : undefined,
           }}
         />
       </GenericDialog>

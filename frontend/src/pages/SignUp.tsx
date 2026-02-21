@@ -1,4 +1,4 @@
-import useAuth from '@/hooks/useAuth';
+import { useAuthContext } from '@/providers/AuthProvider';
 import { RoutePath } from '@/utils/routes';
 import { Box, Button, Container, Link, Paper, Stack, TextField, Typography } from '@mui/material';
 import { GoogleLogin, type GoogleLoginProps } from '@react-oauth/google';
@@ -11,7 +11,7 @@ export const SignUp: FC = () => {
   const [usernameError, setUsernameError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
-  const { signup, loginWithGoogle } = useAuth();
+  const { signup, loginWithGoogle } = useAuthContext();
 
   const handleSubmit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();

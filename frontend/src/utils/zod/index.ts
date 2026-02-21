@@ -1,10 +1,14 @@
 import { z } from 'zod';
 
-export const imageSchema = z
-  .file()
+export const imageFileSchema = z
+  .file('Not a file')
   .optional()
   .refine((file) => file instanceof File, 'Image is required')
   .refine((file) => !file || file.type.startsWith('image/'), 'File must be an image');
+
+export const imageURLSchema = z.string('Not a string').optional();
+
+export const imageSchema = z.union([imageFileSchema, imageURLSchema]);
 
 export const metadataSchema = z.object({
   id: z.uuid({ message: 'id must be a valid UUID' }),

@@ -9,10 +9,9 @@ export default class PostService extends Service<PostDocument, CreatePostDTO, Up
   }
 
   async getParsedPosts({ senderId }: FilterQuery<PostDocument> = {}, options?: QueryOptions<PostDocument>) {
-    const postsFilter: any = {};
-    if (senderId) {
-      postsFilter.senderId = typeof senderId === 'string' ? new Types.ObjectId(senderId) : senderId;
-    }
+    const postsFilter = senderId
+      ? { senderId: typeof senderId === 'string' ? new Types.ObjectId(senderId) : senderId }
+      : {};
 
     const posts = await postModel.aggregate<ParsedPost>([
       { $match: postsFilter },

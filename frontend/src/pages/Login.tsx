@@ -1,4 +1,4 @@
-import useAuth from '@/hooks/useAuth';
+import { useAuthContext } from '@/providers/AuthProvider';
 import { RoutePath } from '@/utils/routes';
 import { Box, Button, Container, Link, Paper, TextField, Typography } from '@mui/material';
 import { GoogleLogin, type GoogleLoginProps } from '@react-oauth/google';
@@ -10,7 +10,7 @@ export const Login: FC = () => {
   const [error, setError] = useState<string>('');
   const [usernameError, setUsernameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle } = useAuthContext();
 
   const handleSubmit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -53,6 +53,7 @@ export const Login: FC = () => {
           <Typography color='primary.main' component='h1' variant='h5' align='center' gutterBottom>
             Sign In
           </Typography>
+
           <Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
             <TextField
               required
@@ -75,6 +76,7 @@ export const Login: FC = () => {
               autoComplete='current-password'
               error={passwordError}
             />
+
             <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2, py: 1.5 }}>
               Log In
             </Button>

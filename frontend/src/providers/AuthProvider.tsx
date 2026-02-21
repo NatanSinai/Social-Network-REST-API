@@ -1,11 +1,12 @@
 import { backendAPI } from '@api';
+import type { User } from '@entities';
+import { getUserIdFromAccessToken } from '@helpers';
 import { useQueryClient } from '@tanstack/react-query';
-import { jwtDecode } from 'jwt-decode';
-import { createContext, useContext, useEffect, useState, type FC, type ReactNode } from 'react';
+import { createContext, useContext, useState, type FC, type ReactNode } from 'react';
+import { useEventListener } from 'usehooks-ts';
 
 type AuthContextType = {
-  isUserLoggedIn: boolean;
-  userId: string | undefined;
+  userId: User['id'] | null;
   signup: (username: string, email: string, password: string) => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
   loginWithGoogle: (idToken: string) => Promise<void>;
@@ -15,81 +16,74 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(!!localStorage.getItem('accessToken'));
-  const [userId, setUserId] = useState<string | undefined>(undefined);
+  const [userId, setUserId] = useState(localStorage.getItem('userId'));
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      try {
-        const decoded = jwtDecode<{ userId: string }>(token);
-        setUserId(decoded.userId);
-      } catch (e) {
-        console.error('Failed to decode token', e);
-        setUserId(undefined);
-      }
-    } else {
-      setUserId(undefined);
-    }
-  }, [isUserLoggedIn]);
+  const updateUserIdFromAccessToken = async (accessToken: string) => {
+    const userId = getUserIdFromAccessToken(accessToken);
+
+    localStorage.setItem('accessToken', accessToken);
+
+    if (userId) localStorage.setItem('userId', userId);
+
+    setUserId(userId);
+
+    await queryClient.invalidateQueries();
+  };
 
   const signup = async (username: string, email: string, password: string) => {
     await backendAPI.post('/users', { username, email, password });
+
     await login(username, password);
   };
 
   const login = async (username: string, password: string) => {
-    const res = await backendAPI.post('/auth/login', { username, password });
-    const { accessToken } = res.data;
+    const {
+      data: { accessToken },
+    } = await backendAPI.post<{ accessToken: string }>('/auth/login', { username, password });
 
-    if (accessToken) {
-      localStorage.setItem('accessToken', accessToken);
-      setIsUserLoggedIn(true);
-      await queryClient.invalidateQueries();
-    }
+    updateUserIdFromAccessToken(accessToken);
   };
 
   const loginWithGoogle = async (idToken: string) => {
-    const res = await backendAPI.post('/auth/google', { idToken });
-    const { accessToken } = res.data;
+    const {
+      data: { accessToken },
+    } = await backendAPI.post<{ accessToken: string }>('/auth/google', { idToken });
 
-    if (accessToken) {
-      localStorage.setItem('accessToken', accessToken);
-      setIsUserLoggedIn(true);
-      await queryClient.invalidateQueries();
-    }
+    updateUserIdFromAccessToken(accessToken);
   };
 
   const logout = async () => {
     try {
       await backendAPI.post('/auth/logout');
+    } catch (error) {
+      console.error('Error while logout', error);
     } finally {
       localStorage.removeItem('accessToken');
-      setIsUserLoggedIn(false);
+      setUserId(null);
+
       queryClient.clear();
     }
   };
 
-  useEffect(() => {
-    const checkAuth = () => {
-      setIsUserLoggedIn(!!localStorage.getItem('accessToken'));
-    };
-    window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
-  }, []);
+  const checkAuth = () => {
+    const accessToken = localStorage.getItem('accessToken');
+
+    if (accessToken) updateUserIdFromAccessToken(accessToken);
+    else logout();
+  };
+
+  useEventListener('storage', checkAuth);
 
   return (
-    <AuthContext.Provider value={{ isUserLoggedIn, userId, signup, login, loginWithGoogle, logout }}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={{ userId, signup, login, loginWithGoogle, logout }}>{children}</AuthContext.Provider>
   );
 };
 
 export const useAuthContext = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuthContext must be used within an AuthProvider');
-  }
+
+  if (!context) throw new Error('useAuthContext must be used within an AuthProvider');
+
   return context;
 };

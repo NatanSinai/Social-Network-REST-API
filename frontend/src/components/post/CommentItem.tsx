@@ -1,5 +1,5 @@
 import type { Comment } from '@/api/comment';
-import useAuth from '@/hooks/useAuth';
+import { useAuthContext } from '@/providers/AuthProvider';
 import { envVar } from '@env';
 import { Avatar, Box, Stack, Typography } from '@mui/material';
 import { type FC } from 'react';
@@ -9,7 +9,7 @@ export type CommentItemProps = {
 };
 
 export const CommentItem: FC<CommentItemProps> = ({ comment }) => {
-  const { userId } = useAuth();
+  const { userId } = useAuthContext();
   const isOwnComment = comment.author?.id === userId;
 
   const avatarUrl = comment.author?.profilePictureURL
@@ -26,11 +26,7 @@ export const CommentItem: FC<CommentItemProps> = ({ comment }) => {
         width: '100%',
       }}
     >
-      <Avatar
-        src={avatarUrl}
-        alt={comment.author?.username}
-        sx={{ width: 32, height: 32, mt: 0.5 }}
-      />
+      <Avatar src={avatarUrl} alt={comment.author?.username} sx={{ width: 32, height: 32, mt: 0.5 }} />
       <Box
         sx={{
           bgcolor: isOwnComment ? 'primary.light' : 'grey.100',
@@ -50,12 +46,7 @@ export const CommentItem: FC<CommentItemProps> = ({ comment }) => {
         }}
       >
         {!isOwnComment && (
-          <Typography
-            color='primary.main'
-            variant='subtitle2'
-            fontWeight={700}
-            sx={{ mb: 0.5 }}
-          >
+          <Typography color='primary.main' variant='subtitle2' fontWeight={700} sx={{ mb: 0.5 }}>
             {comment.author?.username}
           </Typography>
         )}

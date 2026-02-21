@@ -1,5 +1,5 @@
-import useAuth from '@/hooks/useAuth';
 import ProfilePage from '@/pages/Profile';
+import { useAuthContext } from '@/providers/AuthProvider';
 import { Navbar } from '@components';
 import { Box } from '@mui/material';
 import { Login, PostsFeedPage, SignUp } from '@pages';
@@ -10,7 +10,7 @@ import { INITIAL_USER_ROUTE, type ProtectedRouteObject, RoutePath, UserProtected
 export type RouterProviderProps = {};
 
 export const RouterProvider = memo<RouterProviderProps>(() => {
-  const { isUserLoggedIn } = useAuth();
+  const { userId } = useAuthContext();
 
   const userProtectedRoutes = useMemo(() => {
     const routes: ProtectedRouteObject[] = [
@@ -42,17 +42,17 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
   const loginRoute = useMemo<RouteObject>(
     () => ({
       path: RoutePath.LOGIN,
-      element: !isUserLoggedIn ? <Login /> : <Navigate to={INITIAL_USER_ROUTE} />,
+      element: !userId ? <Login /> : <Navigate to={INITIAL_USER_ROUTE} />,
     }),
-    [isUserLoggedIn],
+    [userId],
   );
 
   const signUpRoute = useMemo<RouteObject>(
     () => ({
       path: RoutePath.SIGNUP,
-      element: !isUserLoggedIn ? <SignUp /> : <Navigate to={INITIAL_USER_ROUTE} />,
+      element: !userId ? <SignUp /> : <Navigate to={INITIAL_USER_ROUTE} />,
     }),
-    [isUserLoggedIn],
+    [userId],
   );
 
   const routes = useMemo<RouteObject[]>(
@@ -62,6 +62,7 @@ export const RouterProvider = memo<RouterProviderProps>(() => {
         element: (
           <Box bgcolor='primary.main' height='100vh' display='flex' flexDirection='column'>
             <Navbar />
+
             <Box flexGrow={1} overflow='auto'>
               <Outlet />
             </Box>

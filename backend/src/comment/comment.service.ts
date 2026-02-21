@@ -9,10 +9,7 @@ export default class CommentService extends Service<CommentDocument, CreateComme
   }
 
   async getMany({ postId }: FilterQuery<CommentDocument> = {}) {
-    const commentsFilter: any = {};
-    if (postId) {
-      commentsFilter.postId = typeof postId === 'string' ? new Types.ObjectId(postId) : postId;
-    }
+    const commentsFilter = postId ? { postId: typeof postId === 'string' ? new Types.ObjectId(postId) : postId } : {};
 
     const comments = await commentModel.aggregate([
       { $match: commentsFilter },

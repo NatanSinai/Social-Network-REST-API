@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './providers/AuthProvider';
+import { EditPostProvider } from './providers/EditPostProvider';
 import { RouterProvider } from './utils/routes';
 
 const queryClient = new QueryClient();
@@ -15,7 +16,9 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RouterProvider />
+        <EditPostProvider>
+          <RouterProvider />
+        </EditPostProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

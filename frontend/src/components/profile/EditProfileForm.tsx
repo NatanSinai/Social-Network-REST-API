@@ -5,12 +5,9 @@ import { Button, DialogActions, DialogContent, Stack, TextField } from '@mui/mat
 import { type FC } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import type z from 'zod';
-import { z as zod } from 'zod';
 import { ImageUpload } from '../generic';
 
-const profileImageSchema = zod.union([imageSchema, zod.string()]).optional();
-
-export const userFormSchema = userSchema.pick({ username: true }).extend({ image: profileImageSchema });
+export const userFormSchema = userSchema.pick({ username: true }).extend({ image: imageSchema });
 
 export type UserFormValues = z.infer<typeof userFormSchema>;
 

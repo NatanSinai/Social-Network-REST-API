@@ -1,22 +1,24 @@
 import { queryKeys } from '@/api/queryKeys';
 import { getUser } from '@/api/user';
-import { ProfileButton } from '@/components';
 import { useAuthContext } from '@/providers/AuthProvider';
 import { RoutePath } from '@/utils/routes';
+import { ProfileButton } from '@components';
 import { envVar } from '@env';
 import { AppBar, Box, Button, Container, Toolbar, Tooltip, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Navbar: FC = () => {
-  const { isUserLoggedIn, logout, userId } = useAuthContext();
+export type NavbarProps = {};
+
+export const Navbar: FC<NavbarProps> = () => {
+  const { logout, userId } = useAuthContext();
   const navigate = useNavigate();
 
   const { data: user } = useQuery({
     queryKey: queryKeys.users.specific(userId!),
     queryFn: () => getUser(userId!),
-    enabled: !!isUserLoggedIn && !!userId,
+    enabled: !!userId,
   });
 
   const handleLogout = async () => {
@@ -77,17 +79,18 @@ const Navbar: FC = () => {
               Feed
             </Button>
 
-            {isUserLoggedIn ? (
+            {userId ? (
               <>
-                <Tooltip title='View Profile'>
+                <Tooltip arrow title='View Profile'>
                   <Box>
                     <ProfileButton
                       src={profilePictureURL}
                       username={user?.username}
-                      onClick={() => navigate('/v1/home/profile')}
+                      onClick={() => navigate(RoutePath.PROFILE)}
                     />
                   </Box>
                 </Tooltip>
+
                 <Button
                   variant='contained'
                   color='error'
@@ -126,5 +129,3 @@ const Navbar: FC = () => {
     </AppBar>
   );
 };
-
-export default Navbar;

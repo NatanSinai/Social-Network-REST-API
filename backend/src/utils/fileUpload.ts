@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
+import { unlink } from 'fs/promises';
 import multer from 'multer';
-import { extname } from 'path';
+import { basename, extname, join, resolve } from 'path';
 import { envVar } from './env';
 import { ensureDirectoryExists } from './helpers';
 
@@ -27,3 +28,16 @@ export const upload = multer({
     callback(new Error('Only images allowed'));
   },
 });
+
+const uploadsDirectoryAbsolutePath = resolve(envVar.FILE_UPLOADS_BASE_PATH);
+
+export const deleteFile = async (filePathFromDB: string) => {
+  const fullPath = join(uploadsDirectoryAbsolutePath, basename(filePathFromDB));
+
+  try {
+    await unlink(fullPath);
+    console.log('File deleted:', fullPath);
+  } catch (error) {
+    console.warn('File delete failed:', (error as Error).message);
+  }
+};

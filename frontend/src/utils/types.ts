@@ -1,3 +1,4 @@
+import type { JwtPayload } from 'jwt-decode';
 import type { Dispatch, SetStateAction } from 'react';
 
 export type RemoveKeys<T, KeysToRemove extends keyof T> = {
@@ -47,3 +48,5 @@ export type SetState<T> = Dispatch<SetStateAction<T>>;
 export type UseStateContent<Name extends string, T> = Prettify<
   { [K in Name]: T } & { [K in `set${Capitalize<Name>}`]: SetState<T> }
 >;
+
+export type AccessTokenPayload = Pick<JwtPayload, 'exp' | 'iat'> & { userId?: string };

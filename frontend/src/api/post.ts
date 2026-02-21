@@ -4,7 +4,7 @@ import { entries } from 'lodash';
 
 export const POSTS_BASE_API = '/posts';
 
-type WithPostImage<T = unknown> = T & { image?: File | null };
+type WithPostImage<T = unknown> = T & { image?: File | string | null };
 
 export type PaginatedPosts = { posts: Post[]; total: number; page: number; pages: number };
 
@@ -28,10 +28,18 @@ export type UpdatePostDTO = Partial<CreatePostDTO>;
 export const createPost = (createPostDTO: CreatePostDTO) => {
   const formData = new FormData();
 
-  const senderId = '';
-  formData.append('senderId', senderId);
-
   entries(createPostDTO).forEach(([key, value]) => (value ? formData.append(key, value) : undefined));
 
   return backendAPI.post<Post>(POSTS_BASE_API, formData);
+};
+
+export const editPost = async ({ id: postId, image, ...createPostDTO }: CreatePostDTO & Pick<Post, 'id'>) => {
+  const formData = new FormData();
+
+  entries(createPostDTO).forEach(([key, value]) => (value ? formData.append(key, value) : undefined));
+
+  if (image) formData.set('image', image);
+  else formData.set('isDeleteImage', 'true');
+
+  return backendAPI.put<Post>(`${POSTS_BASE_API}/${postId}`, formData);
 };

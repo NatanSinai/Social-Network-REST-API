@@ -31,12 +31,7 @@ export const CommentsDialog: FC<CommentsDialogProps> = ({ postId, isOpen, onClos
   });
 
   return (
-    <GenericDialog
-      isOpen={isOpen}
-      onClose={onClose}
-      title='Comments'
-      dialogProps={{ maxWidth: 'sm', fullWidth: true }}
-    >
+    <GenericDialog isOpen={isOpen} onClose={onClose} title='Comments' dialogProps={{ maxWidth: 'sm', fullWidth: true }}>
       {isLoading ? (
         <CircularProgress sx={{ display: 'block', m: 'auto', my: 4 }} />
       ) : (
