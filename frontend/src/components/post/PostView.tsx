@@ -30,7 +30,7 @@ export const PostView: FC<PostViewProps> = ({
   },
 }) => {
   const [liked, setLiked] = useState(false);
-  const { value: isCommentsOpen, setTrue: openComments, setFalse: closeComments } = useBoolean(false);
+  const { value: isCommentsOpen, setTrue: openComments, setFalse: closeComments } = useBoolean();
 
   const fullImageURL = imageURL ? `${envVar.VITE_BACKEND_URL}${imageURL}` : undefined;
   const fullAuthorAvatarURL = authorProfilePictureURL ? `${envVar.VITE_BACKEND_URL}${authorProfilePictureURL}` : undefined;

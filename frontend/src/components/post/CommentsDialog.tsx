@@ -41,7 +41,7 @@ export const CommentsDialog: FC<CommentsDialogProps> = ({ postId, isOpen, onClos
         <CircularProgress sx={{ display: 'block', m: 'auto', my: 4 }} />
       ) : (
         <>
-          <List sx={{ maxHeight: '60vh', overflowY: 'auto', py: 0 }}>
+          <List sx={{ maxHeight: '60vh', overflowY: 'auto', py: 0, px: 1 }}>
             {comments?.length === 0 ? (
               <Typography sx={{ py: 4, textAlign: 'center' }} color='text.secondary'>
                 No comments yet. Be the first to comment!
