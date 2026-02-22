@@ -1,3 +1,4 @@
+import { RoutePath } from '@/utils/routes';
 import { envVar } from '@env';
 import axios from 'axios';
 
@@ -34,7 +35,7 @@ backendAPI.interceptors.response.use(
       } catch (refreshError) {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('userId');
-        window.location.replace('/v1/login');
+        window.location.replace(RoutePath.LOGIN);
         return Promise.reject(refreshError);
       }
     }
@@ -43,8 +44,8 @@ backendAPI.interceptors.response.use(
       localStorage.removeItem('accessToken');
       localStorage.removeItem('userId');
 
-      if (window.location.pathname !== '/v1/login') {
-        window.location.replace('/v1/login');
+      if (window.location.pathname !== RoutePath.LOGIN) {
+        window.location.replace(RoutePath.LOGIN);
       }
     }
 

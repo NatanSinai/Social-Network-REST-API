@@ -180,7 +180,9 @@ postsRouter.get<
     try {
       const { userId } = verify(token, envVar.JWT_SECRET) as { userId: string };
       currentUserId = userId;
-    } catch { }
+    } catch { 
+      console.log('Invalid token');
+    }
   }
 
   if (!!senderId && !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
@@ -294,16 +296,16 @@ postsRouter.delete<{ postId: Post['_id'] }>('/:postId', authMiddleware(), async 
  *       200:
  *         description: Post like toggled
  */
-postsRouter.put<{ postId: string }>('/:postId/like', authMiddleware(), async (request, response) => {
+postsRouter.put<{ postId: Post['_id'] }>('/:postId/like', authMiddleware(), async (request, response) => {
   const { postId } = request.params;
   const userId = request.userId;
 
   if (!userId || !isValidObjectId(userId)) return respondWithInvalidId(userId, response, 'user');
   if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
 
-  const updatedPost = await postService.toggleLike(postId as any, userId as any);
+  const updatedPost = await postService.toggleLike(postId, userId);
 
-  if (!updatedPost) return respondWithNotFoundPost(postId as any, response);
+  if (!updatedPost) return respondWithNotFoundPost(postId, response);
 
   response.send(updatedPost);
 });
