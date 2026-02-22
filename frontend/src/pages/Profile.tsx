@@ -5,7 +5,6 @@ import { getUser, updateUserDetails } from '@/api/user';
 import EditProfileForm from '@/components/profile/EditProfileForm';
 import { useInfiniteScroll } from '@/hooks';
 import { useAuthContext } from '@/providers/AuthProvider';
-import { useEditPostContext } from '@/providers/EditPostProvider';
 import { envVar } from '@/utils/env';
 import { GenericDialog, PostView } from '@components';
 import { Avatar, Box, Button, Container, Grid, Stack, Typography } from '@mui/material';
@@ -57,10 +56,10 @@ const styles: Record<string, any> = {
 };
 
 const ProfilePage = () => {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const queryClient = useQueryClient();
   const { userId } = useAuthContext();
-  const { openEditPostDialog } = useEditPostContext();
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const {
     data: postsData,
@@ -127,7 +126,7 @@ const ProfilePage = () => {
         <Grid container spacing={3} justifyContent='center' sx={{ width: '100%', maxWidth: '65%' }}>
           {posts.map((post) => (
             <Grid size={{ xs: 12, sm: 6 }} key={post.id}>
-              <PostView {...{ post, openEditPostDialog }} />
+              <PostView {...{ post }} />
             </Grid>
           ))}
           <div ref={loadMoreRef} style={{ height: 40, width: '100%' }} />

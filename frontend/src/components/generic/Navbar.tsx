@@ -69,12 +69,7 @@ export const Navbar: FC<NavbarProps> = () => {
             <Button
               color='secondary'
               onClick={() => navigate(RoutePath.POSTS_FEED)}
-              sx={{
-                textTransform: 'none',
-                fontWeight: 600,
-                display: { xs: 'none', sm: 'block' },
-                '&:hover': { bgcolor: 'primary.dark' },
-              }}
+              sx={{ textTransform: 'none', fontWeight: 600, display: { xs: 'none', sm: 'block' } }}
             >
               Feed
             </Button>
