@@ -43,3 +43,7 @@ export const editPost = async ({ id: postId, image, ...createPostDTO }: CreatePo
 
   return backendAPI.put<Post>(`${POSTS_BASE_API}/${postId}`, formData);
 };
+
+export const deletePost = ({ id: postId }: Pick<Post, 'id'>) => {
+  return backendAPI.delete<Post>(`${POSTS_BASE_API}/${postId}`);
+};

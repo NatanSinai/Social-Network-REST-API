@@ -3,6 +3,7 @@ import UserService from '@user/user.service';
 import { createUploadedFilePath, deleteFile, respondWithInvalidId, respondWithNotFoundById, upload } from '@utils';
 import { Router, type Response } from 'express';
 import { isValidObjectId } from 'mongoose';
+import { setTimeout } from 'timers/promises';
 import PostService from './post.service';
 import type { CreatePostDTO, ParsedPost, Post, PostDocument, UpdatePostDTO } from './post.types';
 
@@ -235,6 +236,8 @@ postsRouter.get<{ postId: Post['_id'] }>('/:postId', async (request, response) =
 postsRouter.delete<{ postId: Post['_id'] }>('/:postId', authMiddleware(), async (request, response) => {
   const { postId } = request.params;
   const senderId = request.userId;
+
+  await setTimeout(5000);
 
   if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 

@@ -1,7 +1,8 @@
 import { useAuthContext } from '@/providers/AuthProvider';
+import { usePostActionsContext } from '@/providers/PostActionsProvider';
 import type { Post } from '@entities';
 import { createFullImageURL } from '@helpers';
-import { ChatBubbleOutline, Edit, Favorite, FavoriteBorder } from '@mui/icons-material';
+import { ChatBubbleOutline, DeleteOutline, EditOutlined, Favorite, FavoriteBorder } from '@mui/icons-material';
 import {
   Avatar,
   Badge,
@@ -18,13 +19,14 @@ import { useRef, useState, type FC, type RefObject } from 'react';
 import { useBoolean, useHover } from 'usehooks-ts';
 import { CommentsDialog } from './CommentsDialog';
 
-export type PostViewProps = { post: Post; openEditPostDialog: (post: Post) => void };
+export type PostViewProps = { post: Post };
 
-export const PostView: FC<PostViewProps> = ({ post, openEditPostDialog }) => {
+export const PostView: FC<PostViewProps> = ({ post }) => {
+  const { userId } = useAuthContext();
+  const { openEditPostDialog, openDeletePostDialog } = usePostActionsContext();
+
   const [liked, setLiked] = useState(false);
   const { value: isCommentsOpen, setTrue: openComments, setFalse: closeComments } = useBoolean();
-
-  const { userId } = useAuthContext();
 
   const postCardElementRef = useRef<HTMLDivElement>(null);
   const isHovering = useHover(postCardElementRef as RefObject<HTMLDivElement>);
@@ -45,7 +47,9 @@ export const PostView: FC<PostViewProps> = ({ post, openEditPostDialog }) => {
 
   return (
     <Card sx={{ borderRadius: 4, width: '100%' }} elevation={10} ref={postCardElementRef}>
-      <CardMedia component='img' height='180px' image={fullImageURL ?? title} alt={title} sx={{ objectFit: 'cover' }} />
+      {!!fullImageURL && (
+        <CardMedia component='img' height='180px' image={fullImageURL} alt={title} sx={{ objectFit: 'cover' }} />
+      )}
 
       <CardContent component={Stack} spacing={1} bgcolor='secondary.main'>
         <Stack>
@@ -75,12 +79,19 @@ export const PostView: FC<PostViewProps> = ({ post, openEditPostDialog }) => {
         </IconButton>
 
         {isUserAuthor && (
-          <IconButton
-            onClick={() => openEditPostDialog(post)}
+          <Stack
+            direction='row'
+            spacing={1}
             style={{ opacity: isHovering ? 1 : 0, transition: 'opacity 0.2s ease-in-out' }}
           >
-            <Edit />
-          </IconButton>
+            <IconButton onClick={() => openEditPostDialog(post)}>
+              <EditOutlined />
+            </IconButton>
+
+            <IconButton onClick={() => openDeletePostDialog(post)}>
+              <DeleteOutline />
+            </IconButton>
+          </Stack>
         )}
 
         <Badge badgeContent={commentsAmount} overlap='circular' color='primary'>

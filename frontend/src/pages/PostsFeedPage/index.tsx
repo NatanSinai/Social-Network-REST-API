@@ -1,7 +1,6 @@
 import { getPosts } from '@/api/post';
 import { queryKeys } from '@/api/queryKeys';
 import { useInfiniteScroll } from '@/hooks';
-import { useEditPostContext } from '@/providers/EditPostProvider';
 import { PostView } from '@components';
 import { Grid, Stack, Typography } from '@mui/material';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -13,8 +12,6 @@ const POSTS_ERROR_MESSAGE = 'We have some trouble getting the posts, please refr
 export type PostsFeedPageProps = {};
 
 export const PostsFeedPage: FC<PostsFeedPageProps> = () => {
-  const { openEditPostDialog } = useEditPostContext();
-
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isError } = useInfiniteQuery({
     queryKey: queryKeys.posts.all(),
     initialPageParam: 1,
@@ -53,7 +50,7 @@ export const PostsFeedPage: FC<PostsFeedPageProps> = () => {
           >
             {posts.map((post) => (
               <Grid size={{ xs: 12, sm: 6 }} key={post.id}>
-                <PostView {...{ post, openEditPostDialog }} />
+                <PostView {...{ post }} />
               </Grid>
             ))}
 
