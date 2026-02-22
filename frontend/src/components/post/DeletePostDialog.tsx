@@ -44,7 +44,7 @@ export const DeletePostDialog: FC<DeletePostDialogProps> = ({ post, isOpen, onCl
     <GenericDialog {...{ isOpen, onClose: handleCloseDialog, isLoading, title: 'Delete Post' }}>
       <Stack spacing={2}>
         <Typography>
-          Are you sure you want to delete the post "<b>{post.title}</b>"
+          Are you sure you want to delete the post "<b>{post.title}</b>"?
         </Typography>
 
         {deletePostMutation.isError && <Alert severity='error'>An error happened, please try again</Alert>}
