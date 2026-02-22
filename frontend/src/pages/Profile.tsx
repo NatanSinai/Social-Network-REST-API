@@ -2,7 +2,7 @@
 import { getPostsBySenderId } from '@/api/post';
 import { queryKeys } from '@/api/queryKeys';
 import { getUser, updateUserDetails } from '@/api/user';
-import EditProfileForm from '@/components/profile/EditProfileForm';
+import EditProfileForm, { UserFormValues } from '@/components/profile/EditProfileForm';
 import { useInfiniteScroll } from '@/hooks';
 import { useAuthContext } from '@/providers/AuthProvider';
 import { envVar } from '@/utils/env';
@@ -83,11 +83,11 @@ const ProfilePage = () => {
     enabled: !!userId,
   });
 
-  const handleEditProfile = async (values: { username: string; image?: File | string | undefined }) => {
+  const handleEditProfile = async (values: UserFormValues) => {
     try {
       await updateUserDetails(userId!, {
         username: values.username,
-        image: values.image instanceof File ? values.image : undefined,
+        image: values.image instanceof File ? values.image : values.image === null ? null : undefined,
       });
 
       await queryClient.invalidateQueries({ queryKey: queryKeys.users.specific(userId!) });

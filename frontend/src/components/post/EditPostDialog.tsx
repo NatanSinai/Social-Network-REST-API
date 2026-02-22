@@ -4,7 +4,7 @@ import type { Post } from '@entities';
 import { useCloseDirtyFormDialog } from '@hooks';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { FC } from 'react';
-import { PostForm, type PostFormProps } from '.';
+import { PostForm, type PostFormProps, type PostFormValues } from '.';
 import { GenericDialog, type GenericDialogProps } from '..';
 
 export type EditPostDialogProps = Pick<GenericDialogProps, 'isOpen' | 'onClose'> & { post: Post | undefined };
@@ -26,8 +26,8 @@ export const EditPostDialog: FC<EditPostDialogProps> = ({ post, isOpen, onClose 
 
   if (!post) return null;
 
-  const handleEdit: PostFormProps['onSubmit'] = (postForm) =>
-    editPostMutation.mutateAsync(
+  const handleEdit = async (postForm: PostFormValues) => {
+    await editPostMutation.mutateAsync(
       { ...postForm, id: post.id },
       {
         onSuccess: () => {
@@ -37,6 +37,7 @@ export const EditPostDialog: FC<EditPostDialogProps> = ({ post, isOpen, onClose 
         },
       },
     );
+  };
 
   const defaultValues = { ...post, image: post.imageURL } satisfies PostFormProps['defaultValues'];
 

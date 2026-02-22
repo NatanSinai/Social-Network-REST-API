@@ -1,6 +1,7 @@
 import { authMiddleware } from '@middlewares';
 import {
   createUploadedFilePath,
+  deleteFile,
   isDuplicateKeyMongoError,
   respondWithBadRequest,
   respondWithInvalidId,
@@ -118,14 +119,14 @@ usersRouter.get<{ userId: User['_id'] }>('/:userId', async (request, response) =
  *       200:
  *         description: Updated user
  */
-usersRouter.put<{ userId: string }, UserDocument, Omit<UpdateUserDTO, 'profilePictureURL'>>(
+usersRouter.put<{ userId: string }, UserDocument, Omit<UpdateUserDTO, 'profilePictureURL'> & { isDeleteImage?: string }>(
   '/:userId',
   authMiddleware(),
   upload.single(USER_IMAGE_FIELD),
   async (request, response) => {
     const { userId: paramsId } = request.params;
     const authenticatedUserId = request.userId;
-    const { file, body: updateUserDTOWithoutImage } = request;
+    const { file, body: { isDeleteImage, ...updateUserDTOWithoutImage } } = request;
 
     const isOwner = authenticatedUserId?.toString() === paramsId;
 
@@ -133,12 +134,24 @@ usersRouter.put<{ userId: string }, UserDocument, Omit<UpdateUserDTO, 'profilePi
       return respondWithInvalidId(paramsId, response, 'user');
     }
 
-    const profilePictureURL = createUploadedFilePath(file);
+    const currentUser = await userService.getById(authenticatedUserId);
+
+    if (!currentUser) return respondWithNotFoundUser(authenticatedUserId, response);
 
     const updateUserDTO: UpdateUserDTO = {
       ...updateUserDTOWithoutImage,
-      ...(profilePictureURL && { profilePictureURL }),
+      profilePictureURL: currentUser.profilePictureURL,
     };
+
+    if (file) {
+      if (currentUser.profilePictureURL) await deleteFile(currentUser.profilePictureURL);
+
+      updateUserDTO.profilePictureURL = createUploadedFilePath(file);
+    } else if (isDeleteImage === 'true') {
+      if (currentUser.profilePictureURL) await deleteFile(currentUser.profilePictureURL);
+
+      updateUserDTO.profilePictureURL = null;
+    }
 
     const updatedUser = await userService.updateById(authenticatedUserId, updateUserDTO);
 

@@ -23,8 +23,6 @@ export const ImageUpload: FC<ImageUploadProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (updatedImage: typeof value) => {
-    if (!updatedImage && !!value) return;
-
     onChange(updatedImage);
   };
 

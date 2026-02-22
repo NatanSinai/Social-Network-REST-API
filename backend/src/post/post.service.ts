@@ -8,10 +8,15 @@ export default class PostService extends Service<PostDocument, CreatePostDTO, Up
     super(postModel);
   }
 
-  async getParsedPosts({ senderId }: FilterQuery<PostDocument> = {}, options?: QueryOptions<PostDocument>) {
+  async getParsedPosts(
+    { senderId }: FilterQuery<PostDocument> = {},
+    options?: QueryOptions<PostDocument> & { currentUserId?: string | undefined },
+  ) {
     const postsFilter = senderId
       ? { senderId: typeof senderId === 'string' ? new Types.ObjectId(senderId) : senderId }
       : {};
+
+    const currentUserId = options?.currentUserId ? new Types.ObjectId(options.currentUserId) : null;
 
     const posts = await postModel.aggregate<ParsedPost>([
       { $match: postsFilter },
@@ -46,6 +51,14 @@ export default class PostService extends Service<PostDocument, CreatePostDTO, Up
           commentsAmount: {
             $ifNull: [{ $arrayElemAt: ['$commentsMeta.count', 0] }, 0],
           },
+          likesAmount: { $size: { $ifNull: ['$likes', []] } },
+          isLiked: {
+            $cond: {
+              if: { $eq: [currentUserId, null] },
+              then: false,
+              else: { $in: [currentUserId, { $ifNull: ['$likes', []] }] },
+            },
+          },
         },
       },
       {
@@ -59,6 +72,8 @@ export default class PostService extends Service<PostDocument, CreatePostDTO, Up
           createdAt: 1,
           updatedAt: 1,
           commentsAmount: 1,
+          likesAmount: 1,
+          isLiked: 1,
 
           author: {
             id: { $toString: '$author._id' },
@@ -76,5 +91,21 @@ export default class PostService extends Service<PostDocument, CreatePostDTO, Up
     ]);
 
     return posts;
+  }
+
+  async toggleLike(postId: Types.ObjectId, userId: Types.ObjectId) {
+    const post = await postModel.findById(postId);
+    if (!post) return null;
+
+    const isLiked = post.likes.some((id) => id.toString() === userId.toString());
+
+    if (isLiked) {
+      post.likes = post.likes.filter((id) => id.toString() !== userId.toString());
+    } else {
+      post.likes.push(userId);
+    }
+
+    await post.save();
+    return post;
   }
 }

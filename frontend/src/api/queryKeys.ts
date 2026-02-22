@@ -2,7 +2,7 @@ import type { Post, User } from '@entities';
 
 export const queryKeys = {
   posts: {
-    all: (filters?: { page?: number }) => ['posts', filters ?? {}],
+    all: (filters?: { page?: number }) => (filters ? ['posts', filters] : ['posts']),
     sender: (senderId: Post['author']['id'], filters?: { page?: number }) => [
       'posts',
       'sender',

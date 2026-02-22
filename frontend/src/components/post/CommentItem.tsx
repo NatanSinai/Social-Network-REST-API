@@ -30,7 +30,7 @@ export const CommentItem: FC<CommentItemProps> = ({ comment }) => {
       <Box
         sx={{
           bgcolor: isOwnComment ? 'primary.light' : 'grey.100',
-          color: isOwnComment ? 'primary.contrastText' : 'text.primary',
+          color: isOwnComment ? 'primary.contrastText' : 'black',
           p: 1.5,
           borderRadius: 2,
           maxWidth: '80%',
@@ -53,7 +53,7 @@ export const CommentItem: FC<CommentItemProps> = ({ comment }) => {
         <Typography
           variant='body2'
           sx={{
-            color: isOwnComment ? 'inherit' : 'text.primary',
+            color: isOwnComment ? 'inherit' : 'black',
             wordBreak: 'break-word',
           }}
         >
@@ -65,7 +65,7 @@ export const CommentItem: FC<CommentItemProps> = ({ comment }) => {
             mt: 0.5,
             display: 'block',
             textAlign: isOwnComment ? 'right' : 'left',
-            color: isOwnComment ? 'rgba(255, 255, 255, 0.7)' : 'text.secondary',
+            color: isOwnComment ? 'rgba(255, 255, 255, 0.7)' : 'black',
           }}
         >
           {new Date(comment.createdAt).toLocaleString()}

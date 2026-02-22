@@ -30,11 +30,21 @@ backendAPI.interceptors.response.use(
 
         localStorage.setItem('accessToken', newAccessToken);
 
-        return backendAPI(originalRequest); // Retry the original request
+        return backendAPI(originalRequest);
       } catch (refreshError) {
         localStorage.removeItem('accessToken');
-        window.location.href = '/login';
+        localStorage.removeItem('userId');
+        window.location.replace('/v1/login');
         return Promise.reject(refreshError);
+      }
+    }
+
+    if (error.response?.status === 403 || (error.response?.status === 401 && originalRequest.url === '/auth/refresh')) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('userId');
+
+      if (window.location.pathname !== '/v1/login') {
+        window.location.replace('/v1/login');
       }
     }
 

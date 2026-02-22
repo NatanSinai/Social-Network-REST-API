@@ -13,7 +13,7 @@ export type UserFormValues = z.infer<typeof userFormSchema>;
 
 export type EditProfileFormProps = {
   defaultValues?: Partial<UserFormValues> & { image?: string };
-  onSubmit: (values: UserFormValues) => void;
+  onSubmit: (values: UserFormValues) => void | Promise<void>;
   onClose: () => void;
 };
 

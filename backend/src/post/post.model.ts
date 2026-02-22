@@ -8,6 +8,7 @@ const PostSchema = new Schema<PostDocument>(
     content: { type: String, required: true },
     senderId: { type: Schema.Types.ObjectId, required: true, ref: ModelName.USER },
     imageURL: { type: String },
+    likes: { type: [{ type: Schema.Types.ObjectId, ref: ModelName.USER }], default: [] },
   },
   { timestamps: true, collection: ModelName.POST },
 );

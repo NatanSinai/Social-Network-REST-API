@@ -1,7 +1,15 @@
 import { authMiddleware } from '@middlewares';
 import UserService from '@user/user.service';
-import { createUploadedFilePath, deleteFile, respondWithInvalidId, respondWithNotFoundById, upload } from '@utils';
+import {
+  createUploadedFilePath,
+  deleteFile,
+  envVar,
+  respondWithInvalidId,
+  respondWithNotFoundById,
+  upload,
+} from '@utils';
 import { Router, type Response } from 'express';
+import { verify } from 'jsonwebtoken';
 import { isValidObjectId } from 'mongoose';
 import { setTimeout } from 'timers/promises';
 import PostService from './post.service';
@@ -165,6 +173,16 @@ postsRouter.get<
 >('', async (request, response) => {
   const { sender: senderId, page: pageString = '1', limit: limitString = '10' } = request.query;
 
+  const token = request.headers.authorization?.split(' ')[1];
+  let currentUserId: string | undefined;
+
+  if (token) {
+    try {
+      const { userId } = verify(token, envVar.JWT_SECRET) as { userId: string };
+      currentUserId = userId;
+    } catch { }
+  }
+
   if (!!senderId && !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
   const page = Number(pageString);
@@ -173,7 +191,7 @@ postsRouter.get<
   const skip = (page - 1) * limit;
 
   const [posts, total] = await Promise.all([
-    postService.getParsedPosts({ senderId }, { skip, limit, sort: { createdAt: -1 } }),
+    postService.getParsedPosts({ senderId }, { skip, limit, sort: { createdAt: -1 }, currentUserId }),
     postService.count(senderId ? { senderId } : {}),
   ]);
 
@@ -255,6 +273,39 @@ postsRouter.delete<{ postId: Post['_id'] }>('/:postId', authMiddleware(), async 
   if (!deletedPost) return respondWithNotFoundPost(postId, response);
 
   response.send(deletedPost);
+});
+
+/* Toggle Like Post */
+/**
+ * @swagger
+ * /posts/{postId}/like:
+ *   put:
+ *     summary: Toggle like post
+ *     tags: [Posts]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           $ref: '#/components/schemas/ObjectId'
+ *     responses:
+ *       200:
+ *         description: Post like toggled
+ */
+postsRouter.put<{ postId: string }>('/:postId/like', authMiddleware(), async (request, response) => {
+  const { postId } = request.params;
+  const userId = request.userId;
+
+  if (!userId || !isValidObjectId(userId)) return respondWithInvalidId(userId, response, 'user');
+  if (!isValidObjectId(postId)) return respondWithInvalidId(postId, response, 'post');
+
+  const updatedPost = await postService.toggleLike(postId as any, userId as any);
+
+  if (!updatedPost) return respondWithNotFoundPost(postId as any, response);
+
+  response.send(updatedPost);
 });
 
 export default postsRouter;
