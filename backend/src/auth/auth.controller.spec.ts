@@ -83,6 +83,8 @@ describe('Auth Controller', () => {
       email: USER.email,
       isPrivate: false,
       bio: 'bio',
+      profilePictureURL: 'http://example.com/profile.jpg',
+      postsCount: 0,
     });
   });
 

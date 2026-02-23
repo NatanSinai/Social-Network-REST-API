@@ -55,6 +55,8 @@ describe('User Controller', () => {
         email: 'john@example.com',
         isPrivate: false,
         bio: 'Hello world',
+        profilePictureURL: 'http://example.com/profile.jpg',
+        postsCount: 0,
       };
 
       const user = await userService.createSingle(createUserDTO);
@@ -102,6 +104,8 @@ describe('User Controller', () => {
         email: 'test@test.com',
         isPrivate: false,
         bio: 'Old bio',
+        profilePictureURL: 'http://example.com/profile.jpg',
+        postsCount: 0,
       });
 
       accessToken = authService.generateAccessToken({ userId: user._id });
@@ -139,6 +143,8 @@ describe('User Controller', () => {
         email: 'delete@test.com',
         isPrivate: false,
         bio: 'Bye',
+        profilePictureURL: 'http://example.com/profile.jpg',
+        postsCount: 0,
       });
 
       accessToken = authService.generateAccessToken({ userId: user._id });

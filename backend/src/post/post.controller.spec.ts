@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { connectToMongoMemoryServer, createMongoMemoryServer } from '@utils';
 import express from 'express';
 import { StatusCodes } from 'http-status-codes';
@@ -36,6 +36,9 @@ afterEach(async () => {
 });
 
 describe('Post Controller', () => {
+  // the delete routes include a deliberate 5 second delay; tests need a bit more time
+  jest.setTimeout(10000);
+
   let app: express.Application;
   let accessToken: string;
 
@@ -55,6 +58,8 @@ describe('Post Controller', () => {
       email: 'author@test.com',
       isPrivate: false,
       bio: 'Bio',
+      profilePictureURL: 'http://example.com/profile.jpg',
+      postsCount: 0,
     });
 
     accessToken = authService.generateAccessToken({ userId: user._id });
@@ -121,10 +126,18 @@ describe('Post Controller', () => {
       expect(response.status).toBe(StatusCodes.BAD_REQUEST);
     });
 
-    it('should return empty array when no posts exist', async () => {
+    it('should return empty list when no posts exist', async () => {
       const response = await request(app).get('/posts');
       expect(response.status).toBe(StatusCodes.OK);
-      expect(response.body).toHaveLength(0);
+      // controller returns paginated result now
+      expect(response.body).toMatchObject({
+        page: 1,
+        pages: 0,
+        posts: [],
+        total: 0,
+      });
+      expect(Array.isArray(response.body.posts)).toBe(true);
+      expect(response.body.posts).toHaveLength(0);
     });
   });
 
@@ -172,6 +185,8 @@ describe('Post Controller', () => {
         email: 'author2@test.com',
         isPrivate: false,
         bio: 'Bio',
+        profilePictureURL: 'http://example.com/profile2.jpg',
+        postsCount: 0,
       });
 
       const post = await postService.createSingle({
@@ -236,6 +251,8 @@ describe('Post Controller', () => {
         email: 'author2@test.com',
         isPrivate: false,
         bio: 'Bio',
+        profilePictureURL: 'http://example.com/profile2.jpg',
+        postsCount: 0,
       });
 
       const post = await postService.createSingle({

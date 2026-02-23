@@ -1,6 +1,6 @@
 import type { JestConfigWithTsJest } from 'ts-jest';
 import { pathsToModuleNameMapper } from 'ts-jest';
-import tsconfig from './tsconfig.json';
+import tsconfig from './tsconfig.json' with { type: 'json' };
 
 const moduleNameMapper = pathsToModuleNameMapper(tsconfig.compilerOptions.paths ?? {}, { prefix: '<rootDir>/src/' });
 

@@ -61,6 +61,8 @@ describe('Comment Controller', () => {
       email: 'test@user.com',
       isPrivate: false,
       bio: 'Bio',
+      profilePictureURL: 'http://example.com/profile.jpg',
+      postsCount: 0,
     });
 
     accessToken = authService.generateAccessToken({ userId: user._id });
