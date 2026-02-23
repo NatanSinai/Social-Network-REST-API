@@ -61,6 +61,8 @@ export const generatePostContent = async ({ title, image }: WithPostImage<Pick<P
 
   if (image && image instanceof File) formData.append('image', image);
 
+  if (image && typeof image === 'string') formData.append('imageURL', image);
+
   formData.append('title', title);
 
   const { data } = await backendAPI.post<Pick<Post, 'content'>>(`${POSTS_BASE_API}/generate-content`, formData);

@@ -6,14 +6,18 @@ import {
   createUploadedFilePath,
   deleteFile,
   envVar,
+  respondWithBadRequest,
   respondWithInvalidId,
   respondWithNotFoundById,
   upload,
+  type MakeOptional,
 } from '@utils';
 import { Router, type Response } from 'express';
 import { readFile } from 'fs/promises';
 import { verify } from 'jsonwebtoken';
 import { isValidObjectId } from 'mongoose';
+import { join } from 'path';
+import { cwd } from 'process';
 import { setTimeout } from 'timers/promises';
 import PostService from './post.service';
 import type { CreatePostDTO, ParsedPost, Post, PostDocument, UpdatePostDTO } from './post.types';
@@ -28,7 +32,6 @@ const aiService = new AIService();
 const respondWithNotFoundPost = (postId: Post['_id'], response: Response) =>
   respondWithNotFoundById(postId, response, 'post');
 
-// 1. Generate Image from Text
 postsRouter.post<{}, Pick<Post, 'imageURL'>, Pick<Post, 'title' | 'content'>>(
   '/generate-image',
   authMiddleware(),
@@ -43,18 +46,23 @@ postsRouter.post<{}, Pick<Post, 'imageURL'>, Pick<Post, 'title' | 'content'>>(
   },
 );
 
-// 2. Generate Content from Image
-postsRouter.post<{}, Pick<Post, 'content'> | string, Pick<Post, 'title'>>(
+postsRouter.post<{}, Pick<Post, 'content'> | string, MakeOptional<Pick<Post, 'title' | 'imageURL'>, 'imageURL'>>(
   '/generate-content',
   authMiddleware(),
   aiCooldownMiddleware,
   upload.single('image'),
   async (request, response) => {
-    const { title } = request.body;
+    const {
+      body: { title, imageURL },
+      file: imageFile,
+    } = request;
 
-    if (!request.file) return response.status(400).send('Image required');
+    if (!imageFile && !imageURL) return respondWithBadRequest(response, 'Image required');
 
-    const fileBuffer = await readFile(request.file.path);
+    const imageURLFullPath = imageURL ? join(cwd(), imageURL.slice(envVar.BASE_URL.length)) : undefined;
+    console.log(imageURLFullPath);
+
+    const fileBuffer = await readFile(imageFile ? imageFile.path : (imageURLFullPath ?? ''));
 
     const content = await aiService.generateContent(title.trim(), fileBuffer);
 
@@ -218,7 +226,7 @@ postsRouter.get<
     try {
       const { userId } = verify(token, envVar.JWT_SECRET) as { userId: string };
       currentUserId = userId;
-    } catch { 
+    } catch {
       console.log('Invalid token');
     }
   }

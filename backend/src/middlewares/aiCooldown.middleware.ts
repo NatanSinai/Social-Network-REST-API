@@ -1,4 +1,3 @@
-// middlewares/aiCooldown.middleware.ts
 import UserService from '@user/user.service';
 import { envVar, respondWithInvalidId, respondWithNotFoundById, respondWithStatusAndJSONMessage } from '@utils';
 import type { NextFunction, Request, Response } from 'express';

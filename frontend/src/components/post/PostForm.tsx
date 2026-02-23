@@ -29,17 +29,12 @@ export const PostForm: FC<PostFormProps> = ({ defaultValues, onSubmit, submitLab
     watch,
   } = useForm<PostFormValues>({
     resolver: zodResolver(postFormSchema),
-    defaultValues: {
-      title: 'Morning Coffee in the Redwoods',
-      content:
-        'A steaming ceramic mug of coffee sitting on a mossy wooden log, giant redwood trees in the background with sunbeams filtering through the mist, soft bokeh, peaceful atmosphere',
-      image: undefined,
-      ...defaultValues,
-    },
+    defaultValues: { title: '', content: '', image: undefined, ...defaultValues },
     mode: 'onTouched',
   });
 
   const formValues = watch();
+  console.log(formValues);
 
   const isSubmitDisabled = (submitCount > 0 && !isValid) || isSubmitting;
 
@@ -137,7 +132,7 @@ export const PostForm: FC<PostFormProps> = ({ defaultValues, onSubmit, submitLab
                   disabled={isAITaskLoading || !formValues.image}
                 >
                   {generateContentMutation.isPending ? <CircularProgress size={20} color='secondary' /> : '✨'} Generate
-                  AI Image Generate AI Content
+                  AI Content
                 </Button>
               </Stack>
             </Stack>
