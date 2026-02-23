@@ -1,5 +1,6 @@
 import { backendAPI } from '@/api/api';
 import type { Post } from '@entities';
+import type { MakeOptional } from '@types';
 import { entries } from 'lodash';
 
 export const POSTS_BASE_API = '/posts';
@@ -22,7 +23,7 @@ export const getPostsBySenderId = async (senderId: string, page: number, limit: 
   return posts;
 };
 
-export type CreatePostDTO = WithPostImage<Pick<Post, 'title' | 'content'>>;
+export type CreatePostDTO = MakeOptional<WithPostImage<Pick<Post, 'title' | 'content' | 'imageURL'>>, 'imageURL'>;
 export type UpdatePostDTO = Partial<CreatePostDTO>;
 
 export const createPost = (createPostDTO: CreatePostDTO) => {
@@ -49,3 +50,20 @@ export const deletePost = ({ id: postId }: Pick<Post, 'id'>) => {
 };
 
 export const toggleLikePost = (postId: string) => backendAPI.put<Post>(`${POSTS_BASE_API}/${postId}/like`);
+export const generatePostImage = async (payload: Pick<Post, 'title' | 'content'>) => {
+  const { data } = await backendAPI.post<Pick<Post, 'imageURL'>>(`${POSTS_BASE_API}/generate-image`, payload);
+
+  return data;
+};
+
+export const generatePostContent = async ({ title, image }: WithPostImage<Pick<Post, 'title'>>) => {
+  const formData = new FormData();
+
+  if (image && image instanceof File) formData.append('image', image);
+
+  formData.append('title', title);
+
+  const { data } = await backendAPI.post<Pick<Post, 'content'>>(`${POSTS_BASE_API}/generate-content`, formData);
+
+  return data;
+};

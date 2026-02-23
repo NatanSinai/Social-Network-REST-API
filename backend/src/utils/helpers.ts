@@ -98,7 +98,7 @@ export const initializeExampleUser = async () => {
 
 export const respondWithJSONMessage = (response: Response, message: string) => response.json({ message });
 
-const respondWithStatusAndJSONMessage =
+export const respondWithStatusAndJSONMessage =
   (status: StatusCodes) =>
   (response: Response, message: string, ...jsonValues: Record<string, unknown>[]) => {
     const additionalJSONValues = jsonValues.reduce((allValues, current) => ({ ...allValues, ...current }), {});

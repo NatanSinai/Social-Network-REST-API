@@ -10,6 +10,7 @@ export type User = Prettify<
     postsCount: number;
     bio: string | null;
     profilePictureURL: string | null;
+    lastAIAction: Date;
   }
 >;
 
@@ -21,7 +22,10 @@ export type CreateUserDTO = MakeOptional<
 >;
 
 export type UpdateUserDTO = Partial<
-  Pick<User, 'username' | 'password' | 'email' | 'isPrivate' | 'postsCount' | 'bio' | 'profilePictureURL'>
+  Pick<
+    User,
+    'username' | 'password' | 'email' | 'isPrivate' | 'postsCount' | 'bio' | 'profilePictureURL' | 'lastAIAction'
+  >
 >;
 
 export type UserCredentials = Pick<User, 'username' | 'password'>;

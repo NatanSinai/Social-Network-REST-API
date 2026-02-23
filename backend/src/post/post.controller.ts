@@ -1,3 +1,5 @@
+import AIService from '@/ai.service';
+import { aiCooldownMiddleware } from '@/middlewares/aiCooldown.middleware';
 import { authMiddleware } from '@middlewares';
 import UserService from '@user/user.service';
 import {
@@ -9,6 +11,7 @@ import {
   upload,
 } from '@utils';
 import { Router, type Response } from 'express';
+import { readFile } from 'fs/promises';
 import { verify } from 'jsonwebtoken';
 import { isValidObjectId } from 'mongoose';
 import { setTimeout } from 'timers/promises';
@@ -20,9 +23,44 @@ const POST_IMAGE_FIELD = 'image';
 const postsRouter = Router();
 const postService = new PostService();
 const userService = new UserService();
+const aiService = new AIService();
 
 const respondWithNotFoundPost = (postId: Post['_id'], response: Response) =>
   respondWithNotFoundById(postId, response, 'post');
+
+// 1. Generate Image from Text
+postsRouter.post<{}, Pick<Post, 'imageURL'>, Pick<Post, 'title' | 'content'>>(
+  '/generate-image',
+  authMiddleware(),
+  aiCooldownMiddleware,
+  async (req, res) => {
+    const { title, content } = req.body;
+
+    const prompt = `${title.trim()}. ${content.trim()}`;
+    const imageURL = await aiService.generateImage(prompt);
+
+    res.send({ imageURL });
+  },
+);
+
+// 2. Generate Content from Image
+postsRouter.post<{}, Pick<Post, 'content'> | string, Pick<Post, 'title'>>(
+  '/generate-content',
+  authMiddleware(),
+  aiCooldownMiddleware,
+  upload.single('image'),
+  async (request, response) => {
+    const { title } = request.body;
+
+    if (!request.file) return response.status(400).send('Image required');
+
+    const fileBuffer = await readFile(request.file.path);
+
+    const content = await aiService.generateContent(title.trim(), fileBuffer);
+
+    response.send({ content });
+  },
+);
 
 /* Create Post */
 /**
@@ -54,11 +92,11 @@ const respondWithNotFoundPost = (postId: Post['_id'], response: Response) =>
  *       200:
  *         description: Post created
  */
-postsRouter.post<{}, PostDocument, Omit<CreatePostDTO, 'senderId' | 'imageURL'>>(
+postsRouter.post<{}, PostDocument, Omit<CreatePostDTO, 'senderId'>>(
   '',
   authMiddleware(),
   upload.single(POST_IMAGE_FIELD),
-  async ({ file, body: createPostDTOWithoutImageURL, userId: senderId }, response) => {
+  async ({ file, body, userId: senderId }, response) => {
     if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
     const user = await userService.getById(senderId);
@@ -66,7 +104,8 @@ postsRouter.post<{}, PostDocument, Omit<CreatePostDTO, 'senderId' | 'imageURL'>>
     if (!user) return respondWithNotFoundById(senderId, response, 'sender');
 
     const imageURL = createUploadedFilePath(file);
-    const createPostDTO = { ...createPostDTOWithoutImageURL, senderId, imageURL } satisfies CreatePostDTO;
+    const createPostDTO = { imageURL, ...body, senderId } satisfies CreatePostDTO;
+    console.log({ createPostDTO });
 
     const newPost = await postService.createSingle(createPostDTO);
     await userService.updateById(senderId, { postsCount: user.postsCount + 1 });

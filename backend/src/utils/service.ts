@@ -49,7 +49,7 @@ export default class Service<
   }
 
   updateById(id: T['_id'], updateDTO: UpdateDTO, options?: QueryOptions<T>) {
-    return this.model.findByIdAndUpdate(id, updateDTO, { new: true, ...options });
+    return this.model.findByIdAndUpdate(id, updateDTO, { returnDocument: 'after', ...options });
   }
 
   deleteSingle(filter?: FilterQuery<T>) {

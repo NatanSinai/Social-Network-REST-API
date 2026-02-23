@@ -11,6 +11,7 @@ const UserSchema = new Schema<UserDocument>(
     postsCount: { type: Number, default: 0 },
     isPrivate: { type: Boolean, default: false },
     profilePictureURL: { type: String },
+    lastAIAction: { type: Date, default: new Date(0) },
   },
   { timestamps: true, collection: ModelName.USER },
 );
