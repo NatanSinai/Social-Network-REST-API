@@ -47,3 +47,5 @@ export const editPost = async ({ id: postId, image, ...createPostDTO }: CreatePo
 export const deletePost = ({ id: postId }: Pick<Post, 'id'>) => {
   return backendAPI.delete<Post>(`${POSTS_BASE_API}/${postId}`);
 };
+
+export const toggleLikePost = (postId: string) => backendAPI.put<Post>(`${POSTS_BASE_API}/${postId}/like`);

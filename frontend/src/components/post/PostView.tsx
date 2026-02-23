@@ -1,3 +1,5 @@
+import { toggleLikePost } from '@/api/post';
+import { queryKeys } from '@/api/queryKeys';
 import { useAuthContext } from '@/providers/AuthProvider';
 import { usePostActionsContext } from '@/providers/PostActionsProvider';
 import type { Post } from '@entities';
@@ -15,7 +17,8 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { useRef, useState, type FC, type RefObject } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRef, type FC, type RefObject } from 'react';
 import { useBoolean, useHover } from 'usehooks-ts';
 import { CommentsDialog } from './CommentsDialog';
 
@@ -24,8 +27,8 @@ export type PostViewProps = { post: Post };
 export const PostView: FC<PostViewProps> = ({ post }) => {
   const { userId } = useAuthContext();
   const { openEditPostDialog, openDeletePostDialog } = usePostActionsContext();
+  const queryClient = useQueryClient();
 
-  const [liked, setLiked] = useState(false);
   const { value: isCommentsOpen, setTrue: openComments, setFalse: closeComments } = useBoolean();
 
   const postCardElementRef = useRef<HTMLDivElement>(null);
@@ -37,13 +40,29 @@ export const PostView: FC<PostViewProps> = ({ post }) => {
     content,
     author: { id: authorId, username: authorName, profilePictureURL: authorProfilePictureURL },
     commentsAmount,
+    likesAmount,
+    isLiked,
     id: postId,
   } = post;
+
+  const { mutate: toggleLike } = useMutation({
+    mutationFn: () => toggleLikePost(postId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all() });
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.posts.sender(userId) });
+      }
+    },
+  });
 
   const isUserAuthor = userId === authorId;
 
   const fullImageURL = createFullImageURL(imageURL);
   const fullAuthorAvatarURL = createFullImageURL(authorProfilePictureURL) ?? undefined;
+
+  const handleLikeClick = () => {
+    toggleLike();
+  };
 
   return (
     <Card sx={{ borderRadius: 4, width: '100%' }} elevation={10} ref={postCardElementRef}>
@@ -74,9 +93,11 @@ export const PostView: FC<PostViewProps> = ({ post }) => {
       <Divider />
 
       <CardActions sx={{ bgcolor: 'secondary.main', justifyContent: 'space-between', alignItems: 'center', px: 2 }}>
-        <IconButton onClick={() => setLiked(!liked)} color={liked ? 'error' : 'default'}>
-          {liked ? <Favorite /> : <FavoriteBorder />}
-        </IconButton>
+        <Badge badgeContent={likesAmount} overlap='circular' color='error'>
+          <IconButton onClick={handleLikeClick} color={isLiked ? 'error' : 'default'}>
+            {isLiked ? <Favorite /> : <FavoriteBorder />}
+          </IconButton>
+        </Badge>
 
         {isUserAuthor && (
           <Stack

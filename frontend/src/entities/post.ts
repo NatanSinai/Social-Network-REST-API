@@ -15,6 +15,10 @@ export const postSchema = metadataSchema.extend({
   commentsAmount: z
     .int({ message: 'Comments amount must be an integer' })
     .nonnegative({ message: 'Comments amount cannot be negative' }),
+  likesAmount: z
+    .int({ message: 'Likes amount must be an integer' })
+    .nonnegative({ message: 'Likes amount cannot be negative' }),
+  isLiked: z.boolean(),
   author: userSchema,
 });
 

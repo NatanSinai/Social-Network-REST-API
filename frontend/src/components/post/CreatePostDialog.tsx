@@ -23,8 +23,9 @@ export const CreatePostDialog: FC<CreatePostDialogProps> = ({ isOpen, onClose })
     },
   });
 
-  const handleCreate: PostFormProps['onSubmit'] = (postForm) =>
+  const handleCreate: PostFormProps['onSubmit'] = (postForm) => {
     createPostMutation.mutateAsync(postForm, { onSuccess: handleCloseOnSubmit });
+  };
 
   return (
     <GenericDialog {...{ isOpen, onClose: handleCloseDialog, title: 'Create Post' }}>

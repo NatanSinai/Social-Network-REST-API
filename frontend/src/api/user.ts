@@ -18,6 +18,7 @@ export const updateUserDetails = async (userId: string, body: UpdateUserDetailsD
 
   if (body.username) formData.append('username', body.username);
   if (body.image) formData.append('profilePicture', body.image);
+  if (body.image === null) formData.append('isDeleteImage', 'true');
 
   return backendAPI.put(`${USERS_BASE_API}/${userId}`, formData);
 };

@@ -13,7 +13,7 @@ export type PostFormValues = z.infer<typeof postFormSchema>;
 
 export type PostFormProps = {
   defaultValues?: Partial<PostFormValues>;
-  onSubmit: (values: PostFormValues) => void;
+  onSubmit: (values: PostFormValues) => void | Promise<void>;
   submitLabel?: string;
   isDirtyFormRef: RefObject<boolean>;
 };

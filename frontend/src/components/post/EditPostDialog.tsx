@@ -26,7 +26,7 @@ export const EditPostDialog: FC<EditPostDialogProps> = ({ post, isOpen, onClose 
 
   if (!post) return null;
 
-  const handleEdit: PostFormProps['onSubmit'] = (postForm) =>
+  const handleEdit : PostFormProps['onSubmit'] = (postForm) => {
     editPostMutation.mutateAsync(
       { ...postForm, id: post.id },
       {
@@ -37,6 +37,7 @@ export const EditPostDialog: FC<EditPostDialogProps> = ({ post, isOpen, onClose 
         },
       },
     );
+  };
 
   const defaultValues = { ...post, image: post.imageURL } satisfies PostFormProps['defaultValues'];
 
