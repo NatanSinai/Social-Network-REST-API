@@ -34,7 +34,6 @@ export const PostForm: FC<PostFormProps> = ({ defaultValues, onSubmit, submitLab
   });
 
   const formValues = watch();
-  console.log(formValues);
 
   const isSubmitDisabled = (submitCount > 0 && !isValid) || isSubmitting;
 
