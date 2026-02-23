@@ -36,7 +36,6 @@ afterEach(async () => {
 });
 
 describe('Post Controller', () => {
-  // the delete routes include a deliberate 5 second delay; tests need a bit more time
   jest.setTimeout(10000);
 
   let app: express.Application;
@@ -126,10 +125,9 @@ describe('Post Controller', () => {
       expect(response.status).toBe(StatusCodes.BAD_REQUEST);
     });
 
-    it('should return empty list when no posts exist', async () => {
+    it('should return empty array when no posts exist', async () => {
       const response = await request(app).get('/posts');
       expect(response.status).toBe(StatusCodes.OK);
-      // controller returns paginated result now
       expect(response.body).toMatchObject({
         page: 1,
         pages: 0,
