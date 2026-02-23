@@ -105,7 +105,6 @@ postsRouter.post<{}, PostDocument, Omit<CreatePostDTO, 'senderId'>>(
 
     const imageURL = createUploadedFilePath(file);
     const createPostDTO = { imageURL, ...body, senderId } satisfies CreatePostDTO;
-    console.log({ createPostDTO });
 
     const newPost = await postService.createSingle(createPostDTO);
     await userService.updateById(senderId, { postsCount: user.postsCount + 1 });
