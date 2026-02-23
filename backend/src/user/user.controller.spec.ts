@@ -176,4 +176,57 @@ describe('User Controller', () => {
       expect(response.status).toBe(StatusCodes.NOT_FOUND);
     });
   });
+
+  describe('POST /users', () => {
+    it('should create a new user successfully', async () => {
+      const createUserDTO: CreateUserDTO = {
+        username: 'newuser',
+        password: '123456',
+        email: 'newuser@test.com',
+        isPrivate: false,
+        bio: 'New user bio',
+        profilePictureURL: 'http://example.com/new.jpg',
+        postsCount: 0,
+      };
+
+      const response = await request(app).post('/users').send(createUserDTO);
+
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body.message).toContain('User was registered successfully');
+    });
+  });
+
+  describe('PUT /users/:userId with non-owner', () => {
+    it('should return 400 when non-owner tries to update user', async () => {
+      const user2 = await userService.createSingle({
+        username: 'User2',
+        password: '11111',
+        email: 'user2@test.com',
+        isPrivate: false,
+        bio: 'Bio2',
+        profilePictureURL: 'http://example.com/profile2.jpg',
+        postsCount: 0,
+      });
+
+      const user2AccessToken = authService.generateAccessToken({ userId: user2._id });
+
+      const response = await request(app)
+        .put(`/users/${VALID_USER_ID}`)
+        .set('Authorization', `Bearer ${user2AccessToken}`)
+        .send({ bio: 'Hacked bio' });
+
+      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 400 for invalid userId format on PUT', async () => {
+      accessToken = authService.generateAccessToken({ userId: INVALID_ID as unknown as Types.ObjectId });
+
+      const response = await request(app)
+        .put(`/users/${INVALID_ID}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ bio: 'New bio' });
+
+      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    });
+  });
 });

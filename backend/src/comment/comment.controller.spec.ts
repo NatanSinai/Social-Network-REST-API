@@ -302,5 +302,122 @@ describe('Comment Controller', () => {
 
       expect(response.status).toBe(StatusCodes.NOT_FOUND);
     });
+
+    it('should return 400 for invalid comment id format on delete', async () => {
+      const response = await request(app)
+        .delete(`/comments/${INVALID_ID}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 404 when deleting with non-existent sender', async () => {
+      const comment = await commentService.createSingle({
+        content: 'Comment',
+        postId: new Types.ObjectId(VALID_POST_ID),
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const nonExistingUserAccessToken = authService.generateAccessToken({
+        userId: new Types.ObjectId(NON_EXISTENT_ID),
+      });
+
+      const response = await request(app)
+        .delete(`/comments/${comment._id}`)
+        .set('Authorization', `Bearer ${nonExistingUserAccessToken}`);
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
+
+    it('should return 404 when deleting a comment not by the sender', async () => {
+      const secondUser = await userService.createSingle({
+        username: 'Other User',
+        password: '123456',
+        email: 'other@test.com',
+        isPrivate: false,
+        bio: 'Bio',
+        profilePictureURL: 'http://example.com/other.jpg',
+        postsCount: 0,
+      });
+
+      const comment = await commentService.createSingle({
+        content: 'Not my comment',
+        postId: new Types.ObjectId(VALID_POST_ID),
+        senderId: secondUser._id,
+      });
+
+      const response = await request(app)
+        .delete(`/comments/${comment._id}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
+  });
+
+  describe('GET /comments/:commentId', () => {
+    it('should return a single comment by id', async () => {
+      const comment = await commentService.createSingle({
+        content: 'Single Comment',
+        postId: new Types.ObjectId(VALID_POST_ID),
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const response = await request(app).get(`/comments/${comment._id}`);
+
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body.content).toBe('Single Comment');
+      expect(response.body._id).toBe(comment._id.toString());
+    });
+
+    it('should return 400 for invalid comment id format', async () => {
+      const response = await request(app).get(`/comments/${INVALID_ID}`);
+
+      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 404 for non-existent comment', async () => {
+      const response = await request(app).get(`/comments/${NON_EXISTENT_ID}`);
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
+  });
+
+  describe('GET /comments with filters', () => {
+    it('should return comments filtered by postId', async () => {
+      const secondPost = await postService.createSingle({
+        title: 'Second Post',
+        content: 'More Content',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const _comment1 = await commentService.createSingle({
+        content: 'Comment for first post',
+        postId: new Types.ObjectId(VALID_POST_ID),
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const _comment2 = await commentService.createSingle({
+        content: 'Comment for second post',
+        postId: secondPost._id,
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const response = await request(app).get(`/comments?postId=${secondPost._id}`);
+
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body).toHaveLength(1);
+      expect(response.body[0].content).toBe('Comment for second post');
+    });
+  });
+
+  describe('PUT /comments/:commentId', () => {
+    it('should return 400 for invalid comment id format on update', async () => {
+      const response = await request(app)
+        .put(`/comments/${INVALID_ID}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ content: 'New' });
+
+      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    });
   });
 });
