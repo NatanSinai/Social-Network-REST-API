@@ -6,7 +6,7 @@ export const postSchema = metadataSchema.extend({
   title: z
     .string()
     .min(3, { error: ({ minimum }) => `Title must be at least ${minimum} characters long` })
-    .max(20, { error: ({ maximum }) => `Title must be maximum ${maximum} characters long` }),
+    .max(30, { error: ({ maximum }) => `Title must be maximum ${maximum} characters long` }),
   content: z
     .string()
     .min(3, { error: ({ minimum }) => `Content must be at least ${minimum} characters long` })

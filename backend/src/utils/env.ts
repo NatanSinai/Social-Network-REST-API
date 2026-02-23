@@ -31,6 +31,10 @@ const envVarSchema = z.object({
   FILE_UPLOADS_BASE_PATH: z.string().default('uploads'),
   GOOGLE_CLIENT_ID: z.string(),
   FRONTEND_URL: z.string().default('http://localhost:5173'),
+  HUGGING_FACE_API_KEY: z.string(),
+  GEMINI_API_KEY: z.string(),
+  BASE_URL: z.string(),
+  AI_GENERATION_COOLDOWN_MS: z.coerce.number().default(60000),
 });
 
 export const envVar = envVarSchema.parse(process.env);

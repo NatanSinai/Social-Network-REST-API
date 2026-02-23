@@ -1,6 +1,7 @@
 import { createPost } from '@/api/post';
 import { queryKeys } from '@/api/queryKeys';
 import { useCloseDirtyFormDialog } from '@/hooks';
+import { envVar } from '@env';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { FC } from 'react';
 import { PostForm, type PostFormProps } from '.';
@@ -23,8 +24,13 @@ export const CreatePostDialog: FC<CreatePostDialogProps> = ({ isOpen, onClose })
     },
   });
 
-  const handleCreate: PostFormProps['onSubmit'] = (postForm) => {
-    createPostMutation.mutateAsync(postForm, { onSuccess: handleCloseOnSubmit });
+  const handleCreate: PostFormProps['onSubmit'] = ({ image, ...postFormValues }) => {
+    const imageURL =
+      typeof image === 'string' && image.startsWith(envVar.VITE_BACKEND_URL)
+        ? image.slice(envVar.VITE_BACKEND_URL.length)
+        : undefined;
+
+    return createPostMutation.mutateAsync({ imageURL, image, ...postFormValues }, { onSuccess: handleCloseOnSubmit });
   };
 
   return (
