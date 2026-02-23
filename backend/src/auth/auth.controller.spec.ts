@@ -83,6 +83,8 @@ describe('Auth Controller', () => {
       email: USER.email,
       isPrivate: false,
       bio: 'bio',
+      profilePictureURL: 'http://example.com/profile.jpg',
+      postsCount: 0,
     });
   });
 
@@ -155,6 +157,23 @@ describe('Auth Controller', () => {
 
     it('fails for invalid refresh token', async () => {
       const response = await refresh(app, ['refreshToken=invalid.token']);
+
+      expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
+    });
+  });
+
+  describe('POST /auth/google', () => {
+    it('should return 401 when no idToken is provided', async () => {
+      const response = await request(app).post('/auth/google').send({});
+
+      expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
+      expect(response.body.message).toContain('No ID Token provided');
+    });
+
+    it('should return 401 for invalid google token', async () => {
+      const response = await request(app).post('/auth/google').send({
+        idToken: 'invalid.token.here',
+      });
 
       expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
     });
