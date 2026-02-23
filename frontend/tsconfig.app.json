@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    "outDir": "./dist",
+    "types": ["node"],
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+
+    "paths": {
+      "@entities": ["./src/entities/index.ts"],
+      "@env": ["./src/utils/env.ts"],
+      "@api": ["./src/api/api.ts"],
+      "@zod": ["./src/utils/zod.ts"],
+      "@constants": ["./src/utils/constants.ts"],
+      "@helpers": ["./src/utils/helpers.ts"],
+      "@types": ["./src/utils/types.ts"],
+      "@hebrew": ["./src/utils/lang/he-IL.ts"],
+      "@utils": ["./src/utils/*"],
+      "@hooks": ["./src/hooks/index.ts"],
+      "@components": ["./src/components/index.ts"],
+      "@pages": ["./src/pages/index.ts"],
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"]
+}

@@ -1,0 +1,429 @@
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { connectToMongoMemoryServer, createMongoMemoryServer } from '@utils';
+import express from 'express';
+import { StatusCodes } from 'http-status-codes';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import mongoose, { Types } from 'mongoose';
+import request from 'supertest';
+import AuthService from '../auth/auth.service';
+import userModel from '../user/user.model';
+import UserService from '../user/user.service';
+import postsRouter from './post.controller';
+import postModel from './post.model';
+import PostService from './post.service';
+import type { CreatePostDTO, UpdatePostDTO } from './post.types';
+
+const VALID_SENDER_ID = '507f1f77bcf86cd799439011';
+const INVALID_ID = 'invalid';
+const NON_EXISTENT_ID = '507f1f77bcf86cd799439012';
+
+let mongoServer: MongoMemoryServer;
+
+beforeAll(async () => {
+  mongoServer = await createMongoMemoryServer();
+
+  await connectToMongoMemoryServer(mongoServer);
+});
+
+afterAll(async () => {
+  await mongoServer.stop();
+  await mongoose.connection.close();
+});
+
+afterEach(async () => {
+  await postModel.deleteMany();
+  await userModel.deleteMany();
+});
+
+describe('Post Controller', () => {
+  jest.setTimeout(10000);
+
+  let app: express.Application;
+  let accessToken: string;
+
+  const userService = new UserService();
+  const postService = new PostService();
+  const authService = new AuthService();
+
+  beforeEach(async () => {
+    app = express();
+    app.use(express.json());
+    app.use('/posts', postsRouter);
+
+    const user = await userService.createSingle({
+      _id: new Types.ObjectId(VALID_SENDER_ID),
+      username: 'Author',
+      password: '123456',
+      email: 'author@test.com',
+      isPrivate: false,
+      bio: 'Bio',
+      profilePictureURL: 'http://example.com/profile.jpg',
+      postsCount: 0,
+    });
+
+    accessToken = authService.generateAccessToken({ userId: user._id });
+  });
+
+  describe('POST /posts', () => {
+    it('should create a post if user exists', async () => {
+      const createPostDTO: Omit<CreatePostDTO, 'senderId'> = { title: 'Test Title', content: 'Test Content' };
+
+      const response = await request(app)
+        .post('/posts')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(createPostDTO);
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body.title).toBe(createPostDTO.title);
+    });
+
+    it('should create a post with image upload', async () => {
+      const createPostDTO: Omit<CreatePostDTO, 'senderId'> = { title: 'Post with Image', content: 'Image Content' };
+
+      const response = await request(app)
+        .post('/posts')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .field('title', createPostDTO.title)
+        .field('content', createPostDTO.content)
+        .attach('image', Buffer.from('fake image data'), 'test-image.jpg');
+
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body.title).toBe(createPostDTO.title);
+      expect(response.body.content).toBe(createPostDTO.content);
+    });
+
+    it('should return 404 if senderId does not exist in database', async () => {
+      const createPostDTO: Omit<CreatePostDTO, 'senderId'> = { title: 'Title', content: 'Content' };
+
+      const nonExistingUserAccessToken = authService.generateAccessToken({
+        userId: new Types.ObjectId(NON_EXISTENT_ID),
+      });
+
+      const response = await request(app)
+        .post('/posts')
+        .set('Authorization', `Bearer ${nonExistingUserAccessToken}`)
+        .send(createPostDTO);
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
+
+    it('should return 401 for invalid senderId format', async () => {
+      const createPostDTO: Omit<CreatePostDTO, 'senderId'> = { title: 'Title', content: 'Content' };
+
+      const response = await request(app)
+        .post('/posts')
+        .set('Authorization', `Bearer ${accessToken.slice(0, accessToken.length - 2)}`)
+        .send(createPostDTO);
+
+      expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
+    });
+  });
+
+  describe('GET /posts/:postId', () => {
+    it('should return a post by id', async () => {
+      const post = await postService.createSingle({
+        title: 'Single Post',
+        content: 'Content',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const response = await request(app).get(`/posts/${post._id}`);
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body._id).toBe(post._id.toString());
+    });
+
+    it('should return 404 if post does not exist', async () => {
+      const response = await request(app).get(`/posts/${NON_EXISTENT_ID}`);
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
+
+    it('should return 400 for invalid postId format', async () => {
+      const response = await request(app).get(`/posts/${INVALID_ID}`);
+      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    });
+
+    it('should return empty array when no posts exist', async () => {
+      const response = await request(app).get('/posts');
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body).toMatchObject({
+        page: 1,
+        pages: 0,
+        posts: [],
+        total: 0,
+      });
+      expect(Array.isArray(response.body.posts)).toBe(true);
+      expect(response.body.posts).toHaveLength(0);
+    });
+  });
+
+  describe('PUT /posts/:postId', () => {
+    it('should update a post', async () => {
+      const post = await postService.createSingle({
+        title: 'Old Title',
+        content: 'Content',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const updateDTO: UpdatePostDTO = { title: 'New Title' };
+      const response = await request(app)
+        .put(`/posts/${post._id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(updateDTO);
+
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body.title).toBe('New Title');
+    });
+
+    it('should return 404 if updating with a non-existent senderId', async () => {
+      const post = await postService.createSingle({
+        title: 'Title',
+        content: 'Content',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const nonExistingUserAccessToken = authService.generateAccessToken({
+        userId: new Types.ObjectId(NON_EXISTENT_ID),
+      });
+
+      const response = await request(app)
+        .put(`/posts/${post._id}`)
+        .set('Authorization', `Bearer ${nonExistingUserAccessToken}`)
+        .send({ title: 'title 2' });
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
+
+    it('should return 404 if updating with a post not by the sender', async () => {
+      const secondUser = await userService.createSingle({
+        username: 'Author2',
+        password: '123456',
+        email: 'author2@test.com',
+        isPrivate: false,
+        bio: 'Bio',
+        profilePictureURL: 'http://example.com/profile2.jpg',
+        postsCount: 0,
+      });
+
+      const post = await postService.createSingle({
+        title: 'Title',
+        content: 'Content',
+        senderId: secondUser._id,
+      });
+
+      const response = await request(app)
+        .put(`/posts/${post._id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ title: 'title 2' });
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
+  });
+
+  describe('DELETE /posts/:postId', () => {
+    it('should delete a post', async () => {
+      const post = await postService.createSingle({
+        title: 'Delete',
+        content: 'Content',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const response = await request(app).delete(`/posts/${post._id}`).set('Authorization', `Bearer ${accessToken}`);
+      expect(response.status).toBe(StatusCodes.OK);
+
+      const remains = await postModel.findById(post._id);
+      expect(remains).toBeNull();
+    });
+
+    it('should return 404 when trying to delete a non-existent post', async () => {
+      const response = await request(app)
+        .delete(`/posts/${NON_EXISTENT_ID}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
+
+    it('should return 404 when trying to delete a post with invalid sender', async () => {
+      const post = await postService.createSingle({
+        title: 'Delete',
+        content: 'Content',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const nonExistingUserAccessToken = authService.generateAccessToken({
+        userId: new Types.ObjectId(NON_EXISTENT_ID),
+      });
+
+      const response = await request(app)
+        .delete(`/posts/${post._id}`)
+        .set('Authorization', `Bearer ${nonExistingUserAccessToken}`);
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
+
+    it('should return 404 if deleting a post not by the sender', async () => {
+      const secondUser = await userService.createSingle({
+        username: 'Author2',
+        password: '123456',
+        email: 'author2@test.com',
+        isPrivate: false,
+        bio: 'Bio',
+        profilePictureURL: 'http://example.com/profile2.jpg',
+        postsCount: 0,
+      });
+
+      const post = await postService.createSingle({
+        title: 'Title',
+        content: 'Content',
+        senderId: secondUser._id,
+      });
+
+      const response = await request(app).delete(`/posts/${post._id}`).set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
+  });
+
+  describe('PUT /posts/:postId/like', () => {
+    it('should toggle like on a post', async () => {
+      const post = await postService.createSingle({
+        title: 'Like Test',
+        content: 'Content',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const response = await request(app).put(`/posts/${post._id}/like`).set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body._id).toBe(post._id.toString());
+    });
+
+    it('should return 404 if post does not exist for like toggle', async () => {
+      const response = await request(app)
+        .put(`/posts/${NON_EXISTENT_ID}/like`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(StatusCodes.NOT_FOUND);
+    });
+
+    it('should return 400 for invalid postId format on like', async () => {
+      const response = await request(app)
+        .put(`/posts/${INVALID_ID}/like`)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 400 for invalid userId format on like', async () => {
+      const post = await postService.createSingle({
+        title: 'Test',
+        content: 'Content',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const invalidAccessToken = authService.generateAccessToken({
+        userId: INVALID_ID as unknown as Types.ObjectId,
+      });
+
+      const response = await request(app)
+        .put(`/posts/${post._id}/like`)
+        .set('Authorization', `Bearer ${invalidAccessToken}`);
+
+      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    });
+  });
+
+  describe('GET /posts with pagination', () => {
+    it('should return paginated posts with default limit and page', async () => {
+      await postService.createSingle({
+        title: 'Post 1',
+        content: 'Content 1',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      await postService.createSingle({
+        title: 'Post 2',
+        content: 'Content 2',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const response = await request(app).get('/posts');
+
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body.posts).toHaveLength(2);
+      expect(response.body.page).toBe(1);
+      expect(response.body.pages).toBe(1);
+      expect(response.body.total).toBe(2);
+    });
+
+    it('should filter posts by sender', async () => {
+      const user2 = await userService.createSingle({
+        username: 'Author3',
+        password: '123456',
+        email: 'author3@test.com',
+        isPrivate: false,
+        bio: 'Bio',
+        profilePictureURL: 'http://example.com/profile3.jpg',
+        postsCount: 0,
+      });
+
+      await postService.createSingle({
+        title: 'Post by User1',
+        content: 'Content',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      await postService.createSingle({
+        title: 'Post by User2',
+        content: 'Content',
+        senderId: user2._id,
+      });
+
+      const response = await request(app).get(`/posts?sender=${user2._id}`);
+
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body.posts).toHaveLength(1);
+      expect(response.body.total).toBe(1);
+    });
+
+    it('should return 400 for invalid sender query', async () => {
+      const response = await request(app).get('/posts?sender=invalid-id');
+
+      expect(response.status).toBe(StatusCodes.BAD_REQUEST);
+    });
+  });
+
+  describe('PUT /posts/:postId with image operations', () => {
+    it('should update post with new image', async () => {
+      const post = await postService.createSingle({
+        title: 'Image Test',
+        content: 'Content',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+      });
+
+      const updateDTO: UpdatePostDTO = { title: 'Updated with Image' };
+
+      const response = await request(app)
+        .put(`/posts/${post._id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(updateDTO);
+
+      expect(response.status).toBe(StatusCodes.OK);
+      expect(response.body.title).toBe('Updated with Image');
+    });
+
+    it('should handle isDeleteImage flag', async () => {
+      const post = await postService.createSingle({
+        title: 'Delete Image Test',
+        content: 'Content',
+        senderId: new Types.ObjectId(VALID_SENDER_ID),
+        imageURL: 'http://example.com/image.jpg',
+      });
+
+      const updateDTO = { title: 'Image Deleted', isDeleteImage: 'true' };
+
+      const response = await request(app)
+        .put(`/posts/${post._id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(updateDTO);
+
+      expect(response.status).toBe(StatusCodes.OK);
+    });
+  });
+});
