@@ -59,7 +59,9 @@ postsRouter.post<{}, Pick<Post, 'content'> | string, MakeOptional<Pick<Post, 'ti
 
     if (!imageFile && !imageURL) return respondWithBadRequest(response, 'Image required');
 
-    const imageURLFullPath = imageURL ? join(cwd(), imageURL.slice(envVar.BASE_URL.length)) : undefined;
+    const imageURLFullPath = imageURL
+      ? join(cwd(), imageURL.startsWith(envVar.BASE_URL) ? imageURL.slice(envVar.BASE_URL.length) : imageURL)
+      : undefined;
 
     const fileBuffer = await readFile(imageFile ? imageFile.path : (imageURLFullPath ?? ''));
 
