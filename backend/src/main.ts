@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import { readFileSync } from 'fs';
 import https from 'https';
+import { join } from 'path';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger';
 import {
@@ -31,6 +32,14 @@ const initializeServer = async () => {
   initializeAppConfig(app);
   app.use(cookieParser());
   initializeRouters(app);
+
+  app.use(express.static(join(__dirname, '../public')));
+
+  app.use((request, response, next) => {
+    if (request.path.startsWith('/api') || request.path.startsWith('/api-docs')) return next();
+
+    response.sendFile(join(__dirname, '../public', 'index.html'));
+  });
 
   app.use(errorHandler);
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
