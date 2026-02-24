@@ -152,11 +152,11 @@ postsRouter.post<{}, PostDocument, Omit<CreatePostDTO, 'senderId'>>(
  *       200:
  *         description: Post updated
  */
-postsRouter.put<{ postId: string }, PostDocument, Omit<UpdatePostDTO, 'imageURL'>>(
+postsRouter.put<{ postId: string }, PostDocument, UpdatePostDTO>(
   '/:postId',
   authMiddleware(),
   upload.single(POST_IMAGE_FIELD),
-  async ({ params, body: { isDeleteImage, ...updatePostDTOWithoutImageURL }, userId: senderId, file }, response) => {
+  async ({ params, body: { isDeleteImage, imageURL, ...body }, userId: senderId, file }, response) => {
     if (!senderId || !isValidObjectId(senderId)) return respondWithInvalidId(senderId, response, 'sender');
 
     if (!isValidObjectId(params.postId)) return respondWithInvalidId(params.postId, response, 'post');
@@ -169,7 +169,7 @@ postsRouter.put<{ postId: string }, PostDocument, Omit<UpdatePostDTO, 'imageURL'
     if (!isUserExist || !currentPost || currentPost.senderId.toString() !== senderId.toString())
       return respondWithNotFoundById(senderId, response, 'sender');
 
-    const updatePostDTO = { ...updatePostDTOWithoutImageURL, imageURL: currentPost.imageURL } satisfies UpdatePostDTO;
+    const updatePostDTO = { ...body, imageURL: imageURL ?? currentPost.imageURL } satisfies UpdatePostDTO;
 
     if (file) {
       if (currentPost.imageURL) await deleteFile(currentPost.imageURL);

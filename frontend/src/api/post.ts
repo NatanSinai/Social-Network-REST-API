@@ -40,7 +40,7 @@ export const editPost = async ({ id: postId, image, ...createPostDTO }: CreatePo
   entries(createPostDTO).forEach(([key, value]) => (value ? formData.append(key, value) : undefined));
 
   if (image) formData.set('image', image);
-  else formData.set('isDeleteImage', 'true');
+  else if (!createPostDTO.imageURL) formData.set('isDeleteImage', 'true');
 
   return backendAPI.put<Post>(`${POSTS_BASE_API}/${postId}`, formData);
 };

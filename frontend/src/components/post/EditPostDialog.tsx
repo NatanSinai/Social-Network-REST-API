@@ -1,6 +1,7 @@
 import { editPost } from '@/api/post';
 import { queryKeys } from '@/api/queryKeys';
 import type { Post } from '@entities';
+import { envVar } from '@env';
 import { useCloseDirtyFormDialog } from '@hooks';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { FC } from 'react';
@@ -26,9 +27,14 @@ export const EditPostDialog: FC<EditPostDialogProps> = ({ post, isOpen, onClose 
 
   if (!post) return null;
 
-  const handleEdit: PostFormProps['onSubmit'] = (postForm) => {
-    editPostMutation.mutateAsync(
-      { ...postForm, id: post.id },
+  const handleEdit: PostFormProps['onSubmit'] = ({ image, ...postFormValues }) => {
+    const imageURL =
+      typeof image === 'string' && image.startsWith(envVar.VITE_BACKEND_URL)
+        ? image.slice(envVar.VITE_BACKEND_URL.length)
+        : undefined;
+
+    return editPostMutation.mutateAsync(
+      { ...postFormValues, imageURL, image, id: post.id },
       {
         onSuccess: () => {
           handleCloseOnSubmit();
