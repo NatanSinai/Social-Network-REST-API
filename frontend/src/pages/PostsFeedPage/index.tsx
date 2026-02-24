@@ -17,6 +17,7 @@ export const PostsFeedPage: FC<PostsFeedPageProps> = () => {
     initialPageParam: 1,
     queryFn: ({ pageParam = 1 }) => getPosts(pageParam, 10),
     getNextPageParam: (lastPage) => (lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined),
+    refetchOnWindowFocus: false,
   });
 
   const loadMoreRef = useInfiniteScroll({ callback: fetchNextPage, isEnabled: hasNextPage && !isFetchingNextPage });

@@ -72,6 +72,7 @@ const ProfilePage = () => {
     queryFn: ({ pageParam = 1 }) => getPostsBySenderId(userId!, pageParam, 10),
     getNextPageParam: (lastPage) => (lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined),
     enabled: !!userId,
+    refetchOnWindowFocus: false,
   });
 
   const loadMoreRef = useInfiniteScroll({ callback: fetchNextPage, isEnabled: hasNextPage && !isFetchingNextPage });
@@ -81,6 +82,7 @@ const ProfilePage = () => {
     queryKey: queryKeys.users.specific(userId!),
     queryFn: () => getUser(userId!),
     enabled: !!userId,
+    refetchOnWindowFocus: false,
   });
 
   const handleEditProfile = async (values: UserFormValues) => {

@@ -19,6 +19,7 @@ export const Navbar: FC<NavbarProps> = () => {
     queryKey: queryKeys.users.specific(userId!),
     queryFn: () => getUser(userId!),
     enabled: !!userId,
+    refetchOnWindowFocus: false,
   });
 
   const handleLogout = async () => {
