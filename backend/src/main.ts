@@ -1,8 +1,8 @@
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import express from 'express';
+import { readFileSync } from 'fs';
 import https from 'https';
-import fs from 'fs';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger';
 import {
@@ -21,7 +21,7 @@ dotenv.config();
 export const app = express();
 
 const initializeServer = async () => {
-  console.log('\n========== STARTING HTTPS SERVER ==========\n');
+  console.log('\n========== STARTING TO INITIALIZE SERVER ==========\n');
 
   await connectToMongoDB();
   await initializeExamplePost();
@@ -35,18 +35,27 @@ const initializeServer = async () => {
   app.use(errorHandler);
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-  const { PORT: port } = envVar;
+  const { PORT: port, NODE_ENV, BASE_URL } = envVar;
 
-  // SSL Options - Point these to your actual file locations
-  const httpsOptions = {
-    key: fs.readFileSync('../../client-key.pem'),
-    cert: fs.readFileSync('../../client-cert.pem')
-  };
+  if (NODE_ENV === 'production') {
+    const httpsOptions = {
+      key: readFileSync('../../client-key.pem'),
+      cert: readFileSync('../../client-cert.pem'),
+    };
 
-  https.createServer(httpsOptions, app).listen(port, () => {
-    console.log(`\nSecure API listening on 'https://localhost:${port}'`);
-    console.log('\n========== FINISHED INITIALIZING SERVER ==========\n');
-  });
+    https.createServer(httpsOptions, app).listen(port, () => {
+      console.log(`\nSecure HTTPS API listening on '${BASE_URL}'`);
+      console.log(`\nSwagger documentation running on '${BASE_URL}/api-docs'`);
+      console.log('\n========== FINISHED INITIALIZING SERVER ==========\n');
+    });
+  } else
+    app.listen(port, (error) => {
+      if (error) return console.error({ error });
+
+      console.log(`\nCRUD API listening on '${BASE_URL}'`);
+      console.log(`\nSwagger documentation running on '${BASE_URL}/api-docs'`);
+      console.log('\n========== FINISHED INITIALIZING SERVER ==========\n');
+    });
 };
 
 if (require.main === module) initializeServer();

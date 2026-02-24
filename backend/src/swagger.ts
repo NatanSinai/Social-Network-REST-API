@@ -4,6 +4,7 @@ import swaggerJsdoc from 'swagger-jsdoc';
 dotenv.config();
 
 const port = process.env.PORT || '3000';
+const baseURL = process.env.BASE_URL || `http://localhost:${port}`;
 
 const swaggerSpec = swaggerJsdoc({
   definition: {
@@ -12,7 +13,7 @@ const swaggerSpec = swaggerJsdoc({
       title: 'Social Network API',
       version: '1.0.0',
     },
-    servers: [{ url: `http://localhost:${port}` }],
+    servers: [{ url: baseURL }],
 
     components: {
       securitySchemes: {

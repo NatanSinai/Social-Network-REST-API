@@ -35,6 +35,7 @@ const envVarSchema = z.object({
   GEMINI_API_KEY: z.string(),
   BASE_URL: z.string(),
   AI_GENERATION_COOLDOWN_MS: z.coerce.number().default(60000),
+  NODE_ENV: z.union([z.literal('production'), z.literal('development')]),
 });
 
 export const envVar = envVarSchema.parse(process.env);
