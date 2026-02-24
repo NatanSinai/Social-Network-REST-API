@@ -1,3 +1,10 @@
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+import express from 'express';
+import https from 'https';
+import fs from 'fs';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './swagger';
 import {
   connectToMongoDB,
   envVar,
@@ -7,19 +14,14 @@ import {
   initializeExamplePost,
   initializeExampleUser,
   initializeRouters,
-} from '@utils';
-import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
-import express from 'express';
-import swaggerUi from 'swagger-ui-express';
-import swaggerSpec from './swagger';
+} from './utils';
 
 dotenv.config();
 
 export const app = express();
 
 const initializeServer = async () => {
-  console.log('\n========== STARTING TO INITIALIZE SERVER ==========\n');
+  console.log('\n========== STARTING HTTPS SERVER ==========\n');
 
   await connectToMongoDB();
   await initializeExamplePost();
@@ -35,11 +37,14 @@ const initializeServer = async () => {
 
   const { PORT: port } = envVar;
 
-  app.listen(port, (error) => {
-    if (error) return console.error({ error });
+  // SSL Options - Point these to your actual file locations
+  const httpsOptions = {
+    key: fs.readFileSync('../../client-key.pem'),
+    cert: fs.readFileSync('../../client-cert.pem')
+  };
 
-    console.log(`\nCRUD API listening on 'http://localhost:${port}'`);
-    console.log(`\nSwagger documentation running on 'http://localhost:${port}/api-docs'`);
+  https.createServer(httpsOptions, app).listen(port, () => {
+    console.log(`\nSecure API listening on 'https://localhost:${port}'`);
     console.log('\n========== FINISHED INITIALIZING SERVER ==========\n');
   });
 };
